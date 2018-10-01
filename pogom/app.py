@@ -5,6 +5,7 @@ import calendar
 import logging
 import gc
 
+import time
 from datetime import datetime, timedelta
 from s2sphere import LatLng
 from bisect import bisect_left
@@ -212,28 +213,6 @@ class Pogom(Flask):
         sightings = {}
         new_spawn_points = []
         sp_id_list = []
-
-        raidbosses = {
-            150 : 5,
-            76  : 4,
-            112 : 4,
-            131 : 4,
-            143 : 4,
-            65  : 3,
-            68  : 3,
-            106 : 3,
-            107 : 3,
-            123 : 3,
-            82  : 2,
-            108 : 2,
-            125 : 2,
-            126 : 2,
-            1   : 1,
-            4   : 1,
-            7   : 1,
-            129 : 1,
-            147 : 1
-        }
 
         now_date = datetime.utcnow()
 
@@ -506,6 +485,8 @@ class Pogom(Flask):
                     'last_modified':
                         datetime.utcfromtimestamp(
                             f['lastModifiedTimestampMs'] / 1000.0),
+                    'is_in_battle' :
+                        f.get('isInBattle', False)
                 }
 
                 gym_id = f['gym_id']
@@ -660,9 +641,8 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
-        search_display = (args.search_control and args.on_demand_timeout <= 0)
-        scan_display = False if (args.only_server or args.fixed_location or
-                                 args.spawnpoint_scanning) else True
+        search_display = False
+        scan_display = False
 
         visibility_flags = {
             'gyms': not args.no_gyms,
@@ -670,10 +650,10 @@ class Pogom(Flask):
             'pokestops': not args.no_pokestops,
             'raids': not args.no_raids,
             'gym_info': args.gym_info,
-            'encounter': args.encounter,
+            'encounter': False,
             'scan_display': scan_display,
             'search_display': search_display,
-            'fixed_display': not args.fixed_location,
+            'fixed_display': True,
             'custom_css': args.custom_css,
             'custom_js': args.custom_js
         }

@@ -694,6 +694,7 @@ function gymLabel(gym, includeMembers = true) {
     const isUpcomingRaid = raid != null && Date.now() < raid.start
     const isRaidStarted = isOngoingRaid(raid)
     const isRaidFilterOn = Store.get('showRaids')
+    const isInBattle = gym.is_in_battle
 
     var subtitle = ''
     var image = ''
@@ -766,7 +767,11 @@ function gymLabel(gym, includeMembers = true) {
                 `
             }
         } else {
-            image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}.png'>`
+            if (isInBattle) {
+                image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}_isInBattle.png'>`
+            } else {
+                image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}.png'>`
+            }
         }
 
         if (isUpcomingRaid) {
@@ -779,7 +784,11 @@ function gymLabel(gym, includeMembers = true) {
                 </div>`
         }
     } else {
-        image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
+        if (isInBattle){
+            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_isInBattle.png'>`
+        } else {
+            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
+        }
     }
 
 
