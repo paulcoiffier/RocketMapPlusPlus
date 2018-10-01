@@ -566,7 +566,8 @@ class Gym(LatLongModel):
                               Gym.longitude,
                               Gym.last_modified,
                               Gym.last_scanned,
-                              Gym.total_cp)
+                              Gym.total_cp,
+                              Gym.is_in_battle)
                       .join(GymDetails, JOIN.LEFT_OUTER,
                             on=(Gym.gym_id == GymDetails.gym_id))
                       .where(Gym.gym_id == id)
