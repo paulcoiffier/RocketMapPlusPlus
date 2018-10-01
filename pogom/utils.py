@@ -432,6 +432,9 @@ def get_args():
                          help=('Filter worker status that are inactive for ' +
                                'X minutes. Default: 30, 0 to disable.'),
                          type=int, default=30)
+    parser.add_argument('-sn', '--status-name', default=str(os.getpid()),
+                        help=('Enable status page database update using ' +
+                              'STATUS_NAME as main worker name.'))
     parser.set_defaults(DEBUG=False)
 
     args = parser.parse_args()
