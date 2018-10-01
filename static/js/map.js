@@ -767,10 +767,10 @@ function gymLabel(gym, includeMembers = true) {
                 `
             }
         } else {
-            if (not isInBattle){
-                image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}.png'>`
-            } else {
+            if (isInBattle) {
                 image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}_isInBattle.png'>`
+            } else {
+                image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}.png'>`
             }
         }
 
@@ -784,10 +784,10 @@ function gymLabel(gym, includeMembers = true) {
                 </div>`
         }
     } else {
-        if (not isInBattle){
-            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
-        } else {
+        if (isInBattle){
             image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_isInBattle.png'>`
+        } else {
+            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
         }
     }
 
