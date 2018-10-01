@@ -62,46 +62,6 @@ def get_args():
                         is_config_file=True, help='Set configuration file')
     parser.add_argument('-scf', '--shared-config',
                         is_config_file=True, help='Set a shared config')
-    parser.add_argument('-a', '--auth-service', type=str.lower,
-                        action='append', default=[],
-                        help=('Auth Services, either one for all accounts ' +
-                              'or one per account: ptc or google. Defaults ' +
-                              'all to ptc.'))
-    parser.add_argument('-u', '--username', action='append', default=[],
-                        help='Usernames, one per account.')
-    parser.add_argument('-p', '--password', action='append', default=[],
-                        help=('Passwords, either single one for all ' +
-                              'accounts or one per account.'))
-    parser.add_argument('-w', '--workers', type=int,
-                        help=('Number of search worker threads to start. ' +
-                              'Defaults to the number of accounts specified.'))
-    parser.add_argument('-asi', '--account-search-interval', type=int,
-                        default=0,
-                        help=('Seconds for accounts to search before ' +
-                              'switching to a new account. 0 to disable.'))
-    parser.add_argument('-ari', '--account-rest-interval', type=int,
-                        default=7200,
-                        help=('Seconds for accounts to rest when they fail ' +
-                              'or are switched out.'))
-    parser.add_argument('-ac', '--accountcsv',
-                        help=('Load accounts from CSV file containing ' +
-                              '"auth_service,username,password" lines.'))
-    parser.add_argument('-hlvl', '--high-lvl-accounts',
-                        help=('Load high level accounts from CSV file '
-                              + ' containing '
-                              + '"auth_service,username,password"'
-                              + ' lines.'))
-    parser.add_argument('-bh', '--beehive',
-                        help=('Use beehive configuration for multiple ' +
-                              'accounts, one account per hex.  Make sure ' +
-                              'to keep -st under 5, and -w under the total ' +
-                              'amount of accounts available.'),
-                        action='store_true', default=False)
-    parser.add_argument('-wph', '--workers-per-hive',
-                        help=('Only referenced when using --beehive. Sets ' +
-                              'number of workers per hive. Default value ' +
-                              'is 1.'),
-                        type=int, default=1)
     parser.add_argument('-l', '--location', type=parse_unicode,
                         help='Location, can be an address or coordinates.')
     # Default based on the average elevation of cities around the world.
@@ -117,68 +77,15 @@ def get_args():
                               ' rather than only once, and store results in' +
                               ' the database.'),
                         action='store_true', default=False)
-    parser.add_argument('-j', '--jitter',
-                        help=('Apply random -5m to +5m jitter to ' +
-                              'location.'),
-                        action='store_true', default=False)
     parser.add_argument('-al', '--access-logs',
                         help=("Write web logs to access.log."),
                         action='store_true', default=False)
-    parser.add_argument('-st', '--step-limit', help='Steps.', type=int,
-                        default=12)
-    parser.add_argument('-gf', '--geofence-file',
-                        help=('Geofence file to define outer borders of the ' +
-                              'scan area.'),
-                        default='')
-    parser.add_argument('-gef', '--geofence-excluded-file',
-                        help=('File to define excluded areas inside scan ' +
-                              'area. Regarded this as inverted geofence. ' +
-                              'Can be combined with geofence-file.'),
-                        default='')
-    parser.add_argument('-sd', '--scan-delay',
-                        help='Time delay between requests in scan threads.',
-                        type=float, default=10)
-    parser.add_argument('--spawn-delay',
-                        help=('Number of seconds after spawn time to wait ' +
-                              'before scanning to be sure the Pokemon ' +
-                              'is there.'),
-                        type=float, default=10)
-    parser.add_argument('-enc', '--encounter',
-                        help='Start an encounter to gather IVs and moves.',
-                        action='store_true', default=False)
-    parser.add_argument('-cs', '--captcha-solving',
-                        help='Enables captcha solving.',
-                        action='store_true', default=False)
-    parser.add_argument('-ck', '--captcha-key',
-                        help='2Captcha API key.')
-    parser.add_argument('-cds', '--captcha-dsk',
-                        help='Pokemon Go captcha data-sitekey.',
-                        default="6LeeTScTAAAAADqvhqVMhPpr_vB9D364Ia-1dSgK")
-    parser.add_argument('-mcd', '--manual-captcha-domain',
-                        help='Domain to where captcha tokens will be sent.',
-                        default="http://127.0.0.1:5000")
-    parser.add_argument('-mcr', '--manual-captcha-refresh',
-                        help='Time available before captcha page refreshes.',
-                        type=int, default=30)
-    parser.add_argument('-mct', '--manual-captcha-timeout',
-                        help='Maximum time captchas will wait for manual ' +
-                        'captcha solving. On timeout, if enabled, 2Captcha ' +
-                        'will be used to solve captcha. Default is 0.',
-                        type=int, default=0)
-    parser.add_argument('-ed', '--encounter-delay',
-                        help=('Time delay between encounter pokemon ' +
-                              'in scan threads.'),
-                        type=float, default=1)
     parser.add_argument('-ignf', '--ignorelist-file',
                         default='', help='File containing a list of ' +
                         'Pokemon IDs to ignore, one line per ID. ' +
                         'Spawnpoints will be saved, but ignored ' +
                         'Pokemon won\'t be encountered, sent to ' +
                         'webhooks or saved to the DB.')
-    parser.add_argument('-encwf', '--enc-whitelist-file',
-                        default='', help='File containing a list of '
-                        'Pokemon IDs to encounter for'
-                        ' IV/CP scanning. One line per ID.')
     parser.add_argument('-nostore', '--no-api-store',
                         help=("Don't store the API objects used by the high"
                               + ' level accounts in memory. This will increase'
@@ -248,28 +155,6 @@ def get_args():
     parser.add_argument('-c', '--china',
                         help='Coordinates transformer for China.',
                         action='store_true')
-    parser.add_argument('-m', '--mock', type=str,
-                        help=('Mock mode - point to a fpgo endpoint instead ' +
-                              'of using the real PogoApi, ec: ' +
-                              'http://127.0.0.1:9090'),
-                        default='')
-    parser.add_argument('-ns', '--no-server',
-                        help=('No-Server Mode. Starts the searcher but not ' +
-                              'the Webserver.'),
-                        action='store_true', default=False)
-    parser.add_argument('-os', '--only-server',
-                        help=('Server-Only Mode. Starts only the Webserver ' +
-                              'without the searcher.'),
-                        action='store_true', default=False)
-    parser.add_argument('-sc', '--search-control',
-                        help='Enables search control.',
-                        action='store_true', dest='search_control',
-                        default=False)
-    parser.add_argument('-nfl', '--no-fixed-location',
-                        help='Disables a fixed map location and shows the ' +
-                        'search bar for use in shared maps.',
-                        action='store_false', dest='fixed_location',
-                        default=True)
     parser.add_argument('-k', '--gmaps-key',
                         help='Google Maps Javascript API Key.',
                         required=True)
@@ -300,34 +185,10 @@ def get_args():
                         help=('Disables PokeStops from the map (including ' +
                               'parsing them into local db).'),
                         action='store_true', default=False)
-    parser.add_argument('-ss', '--spawnpoint-scanning',
-                        help=('Use spawnpoint scanning (instead of hex ' +
-                              'grid). Scans in a circle based on step_limit ' +
-                              'when on DB.'),
-                        action='store_true', default=False)
     parser.add_argument('-ssct', '--ss-cluster-time',
                         help=('Time threshold in seconds for spawn point ' +
                               'clustering (0 to disable).'),
                         type=int, default=0)
-    parser.add_argument('-speed', '--speed-scan',
-                        help=('Use speed scanning to identify spawn points ' +
-                              'and then scan closest spawns.'),
-                        action='store_true', default=False)
-    parser.add_argument('-spin', '--pokestop-spinning',
-                        help=('Spin Pokestops with 50%% probability.'),
-                        action='store_true', default=False)
-    parser.add_argument('-ams', '--account-max-spins',
-                        help='Maximum number of Pokestop spins per hour.',
-                        type=int, default=20)
-    parser.add_argument('-kph', '--kph',
-                        help=('Set a maximum speed in km/hour for scanner ' +
-                              'movement. Default: 35, 0 to disable.'),
-                        type=int, default=35)
-    parser.add_argument('-hkph', '--hlvl-kph',
-                        help=('Set a maximum speed in km/hour for scanner ' +
-                              'movement, for high-level (L30) accounts. ' +
-                              'Default: 25, 0 to disable.'),
-                        type=int, default=25)
     parser.add_argument('-ldur', '--lure-duration',
                         help=('Change duration for lures set on pokestops. ' +
                               'This is useful for events that extend lure ' +
@@ -492,27 +353,6 @@ def get_args():
     parser.add_argument('-slt', '--stats-log-timer',
                         help='In log view, list per hr stats every X seconds',
                         type=int, default=0)
-    parser.add_argument('-sn', '--status-name', default=str(os.getpid()),
-                        help=('Enable status page database update using ' +
-                              'STATUS_NAME as main worker name.'))
-    parser.add_argument('-hk', '--hash-key', default=None, action='append',
-                        help='Key for hash server.')
-    parser.add_argument('-hs', '--hash-service', default='bossland', type=str,
-                        help=('Hash service name. Supports bossland and'
-                              ' devkat hashing.'),
-                        choices=['bossland', 'devkat'])
-    parser.add_argument('--hash-header-sleep',
-                        help=('Use the BossLand headers to determine how long'
-                              ' a worker should sleep if it exceeds the'
-                              ' hashing quota. Default: False.'),
-                        action='store_true', default=False)
-    parser.add_argument('-novc', '--no-version-check', action='store_true',
-                        help='Disable API version check.',
-                        default=False)
-    parser.add_argument('-vci', '--version-check-interval', type=int,
-                        help='Interval to check API version in seconds ' +
-                        '(Default: in [60, 300]).',
-                        default=random.randint(60, 300))
     parser.add_argument('-odt', '--on-demand_timeout',
                         help=('Pause searching while web UI is inactive ' +
                               'for this timeout (in seconds).'),
@@ -525,8 +365,6 @@ def get_args():
                         help=('Enables the use of X-FORWARDED-FOR headers ' +
                               'to identify the IP of clients connecting ' +
                               'through these trusted proxies.'))
-    parser.add_argument('--api-version', default='0.91.2',
-                        help=('API version currently in use.'))
     parser.add_argument('--no-file-logs',
                         help=('Disable logging to files. ' +
                               'Does not disable --access-logs.'),
@@ -560,6 +398,22 @@ def get_args():
                          help=('Show debug messages from RocketMap ' +
                                'and pgoapi.'),
                          type=int, dest='verbose')
+    parser.add_argument('-uas', '--user-auth-service', default=None,
+                        help='Force end users to auth to an external service.')
+    parser.add_argument('-uascid', '--uas-client-id', default=None,
+                        help='Client ID for user external authentication.')
+    parser.add_argument('-uascs', '--uas-client-secret', default=None,
+                        help='Client Secret for user external authentication.')
+    parser.add_argument('-uasho', '--uas-host-override', default=None,
+                        help='Host override for user external authentication.')
+    parser.add_argument('-uasdrg', '--uas-discord-required-guilds', default=None,
+                        help='Required Discord Guild(s) for user external authentication.')
+    parser.add_argument('-uasdgi', '--uas-discord-guild-invite', default=None,
+                        help='Link for users not in required guild.')
+    parser.add_argument('-uasdrr', '--uas-discord-required-roles', default=None,
+                        help='Required Discord Guild Role(s) for user external authentication.')
+    parser.add_argument('-uasdbt', '--uas-discord-bot-token', default=None,
+                        help='Discord Bot Token for user external authentication.')
     rarity = parser.add_argument_group('Dynamic Rarity')
     rarity.add_argument('-Rh', '--rarity-hours',
                         help=('Number of hours of Pokemon data to use ' +
