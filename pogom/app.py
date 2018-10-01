@@ -650,10 +650,10 @@ class Pogom(Flask):
             'pokestops': not args.no_pokestops,
             'raids': not args.no_raids,
             'gym_info': args.gym_info,
-            'encounter': args.encounter,
+            'encounter': False,
             'scan_display': scan_display,
             'search_display': search_display,
-            'fixed_display': not args.fixed_location,
+            'fixed_display': True,
             'custom_css': args.custom_css,
             'custom_js': args.custom_js
         }
