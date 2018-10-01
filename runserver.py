@@ -267,8 +267,6 @@ def main():
              'disabled' if args.no_pokestops else 'enabled')
     log.info('Parsing of Gyms %s.',
              'disabled' if args.no_gyms else 'enabled')
-    log.info('Pokemon encounters %s.',
-             'enabled' if args.encounter else 'disabled')
 
     app = None
     if not args.clear_db:
@@ -282,15 +280,6 @@ def main():
     db = startup_db(app, args.clear_db)
 
     args.root_path = os.path.dirname(os.path.abspath(__file__))
-
-    if args.ex_gyms:
-        # Geofence is required.
-        if not args.geofence_file:
-            log.critical('A geofence is required to find EX-gyms.')
-            sys.exit(1)
-        update_ex_gyms(args.geofence_file)
-        log.info('Finished checking gyms against OSM parks, exiting.')
-        sys.exit(1)
 
     # Control the search status (running or not) across threads.
     control_flags = {

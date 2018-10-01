@@ -18,6 +18,7 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
+from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
@@ -75,9 +76,12 @@ class Pogom(Flask):
             self.blacklist = []
             self.blacklist_keys = []
 
+        self.user_auth_code_cache = {}
+
         # Routes
         self.json_encoder = CustomJSONEncoder
         self.route("/", methods=['GET'])(self.fullmap)
+        self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
@@ -647,6 +651,9 @@ class Pogom(Flask):
             return jsonify({'message': 'invalid use of api'})
         return self.get_search_control()
 
+    def auth_callback(self, statusname=None):
+        return render_template('auth_callback.html')
+
     def fullmap(self):
         self.heartbeat[0] = now()
         args = get_args()
@@ -698,6 +705,10 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
         d = {}
+
+        auth_redirect = check_auth(args, request, self.user_auth_code_cache)
+        if (auth_redirect):
+          return auth_redirect
 
         # Request time of this request.
         d['timestamp'] = datetime.utcnow()

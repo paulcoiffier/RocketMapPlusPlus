@@ -10,10 +10,6 @@
 ###################
 
 #gmaps-key:                     # Your Google Maps API key
-#auth-service:                  # ptc (default) or google
-#username:                      # Usernames, one per account. (default=[])
-#password:                      # Passwords, either single one for all accounts or one per account. (default=[])
-#hash-key:                      # Key for hash server (default=None)
 
 
 # Common settings
@@ -21,19 +17,11 @@
 
 #host:                          # Address to listen on (default='127.0.0.1')
 #port:                          # Port to listen on (default=5000)
-#accountcsv:                    # Load accounts instead from a CSV file containing "auth-service,username,password" lines.
-#speed-scan                     # Use speed-scan as the search scheduler.
 #location:                      # Location, can be an address or coordinates.
-#step-limit:                    # Steps (default=10)
-#scan-delay:                    # Time delay between requests in scan threads. (default=10)
 #no-gyms                        # Disables gym scanning (default=False)
 #no-pokemon                     # Disables pokemon scanning. (default=False)
 #no-pokestops                   # Disables pokestop scanning. (default=False)
 #no-raids                       # Disables raid scanning (default=False)
-#print-status                   # Enable ENTER to switch between log view and a status view.
-                                # Optionally add ": status" to start in status view and ": logs" to start in log view. (default=False)
-#status-page-password:          # Enables and protects the /status page to view status of all workers. (default=None)
-#captcha-solving                # Enables captcha solving. (default=False)
 
 
 # Database settings
@@ -47,77 +35,21 @@
 #db-threads:                    # Number of db threads; increase if the db queue falls behind. (default=1)
 
 
-# Scan method (speed-scan preferable, (default is hex-scan)
-#############
-
-#beehive                        # Use beehive configuration for multiple accounts, one account per hex.
-                                # Make sure to keep -st under 5, and -w under the total amount of accounts available.
-#spawnpoint-scanning            # Use spawnpoint scanning (instead of hex grid).
-                                # Scans in a circle based on step_limit when on DB.
-                                # A spawnpoint-file can be added optinal as value for "spawnpoint-scanning".
-#dump-spawnpoints               # Dump the spawnpoints from the db to json (only for use with -ss).
-
-
-# Geofence settings
-###################
-
-#geofence-file:                 # Geofence file to define outer borders of the scan area.
-#geofence-excluded-file:        # File to define forbidden areas inside scan area. Regarded this as inverted geofence. Can be combined with geofence-file.
-
-
 # Search settings
 #################
 
 #china                          # Coordinates transformer for China.
-#no-jitter                      # Don't apply random -9m to +9m jitter to location.
-#altitude:                      # Default altitude in meters. Retrieve this value regarding your scan location from the web. (default=507)
-#altitude-variance:             # Variance for --altitude in meters (default=1)
-#use-altitude-cache             # Query the Elevation API for each step, rather than only once, and store results in the database.
-                                # Make sure your Google Elevation API is enabled
-#workers-per-hive:              # Only referenced when using --beehive. Sets number of workers per hive. (default=1)
-#workers:                       # Number of search worker threads to start. (default=#accounts)
-#spawn-delay:                   # Number of seconds after spawn time to wait before scanning to be sure the Pokemon is there. (default=10)
-#kph:                           # Set a maximum speed in km/hour for scanner movement. 0 to disable. (default=35)
-#bad-scan-retry:                # Number of bad scans before giving up on a step. (default=2, 0 to disable)
-#skip-empty                     # Enables skipping of empty cells in normal scans - requires previously populated database. (not to be used with -ss)
-#min-seconds-left:              # Time that must be left on a spawn before considering it too late and skipping it. (default=0)
 #gym-info                       # Enables detailed gym info collection. (default=False)
-#pokestop-spinning              # Spin Pokestops with "50%" Chance (default=False)
-#account-max-spins:             # Maximum number of Pokestop spins per hour (default=20)
-#on-demand_timeout:             # Pause searching while web UI is inactive for this timeout (in seconds). (default=0)
-
-
-# Account rotation
-##################
-
-#login-delay:                   # Time delay between each login attempt. (default=6)
-#login-retries:                 # Number of times to retry the login before refreshing a thread. (default=3)
-#account-search-interval:       # Seconds for accounts to search before switching to a new account. (default=0)
-#account-rest-interval:         # Seconds for accounts to rest when they fail or are switched out. (default=7200)
-#max-failures:                  # Maximum number of failures to parse locations before an account will go into a sleep for
-                                # account-rest-interval seconds. (default 5, 0 to disable)
-#max-empty:                     # Maximum number of empty scans before an account will go into a sleep for
-                                # account-rest-interval seconds. Reasonable to use with proxies. (default=0)
-
-
-# Pokemon IV (Only use one of the filters below)
-############
-
-#encounter                      # Set to true to start encounters to pull more info, like IVs or movesets. (default=False)
-#encounter-delay:               # Delay in seconds before starting an encounter. Must not be zero. (default=1)
-#high-lvl-accounts:             # File containing a list high level accounts, in the format "auth_service,username,password"
-#enc-whitelist-file:            # File containing a list of Pokemon IDs to encounter for IV/CPs. Requires L30 or higher accounts in --high-lvl-accounts.
-#hlvl-kph:                      # Set a maximum speed in km/hour for high level account scanning. 0 to disable. (default=25)
+#stepsize                       # Size of the steps for the fetch urls. (default=0.00007)
+#maxradius                      # Maximum radius (factor times the stepsize) before device is resend to center point, use 0 to disable it. (default=0)
+#dont-move-map                  # Don't update the map location on a new scanned location. (default=False)
+#teleport-factor                # Teleport factor for the stepsize. (default=10)
 
 
 # Webserver settings
 ####################
 
-#no-server                      # No-Server Mode. Starts the searcher but not the Webserver.
-#only-server                    # Server-Only Mode. Starts only the Webserver without the searcher.
 #locale:                        # Pokemon translation
-#search-control                 # Enables search control.
-#no-fixed-location              # Disables the fixed map location and shows the search bar for use in shared maps.
 #cors                           # Enable CORS on web server.
 #ssl-certificate:               # Path to ssl certificate
 #ssl-privatekey:                # Path to ssl private key
@@ -159,26 +91,6 @@
 
 
 
-# Status and logs
-#################
-
-#stats-log-timer                # In log view, list per hr stats every X seconds
-#status-name:                   # Enables writing status updates to the database - if you use multiple processes, each needs a unique value. (default=None)
-
-
-# Captcha Solving
-#################
-
-#captcha-key:                   # 2Captcha API key.
-#captcha-dsk:                   # PokemonGo captcha data-sitekey. Don't change this if not explicitly needed due to recent changes.
-                                # (default="6LeeTScTAAAAADqvhqVMhPpr_vB9D364Ia-1dSgK")
-#manual-captcha-domain:         # Enables the option to manual solve Captcha.
-                                # Enter domain where captcha tokens will be sent. (default="http://127.0.0.1:5000")
-#manual-captcha-refresh:        # Time available before captcha page refreshes. (default=30)
-#manual-captcha-timeout:        # Maximum time captchas will wait for manual captcha solving.
-                                # On timeout, if enabled, 2Captcha will be used to solve captcha. (default=0)
-
-
 # Misc
 ######
 
@@ -186,7 +98,25 @@
 #no-file-logs                   # Disables logging to files except for access.log. (default=False)
 #log-path:                      # Defines the path logs are saved at. (default=logs/)
 #log-filename:                  # Defines the log filename to be saved. The default generates yyyymmdd_HHMM_statusname.log. (default=%Y%m%d_%H%M_<SN>)
-#no-version-check               # Disable API version check. (default=False)
-#version-check-interval:        # Interval to check API version in seconds (Default: in range [60, 300]).
-#mock:                          # Mock mode - point to a fpgo endpoint instead of using the real PogoApi,
-                                # ec: http://127.0.0.1:9090 (default='')
+
+
+# User Auth Settings
+################
+# If you want users to auth to Discord prior to accessing server, set user-auth-service to Discord, create an app here:
+# https://discordapp.com/developers/applications/me and add a redrect uri to your the application in this format: https://mysrv.com/auth_callback.
+# If you get an error on the discord page when authenticating, and the redirect_uri in the url doesn't match your servers actual web address
+# override it by specifying uas-host-override, e.g. https://mysrv.com/
+# To require a user to be in one of your guilds (servers) to gain access, specify the required guild ids and an invite url to send them to if
+# they are not in any of the required guilds.
+# To require a user be in specific roles in the guild to gain access, add a bot to the application at the above developer application page,
+# then add that bot to your guild (server) using this link: https://discordapp.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot
+# Note that the required-roles feature requires a configuration with a single required guild.
+
+#user-auth-service:              # Force end users to auth to an external service. Supported: Discord
+#uas-client-id:                  # OAuth2 Client ID.
+#uas-client-secret:              # OAuth2 Client Secret. Client should have auth callback url of <yourserverurl>/auth_callback
+#uas-host-override               # override auth redirect host.
+#uas-discord-required-guilds     # (Optional) If guild ID(s) are specified, user must be in at least one discord guild (server) to access map. Comma separated if multiple.
+#uas-discord-guild-invite        # Invite link to redirect user to if user is not in above guild(s)
+#uas-discord-required-roles      # (Optional) If specified, user must be in one of these discord roles. Comma separated list of role ids. Requires bot configured below. Only supports single required guild.
+#uas-discord-bot-token           # Token for bot with access to your guild. Only required for required-roles feature
