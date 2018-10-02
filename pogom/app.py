@@ -409,7 +409,7 @@ class Pogom(Flask):
                     l_e = None
                     if lure_expiration is not None:
                         l_e = calendar.timegm(lure_expiration.timetuple())
-                    wh_pokestop = pokestops[f.id].copy()
+                    wh_pokestop = pokestops[f['pokestop_id']].copy()
                     wh_pokestop.update({
                         'pokestop_id': f['pokestop_id'],
                         'last_modified': f['last_modified'],
