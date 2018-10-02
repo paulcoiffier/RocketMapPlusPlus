@@ -334,33 +334,33 @@ class Pogom(Flask):
                     'weather_boosted_condition': None
                 }
 
-            if 'pokemon' in self.args.wh_types:
-                if (pokemon_id in self.args.webhook_whitelist or
-                    (not self.args.webhook_whitelist and pokemon_id
-                     not in self.args.webhook_blacklist)):
-                    wh_poke = pokemon[p['id']].copy()
-                    wh_poke.update({
-                        'disappear_time': calendar.timegm(
-                            disappear_time.timetuple()),
-                        'last_modified_time': now(),
-                        'time_until_hidden_ms': p['despawn_time'],
-                        'verified': SpawnPoint.tth_found(sp),
-                        'seconds_until_despawn': seconds_until_despawn,
-                        'spawn_start': start_end[0],
-                        'spawn_end': start_end[1],
-                        'player_level': 30,
-                        'individual_attack': 0,
-                        'individual_defense': 0,
-                        'individual_stamina': 0,
-                        'move_1': 0,
-                        'move_2': 0,
-                        'cp': 0,
-                        'cp_multiplier': 0,
-                        'height': 0,
-                        'weight': 0,
-                        'weather_boosted_condition': 0
-                    })
-                    self.wh_update_queue.put(('pokemon', wh_poke))
+                if 'pokemon' in self.args.wh_types:
+                    if (pokemon_id in self.args.webhook_whitelist or
+                        (not self.args.webhook_whitelist and pokemon_id
+                         not in self.args.webhook_blacklist)):
+                        wh_poke = pokemon[p['id']].copy()
+                        wh_poke.update({
+                            'disappear_time': calendar.timegm(
+                                disappear_time.timetuple()),
+                            'last_modified_time': now(),
+                            'time_until_hidden_ms': p['despawn_time'],
+                            'verified': SpawnPoint.tth_found(sp),
+                            'seconds_until_despawn': seconds_until_despawn,
+                            'spawn_start': start_end[0],
+                            'spawn_end': start_end[1],
+                            'player_level': 30,
+                            'individual_attack': 0,
+                            'individual_defense': 0,
+                            'individual_stamina': 0,
+                            'move_1': 0,
+                            'move_2': 0,
+                            'cp': 0,
+                            'cp_multiplier': 0,
+                            'height': 0,
+                            'weight': 0,
+                            'weather_boosted_condition': 0
+                        })
+                        self.wh_update_queue.put(('pokemon', wh_poke))
 
         if pokestops_dict:
             stop_ids = [f['pokestop_id'] for f in pokestops_dict]
