@@ -41,7 +41,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 41
+db_schema_version = 42
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -442,6 +442,7 @@ class Gym(LatLongModel):
     last_modified = DateTimeField(index=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
     is_in_battle = BooleanField(default=False)
+    is_ex_raid_eligible = BooleanField(default=False)
 
     class Meta:
         indexes = ((('latitude', 'longitude'), False),)
@@ -567,7 +568,8 @@ class Gym(LatLongModel):
                               Gym.last_modified,
                               Gym.last_scanned,
                               Gym.total_cp,
-                              Gym.is_in_battle)
+                              Gym.is_in_battle,
+                              Gym.is_ex_raid_eligible)
                       .join(GymDetails, JOIN.LEFT_OUTER,
                             on=(Gym.gym_id == GymDetails.gym_id))
                       .where(Gym.gym_id == id)
@@ -3410,8 +3412,12 @@ def database_migrate(db, old_ver):
 
     if old_ver < 41:
         migrate(
-            migrator.add_column('gym', 'is_in_battle',
-                                BooleanField(default=False))
+            migrator.add_column('gym', 'is_in_battle', BooleanField(default=False))
+        )
+
+    if old_ver < 42:
+        migrate(
+            migrator.add_column('gym', 'is_ex_raid_eligible', BooleanField(default=False))
         )
 
     # Always log that we're done.
