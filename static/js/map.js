@@ -986,6 +986,10 @@ function getGymLevel(gym) {
     return 6 - gym['slots_available']
 }
 
+function getGymInBattle(gym) {
+    return gym['is_in_battle']
+}
+
 function getRaidLevel(raid) {
     if (raid) {
         return raid['level']
@@ -1210,6 +1214,7 @@ function updateGymMarker(item, marker) {
     const hasActiveRaid = item.raid && item.raid.end > Date.now()
     const raidLevelVisible = raidLevel >= Store.get('showRaidMinLevel') && raidLevel <= Store.get('showRaidMaxLevel')
     const showRaidSetting = Store.get('showRaids') && (!Store.get('showActiveRaidsOnly') || !Store.get('showParkRaidsOnly'))
+    const gymInBattle = getGymInBattle(item)
 
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible) {
         let markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '_' + item.raid.level + '_unknown.png'
@@ -1222,15 +1227,29 @@ function updateGymMarker(item, marker) {
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
     } else if (hasActiveRaid && raidLevelVisible && showRaidSetting) {
-        marker.setIcon({
-            url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png',
-            scaledSize: new google.maps.Size(48, 48)
-        })
+        if (gymInBattle) {
+            marker.setIcon({
+                url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '_isInBattle.png',
+                scaledSize: new google.maps.Size(48, 48)
+            })
+        } else {
+            marker.setIcon({
+                url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png',
+                scaledSize: new google.maps.Size(48, 48)
+            })
+        }
     } else {
-        marker.setIcon({
-            url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '.png',
-            scaledSize: new google.maps.Size(48, 48)
-        })
+        if (gymInBattle) {
+            marker.setIcon({
+                url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_isInBattle.png',
+                scaledSize: new google.maps.Size(48, 48)
+            })
+        } else {
+            marker.setIcon({
+                url: 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '.png',
+                scaledSize: new google.maps.Size(48, 48)
+            })
+        }
         marker.setZIndex(1)
     }
     marker.infoWindow.setContent(gymLabel(item))
