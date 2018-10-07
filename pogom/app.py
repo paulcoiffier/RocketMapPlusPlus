@@ -333,6 +333,10 @@ class Pogom(Flask):
                     'form': p.get('form', 0),
                     'weather_boosted_condition': None
                 }
+                if pokemon[p['id']]['costume'] < -1:
+                    pokemon[p['id']]['costume'] = -1
+                if pokemon[p['id']]['form'] < -1:
+                    pokemon[p['id']]['form'] = -1
 
                 if 'pokemon' in self.args.wh_types:
                     if (pokemon_id in self.args.webhook_whitelist or
@@ -487,6 +491,8 @@ class Pogom(Flask):
                             f['lastModifiedTimestampMs'] / 1000.0),
                     'is_in_battle' :
                         f.get('isInBattle', False)
+                    'is_ex_raid_eligible' :
+                        f.get('isExRaidEligible', False)
                 }
 
                 gym_id = f['gym_id']
