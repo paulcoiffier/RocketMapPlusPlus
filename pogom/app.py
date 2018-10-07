@@ -570,6 +570,8 @@ class Pogom(Flask):
 
                 pokemon_id = p['pokemon_id']
 
+                distance = round(p.get('distance', 0), 5)
+
                 nearby_pokemon[p['encounter_id']] = {
                     'encounter_id': p['encounter_id'],
                     'pokestop_id' : p['fort_id'],
@@ -579,7 +581,7 @@ class Pogom(Flask):
                     'costume': p['costume'],
                     'form': p.get('form', 0),
                     'weather_boosted_condition': p.get('weather', None),
-                    'distance': p['distance']
+                    'distance': distance
                 }
                 if nearby_pokemon[p['id']]['costume'] < -1:
                     nearby_pokemon[p['id']]['costume'] = -1
