@@ -16,7 +16,7 @@ from flask_compress import Compress
 
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
-                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint)
+                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
 from .client_auth import check_auth
@@ -158,6 +158,7 @@ class Pogom(Flask):
         pokestops = request_json.get('pokestops')
         pokemon = request_json.get('pokemon')
         gyms = request_json.get('gyms')
+        nearby_pokemon = request_json.get('nearby_pokemon')
 
         uuid = request_json.get('uuid')
         if uuid == "":
@@ -192,9 +193,9 @@ class Pogom(Flask):
 
         self.db_update_queue.put((DeviceWorker, deviceworkers))
 
-        return self.parse_map(pokemon, pokestops, gyms, deviceworker)
+        return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, deviceworker)
 
-    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, deviceworker):
+    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, deviceworker):
         pokemon = {}
         pokestops = {}
         gyms = {}
@@ -301,8 +302,8 @@ class Pogom(Flask):
 
                 start_end = SpawnPoint.start_end(sp, 1)
                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                disappear_time = now_date + \
-                    timedelta(seconds=seconds_until_despawn)
+                #disappear_time = now_date + \
+                #    timedelta(seconds=seconds_until_despawn)
 
                 pokemon_id = p['type']
 
@@ -331,7 +332,7 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-                    'weather_boosted_condition': None
+                    'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
                     pokemon[p['id']]['costume'] = -1
@@ -362,7 +363,7 @@ class Pogom(Flask):
                             'cp_multiplier': 0,
                             'height': 0,
                             'weight': 0,
-                            'weather_boosted_condition': 0
+                            'weather_boosted_condition': p.get('weather', 0)
                         })
                         self.wh_update_queue.put(('pokemon', wh_poke))
 
@@ -541,6 +542,61 @@ class Pogom(Flask):
 
             del forts
 
+        if nearby_pokemon_dict:
+            "s2cell":6924438434945695744,
+            "gender":1,
+            "distance":608.07403564453125,
+            "fort_id":"3a94d909afbc42e4b2a71cc899e51aea.16",
+            "encounter_id":12549233908291292283,
+            "pokemon_id":96,
+            "weather":0,
+            "costume":0,
+            "form":0
+
+
+            nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
+            # For all the wild Pokemon we found check if an active Pokemon is in
+            # the database.
+            with PokestopMember.database().execution_context():
+                query = (PokestopMember
+                         .select(PokestopMember.encounter_id, PokestopMember.pokestop_id)
+                         .where((PokestopMember.disappear_time >= now_date) &
+                                (PokestopMember.encounter_id << nearby_encounter_ids))
+                         .dicts())
+
+                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                # query.
+                # All of that is needed to make sure it's unique.
+                nearby_encountered_pokemon = [
+                    (p['encounter_id'], p['pokestop_id']) for p in query]
+
+            for p in nearby_pokemon_dict:
+                pokestop_id = p['fort_id']
+                if ((p['encounter_id'], pokestop_id) in nearby_encountered_pokemon):
+                    # If Pokemon has been encountered before don't process it.
+                    skipped += 1
+                    continue
+
+                disappear_time = now_date + timedelta(seconds=600)
+
+                pokemon_id = p['pokemon_id']
+
+                nearby_pokemon[p['encounter_id']] = {
+                    'encounter_id': p['encounter_id'],
+                    'pokestop_id' : p['fort_id']
+                    'pokemon_id': pokemon_id,
+                    'disappear_time': disappear_time,
+                    'gender': p['gender'],
+                    'costume': p['costume'],
+                    'form': p.get('form', 0),
+                    'weather_boosted_condition': p.get('weather', None),
+                    'distance': p['distance']
+                }
+                if nearby_pokemon[p['id']]['costume'] < -1:
+                    nearby_pokemon[p['id']]['costume'] = -1
+                if nearby_pokemon[p['id']]['form'] < -1:
+                    nearby_pokemon[p['id']]['form'] = -1
+
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
                  'pokestops: %d, gyms: %d, raids: %d.',
                  len(pokemon) + skipped,
@@ -567,6 +623,8 @@ class Pogom(Flask):
             self.db_update_queue.put((ScanSpawnPoint, scan_spawn_points))
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
+        if nearby_pokemon:
+            self.db_update_queue.put((PokestopMember, nearby_pokemon))
 
         return 'ok'
 

@@ -41,7 +41,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 42
+db_schema_version = 43
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1767,6 +1767,20 @@ class GymMember(BaseModel):
         primary_key = False
 
 
+class PokestopMember(BaseModel):
+    encounter_id = UBigIntegerField(primary_key=True)
+    pokestop_id = Utf8mb4CharField(index=True, max_length=100)
+    pokemon_id = SmallIntegerField(index=True)
+    disappear_time = DateTimeField()
+    gender = SmallIntegerField(null=True)
+    costume = SmallIntegerField(null=True)
+    form = SmallIntegerField(null=True)
+    weather_boosted_condition = SmallIntegerField(null=True)
+    last_modified = DateTimeField(
+        null=True, index=True, default=datetime.utcnow)
+    distance = DoubleField()
+
+
 class GymPokemon(BaseModel):
     pokemon_uid = UBigIntegerField(primary_key=True)
     pokemon_id = SmallIntegerField()
@@ -3122,7 +3136,7 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker]
+              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3138,7 +3152,7 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys]
+              Token, HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3419,6 +3433,9 @@ def database_migrate(db, old_ver):
         migrate(
             migrator.add_column('gym', 'is_ex_raid_eligible', BooleanField(default=False))
         )
+
+    if old_ver < 43:
+        create_tables(db)
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')
