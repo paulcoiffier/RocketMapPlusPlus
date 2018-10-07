@@ -572,7 +572,7 @@ class Pogom(Flask):
 
                 nearby_pokemon[p['encounter_id']] = {
                     'encounter_id': p['encounter_id'],
-                    'pokestop_id' : p['fort_id']
+                    'pokestop_id' : p['fort_id'],
                     'pokemon_id': pokemon_id,
                     'disappear_time': disappear_time,
                     'gender': p['gender'],
