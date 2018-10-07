@@ -490,7 +490,7 @@ class Pogom(Flask):
                         datetime.utcfromtimestamp(
                             f['lastModifiedTimestampMs'] / 1000.0),
                     'is_in_battle' :
-                        f.get('isInBattle', False)
+                        f.get('isInBattle', False),
                     'is_ex_raid_eligible' :
                         f.get('isExRaidEligible', False)
                 }
