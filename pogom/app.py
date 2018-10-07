@@ -543,17 +543,6 @@ class Pogom(Flask):
             del forts
 
         if nearby_pokemon_dict:
-            "s2cell":6924438434945695744,
-            "gender":1,
-            "distance":608.07403564453125,
-            "fort_id":"3a94d909afbc42e4b2a71cc899e51aea.16",
-            "encounter_id":12549233908291292283,
-            "pokemon_id":96,
-            "weather":0,
-            "costume":0,
-            "form":0
-
-
             nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
             # For all the wild Pokemon we found check if an active Pokemon is in
             # the database.
