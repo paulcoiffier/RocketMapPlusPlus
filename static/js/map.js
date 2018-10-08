@@ -2895,7 +2895,7 @@ $(function () {
 
     $switchPokestopSidebar.on('change', function () {
         Store.set('usePokestopSidebar', this.checked)
-        lastpokestop = false
+        lastpokestops = false
         $.each(['pokestops'], function (d, dType) {
             $.each(mapData[dType], function (key, value) {
                 // for any marker you're turning off, you'll want to wipe off the range
