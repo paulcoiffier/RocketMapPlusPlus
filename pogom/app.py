@@ -584,10 +584,10 @@ class Pogom(Flask):
                     'weather_boosted_condition': p.get('weather', None),
                     'distance': distance
                 }
-                if nearby_pokemons[p['id']]['costume'] < -1:
-                    nearby_pokemons[p['id']]['costume'] = -1
-                if nearby_pokemons[p['id']]['form'] < -1:
-                    nearby_pokemons[p['id']]['form'] = -1
+                if nearby_pokemons[p['encounter_id']]['costume'] < -1:
+                    nearby_pokemons[p['encounter_id']]['costume'] = -1
+                if nearby_pokemons[p['encounter_id']]['form'] < -1:
+                    nearby_pokemons[p['encounter_id']]['form'] = -1
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
                  'pokestops: %d, gyms: %d, raids: %d.',
