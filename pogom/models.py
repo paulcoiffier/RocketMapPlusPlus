@@ -416,6 +416,8 @@ class Pokestop(LatLongModel):
         # (potentially) large dict with append().
         gc.disable()
 
+        now_date = datetime.utcnow()
+
         pokestops = []
         pokestop_ids = []
         for p in query:
@@ -440,8 +442,8 @@ class Pokestop(LatLongModel):
                            PokestopMember.last_modified,
                            PokestopMember.distance)
                        .where(PokestopMember.pokestop_id << pokestop_ids)
-                       .where(datetime.utcnow() > PokestopMember.last_modified)
-                       .where(PokestopMember.disappear_time > datetime.utcnow())
+                       .where(now_date > PokestopMember.last_modified)
+                       .where(PokestopMember.disappear_time > now_date)
                        .distinct()
                        .dicts())
 
@@ -474,6 +476,8 @@ class Pokestop(LatLongModel):
 
         result['pokemon'] = []
 
+        now_date = datetime.utcnow()
+
         pokemon = (PokestopMember
                    .select(
                        PokestopMember.encounter_id,
@@ -487,8 +491,8 @@ class Pokestop(LatLongModel):
                        PokestopMember.last_modified,
                        PokestopMember.distance)
                    .where(PokestopMember.pokestop_id << pokestop_ids)
-                   .where(datetime.utcnow() > PokestopMember.last_modified)
-                   .where(PokestopMember.disappear_time > datetime.utcnow())
+                   .where(now_date > PokestopMember.last_modified)
+                   .where(PokestopMember.disappear_time > now_date)
                    .distinct()
                    .dicts())
 
