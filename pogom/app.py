@@ -581,7 +581,7 @@ class Pogom(Flask):
                     'costume': p['costume'],
                     'form': p.get('form', 0),
                     'weather_boosted_condition': p.get('weather', None),
-                    'distance': distance
+#                    'distance': distance
                 }
                 if nearby_pokemon[p['id']]['costume'] < -1:
                     nearby_pokemon[p['id']]['costume'] = -1
