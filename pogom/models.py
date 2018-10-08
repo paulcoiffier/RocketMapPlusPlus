@@ -417,16 +417,87 @@ class Pokestop(LatLongModel):
         gc.disable()
 
         pokestops = []
+        pokestop_ids = []
         for p in query:
             if args.china:
                 p['latitude'], p['longitude'] = \
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
+            p['pokemon'] = []
             pokestops.append(p)
+            pokestop_ids.append(p['pokestop_id'])
+
+        if len(pokestop_ids) > 0:
+            pokemon = (PokestopMember
+                       .select(
+                           PokestopMember.encounter_id,
+                           PokestopMember.pokestop_id,
+                           PokestopMember.pokemon_id,
+                           PokestopMember.disappear_time,
+                           PokestopMember.gender,
+                           PokestopMember.costume,
+                           PokestopMember.form,
+                           PokestopMember.weather_boosted_condition,
+                           PokestopMember.last_modified,
+                           PokestopMember.distance)
+                       .where(PokestopMember.pokestop_id << pokestop_ids)
+                       .where(datetime.utcnow() > PokestopMember.last_modified)
+                       .where(PokestopMember.disappear_time > datetime.utcnow())
+                       .distinct()
+                       .dicts())
+
+            for p in pokemon:
+                p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
+                pokestops[p['pokestop_id']]['pokemon'].append(p)
 
         # Re-enable the GC.
         gc.enable()
 
         return pokestops
+
+    @staticmethod
+    def get_stop(id):
+        try:
+            result = (Pokestop
+                      .select(Pokestop.pokestop_id,
+                              Pokestop.enabled,
+                              Pokestop.latitude,
+                              Pokestop.longitude,
+                              Pokestop.last_modified,
+                              Pokestop.lure_expiration,
+                              Pokestop.active_fort_modifier,
+                              Pokestop.last_updated)
+                      .where(Pokestop.pokestop_id == id)
+                      .dicts()
+                      .get())
+        except Pokestop.DoesNotExist:
+            return None
+
+        result['pokemon'] = []
+
+        pokemon = (PokestopMember
+                   .select(
+                       PokestopMember.encounter_id,
+                       PokestopMember.pokestop_id,
+                       PokestopMember.pokemon_id,
+                       PokestopMember.disappear_time,
+                       PokestopMember.gender,
+                       PokestopMember.costume,
+                       PokestopMember.form,
+                       PokestopMember.weather_boosted_condition,
+                       PokestopMember.last_modified,
+                       PokestopMember.distance)
+                   .where(PokestopMember.pokestop_id << pokestop_ids)
+                   .where(datetime.utcnow() > PokestopMember.last_modified)
+                   .where(PokestopMember.disappear_time > datetime.utcnow())
+                   .distinct()
+                   .dicts())
+
+        for p in pokemon:
+            p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
+
+            result['pokemon'].append(p)
+
+        return result
 
 
 class Gym(LatLongModel):

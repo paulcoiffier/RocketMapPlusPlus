@@ -24,6 +24,7 @@ var $selectLuredPokestopsOnly
 var $selectSearchIconMarker
 var $selectLocationIconMarker
 var $switchGymSidebar
+var $switchPokestopSidebar
 var $selectExcludeRarity
 
 const language = document.documentElement.lang === '' ? 'en' : document.documentElement.lang
@@ -471,6 +472,7 @@ function initSidebar() {
     $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
     $('#pokemon-stats-switch').prop('checked', Store.get('showPokemonStats'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
+    $('#pokestop-sidebar-switch').prop('checked', Store.get('usePokestopSidebar'))
     $('#lured-pokestops-only-switch').val(Store.get('showLuredPokestopsOnly'))
     $('#lured-pokestops-only-wrapper').toggle(Store.get('showPokestops'))
     $('#geoloc-switch').prop('checked', Store.get('geoLocate'))
@@ -854,8 +856,36 @@ function gymLabel(gym, includeMembers = true) {
         </div>`
 }
 
-function pokestopLabel(expireTime, latitude, longitude) {
+function pokestopLabel(pokestop, includeMembers = true) {
     var str
+    var memberStr = ''
+
+    var expireTime = pokestop['lure_expiration']
+    var latitude = pokestop['latitude']
+    var longitude = pokestop['longitude']
+
+    if (includeMembers) {
+        memberStr = '<div>'
+
+        pokestop.pokemon.forEach((member) => {
+            memberStr += `
+            <span class='pokestop member'>
+              <center>
+                <div>
+                  <div>
+                    <i class='pokemon-sprite n${member.pokemon_id}'></i>
+                  </div>
+                  <div>
+                    <span class='gym pokemon'>${member.pokemon_name}</span>
+                  </div>
+                </div>
+              </center>
+            </span>`
+        })
+
+        memberStr += '</div>'
+    }
+
     if (expireTime) {
         str = `
             <div>
@@ -868,6 +898,7 @@ function pokestopLabel(expireTime, latitude, longitude) {
               <div>
                 <img class='pokestop sprite' src='static/images/pokestop//PokestopLured.png'>
               </div>
+              ${memberStr}
               <div>
                 <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop lure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
               </div>
@@ -882,6 +913,7 @@ function pokestopLabel(expireTime, latitude, longitude) {
               <div>
                 <img class='pokestop sprite' src='static/images/pokestop//Pokestop.png'>
               </div>
+              ${memberStr}
               <div>
                 <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
               </div>
@@ -890,6 +922,7 @@ function pokestopLabel(expireTime, latitude, longitude) {
     }
 
     return str
+
 }
 
 function formatSpawnTime(seconds) {
@@ -1288,11 +1321,41 @@ function setupPokestopMarker(item) {
     }
 
     marker.infoWindow = new google.maps.InfoWindow({
-        content: pokestopLabel(item['lure_expiration'], item['latitude'], item['longitude']),
+        content: pokestopLabel(item),
         disableAutoPan: true
     })
 
-    addListeners(marker)
+    if (Store.get('usePokestopSidebar')) {
+        marker.addListener('click', function () {
+            var pokestopSidebar = document.querySelector('#pokestop-details')
+            if (pokestopSidebar.getAttribute('data-id') === item['pokestop_id'] && pokestopSidebar.classList.contains('visible')) {
+                pokestopSidebar.classList.remove('visible')
+            } else {
+                pokestopSidebar.setAttribute('data-id', item['pokestop_id'])
+                showPokestopDetails(item['pokestop_id'])
+            }
+        })
+
+        google.maps.event.addListener(marker.infoWindow, 'closeclick', function () {
+            marker.persist = null
+        })
+
+        if (!isMobileDevice() && !isTouchDevice()) {
+            marker.addListener('mouseover', function () {
+                marker.infoWindow.open(map, marker)
+                clearSelection()
+                updateLabelDiffTime()
+            })
+        }
+
+        marker.addListener('mouseout', function () {
+            if (!marker.persist) {
+                marker.infoWindow.close()
+            }
+        })
+    } else {
+        addListeners(marker)
+    }
     return marker
 }
 
@@ -2476,7 +2539,94 @@ function getSidebarGymMember(pokemon) {
                     `
 }
 
+function showPokestopDetails(id) { // eslint-disable-line no-unused-vars
+    var sidebar = document.querySelector('#pokestop-details')
+    var sidebarClose
+
+    sidebar.classList.add('visible')
+
+    var data = $.ajax({
+        url: 'pokestop_data',
+        type: 'GET',
+        data: {
+            'id': id
+        },
+        dataType: 'json',
+        cache: false
+    })
+
+    data.done(function (result) {
+        var pokemonHtml = ''
+        if (result.pokemon.length) {
+            result.pokemon.forEach((pokemon) => {
+                pokemonHtml += getSidebarPokestopMember(pokemon)
+            })
+
+            pokemonHtml = `<table><tbody>${pokemonHtml}</tbody></table>`
+        } else {
+            pokemonHtml = ''
+        }
+
+        var topPart = pokestopLabel(result, false)
+        sidebar.innerHTML = `${topPart}${pokemonHtml}`
+
+        sidebarClose = document.createElement('a')
+        sidebarClose.href = '#'
+        sidebarClose.className = 'close'
+        sidebarClose.tabIndex = 0
+        sidebar.appendChild(sidebarClose)
+
+        sidebarClose.addEventListener('click', function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+            sidebar.classList.remove('visible')
+        })
+    })
+}
+
+function getSidebarPokestopMember(pokemon) {
+    // Skip getDateStr() so we can re-use the moment.js object.
+    var relativeTime = 'Unknown'
+    var absoluteTime = ''
+
+    if (pokemon.disappear_time) {
+        let disappearTime = moment(pokemon.disappear_time)
+        relativeTime = disappearTime.fromNow()
+        // Append as string so we show nothing when the time is Unknown.
+        absoluteTime = '<div class="pokestop pokemon">(' + disappearTime.format('MMM Do HH:mm') + ')</div>'
+    }
+
+    return `
+                    <tr onclick=togglePokestopPokemonDetails(this)>
+                        <td width="30px">
+                            <img class="pokestop pokemon sprite" src="static/icons/${pokemon.pokemon_id}.png">
+                        </td>
+                        <td>
+                            <div class="pokestop pokemon"><span class="pokestop pokemon name">${pokemon.pokemon_name}</span></div>
+                            <div>
+                                <span class="pokestop pokemon distance">Distance: ${pokemon.distance}</span>
+                            </div>
+                        </td>
+                        <td width="190" align="center">
+                            <div class="pokestop pokemon">Disappears ${relativeTime}</div>
+                            ${absoluteTime}
+                        </td>
+                        <td width="10">
+                            <!--<a href="#" onclick="togglePokestopPokemonDetails(this)">-->
+                                <i class="fa fa-angle-double-down"></i>
+                            <!--</a>-->
+                        </td>
+                    </tr>
+                    `
+}
+
 function toggleGymPokemonDetails(e) { // eslint-disable-line no-unused-vars
+    e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-up')
+    e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-down')
+    e.nextElementSibling.classList.toggle('visible')
+}
+
+function togglePokestopPokemonDetails(e) { // eslint-disable-line no-unused-vars
     e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-up')
     e.lastElementChild.firstElementChild.classList.toggle('fa-angle-double-down')
     e.nextElementSibling.classList.toggle('visible')
@@ -2727,6 +2877,25 @@ $(function () {
         Store.set('useGymSidebar', this.checked)
         lastgyms = false
         $.each(['gyms'], function (d, dType) {
+            $.each(mapData[dType], function (key, value) {
+                // for any marker you're turning off, you'll want to wipe off the range
+                if (mapData[dType][key].marker.rangeCircle) {
+                    mapData[dType][key].marker.rangeCircle.setMap(null)
+                    delete mapData[dType][key].marker.rangeCircle
+                }
+                mapData[dType][key].marker.setMap(null)
+            })
+            mapData[dType] = {}
+        })
+        updateMap()
+    })
+
+    $switchPokestopSidebar = $('#pokestop-sidebar-switch')
+
+    $switchPokestopSidebar.on('change', function () {
+        Store.set('usePokestopSidebar', this.checked)
+        lastpokestop = false
+        $.each(['pokestops'], function (d, dType) {
             $.each(mapData[dType], function (key, value) {
                 // for any marker you're turning off, you'll want to wipe off the range
                 if (mapData[dType][key].marker.rangeCircle) {

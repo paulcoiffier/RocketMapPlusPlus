@@ -94,6 +94,7 @@ class Pogom(Flask):
             self.post_search_control)
         self.route("/stats", methods=['GET'])(self.get_stats)
         self.route("/gym_data", methods=['GET'])(self.get_gymdata)
+        self.route("/pokestop_data", methods=['GET'])(self.get_pokestopdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
         self.route("/webhook", methods=['POST'])(self.webhook)
@@ -616,6 +617,9 @@ class Pogom(Flask):
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
         if nearby_pokemons:
+            with PokestopMember.database().execution_context():
+                DeleteQuery(PokestopMember).where(
+                    PokestopMember.pokemon_id << pokestops.keys()).where(PokestopMember.disappear_time < datetime.utcnow()).execute()
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
 
         return 'ok'
@@ -1206,6 +1210,12 @@ class Pogom(Flask):
         gym = Gym.get_gym(gym_id)
 
         return jsonify(gym)
+
+    def get_pokestopdata(self):
+        pokestop_id = request.args.get('id')
+        pokestop = Pokestop.get_pokestop(pokestop_id)
+
+        return jsonify(pokestop)
 
 
 class CustomJSONEncoder(JSONEncoder):

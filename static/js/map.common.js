@@ -946,6 +946,10 @@ var StoreOptions = {
         default: 0,
         type: StoreTypes.Number
     },
+    'usePokestopSidebar': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showScanned': {
         default: false,
         type: StoreTypes.Boolean

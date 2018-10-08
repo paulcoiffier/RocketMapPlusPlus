@@ -191,6 +191,16 @@
                 <option value="1">Only Lured</option>
               </select>
             </div>
+            <div class="form-control switch-container" id="pokestop-sidebar-wrapper" style="display:none">
+              <h3>Use Pokestop Sidebar</h3>
+              <div class="onoffswitch">
+                <input id="pokestop-sidebar-switch" type="checkbox" name="pokestop-sidebar-switch" class="onoffswitch-checkbox" checked>
+                <label class="onoffswitch-label" for="pokestop-sidebar-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
               {% endif %}
             <div class="form-control switch-container">
               <h3>Scanned Locations</h3>
@@ -394,6 +404,9 @@
         </div>
       </nav>
       <nav id="gym-details">
+        <center><h1>Loading...</h1></center>
+      </nav>
+      <nav id="pokestop-details">
         <center><h1>Loading...</h1></center>
       </nav>
       <div id="map"></div>
