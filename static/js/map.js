@@ -11,6 +11,7 @@ var $selectStyle
 var $selectIconSize
 var $switchOpenGymsOnly
 var $switchParkGymsOnly
+var $switchExRaidGymsOnly
 var $switchParkRaidGymsOnly
 var $switchActiveRaidGymsOnly
 var $switchRaidMinLevel
@@ -466,6 +467,7 @@ function initSidebar() {
     $('#min-level-gyms-filter-switch').val(Store.get('minGymLevel'))
     $('#max-level-gyms-filter-switch').val(Store.get('maxGymLevel'))
     $('#last-update-gyms-switch').val(Store.get('showLastUpdatedGymsOnly'))
+    $('#ex-raid-gyms-only-switch').val(Store.get('showExRaidGymsOnly'))
     $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
     $('#pokemon-stats-switch').prop('checked', Store.get('showPokemonStats'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
@@ -1856,6 +1858,13 @@ function processGym(i, item) {
         }
     }
 
+    if (Store.get('showExRaidGymsOnly')) {
+        if (!item.is_ex_raid_eligible) {
+            removeGymFromMap(item['gym_id'])
+            return true
+        }
+    }
+
     if (!Store.get('showGyms')) {
         if (Store.get('showRaids') && !isValidRaid(item.raid)) {
             removeGymFromMap(item['gym_id'])
@@ -2597,6 +2606,14 @@ $(function () {
         updateMap()
     })
 
+    $switchExRaidGymsOnly = $('#ex-raid-gyms-only-switch')
+
+    $switchExRaidGymsOnly.on('change', function () {
+        Store.set('showExRaidGymsOnly', this.checked)
+        lastgyms = false
+        updateMap()
+    })
+
     $switchParkRaidGymsOnly = $('#raid-park-gym-switch')
 
     $switchParkRaidGymsOnly.on('change', function () {
@@ -2990,12 +3007,14 @@ $(function () {
         Store.set('maxGymLevel', 6)
         Store.set('showOpenGymsOnly', false)
         Store.set('showParkGymsOnly', false)
+        Store.set('showExRaidGymsOnly', false)
 
         $('#team-gyms-only-switch').val(Store.get('showTeamGymsOnly'))
         $('#open-gyms-only-switch').prop('checked', Store.get('showOpenGymsOnly'))
         $('#park-gyms-only-switch').prop('checked', Store.get('showParkGymsOnly'))
         $('#min-level-gyms-filter-switch').val(Store.get('minGymLevel'))
         $('#max-level-gyms-filter-switch').val(Store.get('maxGymLevel'))
+        $('#ex-raid-gyms-only-switch').prop('checked', Store.get('showExRaidGymsOnly'))
 
         $('#team-gyms-only-switch').trigger('change')
         $('#min-level-gyms-filter-switch').trigger('change')
