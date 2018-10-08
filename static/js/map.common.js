@@ -882,6 +882,10 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showExRaidGymsOnly': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showActiveRaidsOnly': {
         default: false,
         type: StoreTypes.Boolean
