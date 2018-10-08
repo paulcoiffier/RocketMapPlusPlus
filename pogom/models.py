@@ -425,7 +425,7 @@ class Pokestop(LatLongModel):
                 p['latitude'], p['longitude'] = \
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
             p['pokemon'] = []
-            pokestops.append(p)
+            pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
 
         if len(pokestop_ids) > 0:
