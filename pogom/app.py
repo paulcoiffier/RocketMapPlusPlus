@@ -14,6 +14,8 @@ from flask import Flask, abort, jsonify, render_template, request,\
 from flask.json import JSONEncoder
 from flask_compress import Compress
 
+from peewee import (DeleteQuery)
+
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
