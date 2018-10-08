@@ -1210,7 +1210,7 @@ class Pogom(Flask):
 
     def get_pokestopdata(self):
         pokestop_id = request.args.get('id')
-        pokestop = Pokestop.get_pokestop(pokestop_id)
+        pokestop = Pokestop.get_stop(pokestop_id)
 
         return jsonify(pokestop)
 
