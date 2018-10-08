@@ -14,8 +14,6 @@ from flask import Flask, abort, jsonify, render_template, request,\
 from flask.json import JSONEncoder
 from flask_compress import Compress
 
-from peewee import (DeleteQuery)
-
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
@@ -619,9 +617,6 @@ class Pogom(Flask):
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
         if nearby_pokemons:
-            with PokestopMember.database().execution_context():
-                DeleteQuery(PokestopMember).where(
-                    PokestopMember.pokemon_id << pokestops.keys()).where(PokestopMember.disappear_time < datetime.utcnow()).execute()
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
 
         return 'ok'
