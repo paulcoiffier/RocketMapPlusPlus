@@ -418,7 +418,7 @@ class Pokestop(LatLongModel):
 
         now_date = datetime.utcnow()
 
-        pokestops = []
+        pokestops = {}
         pokestop_ids = []
         for p in query:
             if args.china:
