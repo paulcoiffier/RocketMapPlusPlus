@@ -490,7 +490,7 @@ class Pokestop(LatLongModel):
                        PokestopMember.weather_boosted_condition,
                        PokestopMember.last_modified,
                        PokestopMember.distance)
-                   .where(PokestopMember.pokestop_id << pokestop_ids)
+                   .where(PokestopMember.pokestop_id == id)
                    .where(now_date > PokestopMember.last_modified)
                    .where(PokestopMember.disappear_time > now_date)
                    .distinct()
