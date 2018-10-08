@@ -473,6 +473,7 @@ function initSidebar() {
     $('#pokemon-stats-switch').prop('checked', Store.get('showPokemonStats'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
     $('#pokestop-sidebar-switch').prop('checked', Store.get('usePokestopSidebar'))
+    $('#pokestop-sidebar-wrapper').toggle(Store.get('showPokestops'))
     $('#lured-pokestops-only-switch').val(Store.get('showLuredPokestopsOnly'))
     $('#lured-pokestops-only-wrapper').toggle(Store.get('showPokestops'))
     $('#geoloc-switch').prop('checked', Store.get('geoLocate'))
@@ -3267,12 +3268,16 @@ $(function () {
             'duration': 500
         }
         var wrapper = $('#lured-pokestops-only-wrapper')
+        var wrapperSidebar = $('#pokestop-sidebar-wrapper')
+
         if (this.checked) {
             lastpokestops = false
             wrapper.show(options)
+            wrapperSidebar.show(options)
         } else {
             lastpokestops = false
             wrapper.hide(options)
+            wrapperSidebar.hide(options)
         }
         return buildSwitchChangeListener(mapData, ['pokestops'], 'showPokestops').bind(this)()
     })
