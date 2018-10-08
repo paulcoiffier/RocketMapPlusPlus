@@ -197,6 +197,7 @@ class Pogom(Flask):
 
     def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, deviceworker):
         pokemon = {}
+        nearby_pokemons = {}
         pokestops = {}
         gyms = {}
         gym_details = {}
@@ -572,7 +573,7 @@ class Pogom(Flask):
 
                 distance = round(p.get('distance', 0), 5)
 
-                nearby_pokemon[p['encounter_id']] = {
+                nearby_pokemons[p['encounter_id']] = {
                     'encounter_id': p['encounter_id'],
                     'pokestop_id' : p['fort_id'],
                     'pokemon_id': pokemon_id,
@@ -581,12 +582,12 @@ class Pogom(Flask):
                     'costume': p['costume'],
                     'form': p.get('form', 0),
                     'weather_boosted_condition': p.get('weather', None),
-#                    'distance': distance
+                    'distance': distance
                 }
-                if nearby_pokemon[p['id']]['costume'] < -1:
-                    nearby_pokemon[p['id']]['costume'] = -1
-                if nearby_pokemon[p['id']]['form'] < -1:
-                    nearby_pokemon[p['id']]['form'] = -1
+                if nearby_pokemons[p['id']]['costume'] < -1:
+                    nearby_pokemons[p['id']]['costume'] = -1
+                if nearby_pokemons[p['id']]['form'] < -1:
+                    nearby_pokemons[p['id']]['form'] = -1
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
                  'pokestops: %d, gyms: %d, raids: %d.',
@@ -614,8 +615,8 @@ class Pogom(Flask):
             self.db_update_queue.put((ScanSpawnPoint, scan_spawn_points))
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
-        if nearby_pokemon:
-            self.db_update_queue.put((PokestopMember, nearby_pokemon))
+        if nearby_pokemons:
+            self.db_update_queue.put((PokestopMember, nearby_pokemons))
 
         return 'ok'
 
