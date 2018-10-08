@@ -442,7 +442,7 @@ class Pokestop(LatLongModel):
                            PokestopMember.last_modified,
                            PokestopMember.distance)
                        .where(PokestopMember.pokestop_id << pokestop_ids)
-                       .where(now_date > PokestopMember.last_modified)
+                       .where(PokestopMember.last_modified <= now_date)
                        .where(PokestopMember.disappear_time > now_date)
                        .distinct()
                        .dicts())
@@ -1854,6 +1854,11 @@ class PokestopMember(BaseModel):
     last_modified = DateTimeField(
         null=True, index=True, default=datetime.utcnow)
     distance = DoubleField()
+
+    class Meta:
+        indexes = (
+            (('disappear_time', 'pokemon_id'), False)
+        )
 
 
 class GymPokemon(BaseModel):
