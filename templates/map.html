@@ -151,8 +151,8 @@
                   </label>
                 </div>
               </div>
-               <div class="form-control switch-container" id="last-update-gyms-wrapper">
-                 <h3>Last Scan</h3>
+              <div class="form-control switch-container" id="last-update-gyms-wrapper">
+                <h3>Last Scan</h3>
                 <select name="last-update-gyms-switch" id="last-update-gyms-switch">
                   <option value="0">All</option>
                   <option value="1">Last Hour</option>
@@ -161,6 +161,16 @@
                   <option value="24">Last 24 Hours</option>
                   <option value="168">Last Week</option>
                 </select>
+              </div>
+              <div class="form-control switch-container" id="ex-raid-gyms-only-wrapper">
+                <h3>Ex Raid Gyms</h3>
+                <div class="onoffswitch">
+                  <input id="ex-raid-gyms-only-switch" type="checkbox" name="ex-raid-gyms-only-switch" class="onoffswitch-checkbox" checked>
+                  <label class="onoffswitch-label" for="ex-raid-gyms-only-switch">
+                  <span class="switch-label" data-on="On" data-off="Off"></span>
+                  <span class="switch-handle"></span>
+                  </label>
+                </div>
               </div>
             </div>
               {% endif %}
