@@ -335,7 +335,7 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-                    'weather_id': p.get('weather', None)
+                    'weather_id': p.get('weather', None),
                     'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
