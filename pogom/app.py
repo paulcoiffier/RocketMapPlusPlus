@@ -367,6 +367,24 @@ class Pogom(Flask):
                             'weight': 0,
                             'weather_boosted_condition': p.get('weather', 0)
                         })
+
+                        root_path = self.args.root_path
+                        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
+                        rarities = {
+                            "New Spawn" : 0,
+                            "Common" : 1,
+                            "Uncommon" : 2,
+                            "Rare" : 3,
+                            "Very Rare" : 4,
+                            "Ultra Rare" : 5
+                        }
+                        with open(rarities_path) as f:
+                            data = json.load(f)
+                            rarity = rarities.get(data.get(str(pokemon_id), "New Spawn"), 0)
+                            wh_poke.update({
+                                'rarity' : rarity
+                            })
+
                         self.wh_update_queue.put(('pokemon', wh_poke))
 
         if pokestops_dict:
