@@ -42,7 +42,7 @@
         })
     }
 
-    // Gym sidebar
+    // Pokestop sidebar
     var $pokestopSidebar = document.querySelector('#pokestop-details')
     var $pokestopSidebarClose
 
