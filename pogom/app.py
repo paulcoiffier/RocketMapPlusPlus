@@ -101,6 +101,121 @@ class Pogom(Flask):
         self.route("/webhook", methods=['POST'])(self.webhook)
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
+        self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
+
+    def feedpokemon(self):
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+        d = {}
+
+        # Request time of this request.
+        d['timestamp'] = datetime.utcnow()
+
+        # Request time of previous request.
+        if request.args.get('timestamp'):
+            timestamp = int(request.args.get('timestamp'))
+            timestamp -= 1000  # Overlap, for rounding errors.
+        else:
+            timestamp = 0
+
+        swLat = request.args.get('swLat')
+        swLng = request.args.get('swLng')
+        neLat = request.args.get('neLat')
+        neLng = request.args.get('neLng')
+
+        oSwLat = request.args.get('oSwLat')
+        oSwLng = request.args.get('oSwLng')
+        oNeLat = request.args.get('oNeLat')
+        oNeLng = request.args.get('oNeLng')
+
+        if request.args.get('pokemon', 'true') == 'true':
+            d['lastpokemon'] = request.args.get('pokemon', 'true')
+
+        # If old coords are not equal to current coords we have moved/zoomed!
+        if (oSwLng < swLng and oSwLat < swLat and
+                oNeLat > neLat and oNeLng > neLng):
+            newArea = False  # We zoomed in no new area uncovered.
+        elif not (oSwLat == swLat and oSwLng == swLng and
+                  oNeLat == neLat and oNeLng == neLng):
+            newArea = True
+        else:
+            newArea = False
+
+        # Pass current coords as old coords.
+        d['oSwLat'] = swLat
+        d['oSwLng'] = swLng
+        d['oNeLat'] = neLat
+        d['oNeLng'] = neLng
+
+        if (request.args.get('pokemon', 'true') == 'true' and
+                not args.no_pokemon):
+
+            # Exclude ids of Pokemon that are hidden.
+            eids = []
+            request_eids = request.args.get('eids')
+            if request_eids:
+                eids = {int(i) for i in request_eids.split(',')}
+
+            if request.args.get('ids'):
+                request_ids = request.args.get('ids').split(',')
+                ids = [int(x) for x in request_ids if int(x) not in eids]
+                d['pokemons'] = convert_pokemon_list(
+                    Pokemon.get_active_by_id(ids, swLat, swLng, neLat, neLng))
+            elif lastpokemon != 'true':
+                # If this is first request since switch on, load
+                # all pokemon on screen.
+                d['pokemons'] = convert_pokemon_list(
+                    Pokemon.get_active(
+                        swLat, swLng, neLat, neLng, exclude=eids))
+            else:
+                # If map is already populated only request modified Pokemon
+                # since last request time.
+                d['pokemons'] = convert_pokemon_list(
+                    Pokemon.get_active(
+                        swLat, swLng, neLat, neLng,
+                        timestamp=timestamp, exclude=eids))
+                if newArea:
+                    # If screen is moved add newly uncovered Pokemon to the
+                    # ones that were modified since last request time.
+                    d['pokemons'] = d['pokemons'] + (
+                        convert_pokemon_list(
+                            Pokemon.get_active(
+                                swLat,
+                                swLng,
+                                neLat,
+                                neLng,
+                                exclude=eids,
+                                oSwLat=oSwLat,
+                                oSwLng=oSwLng,
+                                oNeLat=oNeLat,
+                                oNeLng=oNeLng)))
+
+            if request.args.get('reids'):
+                reids = [int(x) for x in request.args.get('reids').split(',')]
+                d['pokemons'] = d['pokemons'] + (
+                    convert_pokemon_list(
+                        Pokemon.get_active_by_id(reids, swLat, swLng, neLat,
+                                                 neLng)))
+                d['reids'] = reids
+
+        if request.args.get('seen', 'false') == 'true':
+            d['seen'] = Pokemon.get_seen(int(request.args.get('duration')))
+
+        if request.args.get('appearances', 'false') == 'true':
+            d['appearances'] = Pokemon.get_appearances(
+                request.args.get('pokemonid'),
+                int(request.args.get('duration')))
+
+        if request.args.get('appearancesDetails', 'false') == 'true':
+            d['appearancesTimes'] = (
+                Pokemon.get_appearances_times_by_spawnpoint(
+                    request.args.get('pokemonid'),
+                    request.args.get('spawnpoint_id'),
+                    int(request.args.get('duration'))))
+
+        return jsonify(d)
 
     def render_robots_txt(self):
         return render_template('robots.txt')
