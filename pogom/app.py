@@ -366,9 +366,7 @@ class Pogom(Flask):
                             'cp': 0,
                             'cp_multiplier': 0,
                             'height': 0,
-                            'weight': 0,
-                            'weather_boosted_condition': p.get('weather', 0),
-                            'weather_id': p.get('weather', 0)
+                            'weight': 0
                         })
 
                         root_path = self.args.root_path
