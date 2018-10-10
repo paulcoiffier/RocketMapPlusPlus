@@ -241,6 +241,9 @@ def get_args():
     parser.add_argument('-tf', '--teleport-factor',
                         help=('Teleport factor for the stepsize'),
                         type=float, default=10)
+    parser.add_argument('-mn', '--mapname',
+                        help=('Name for the map in the HTML'),
+                        type=str, default='RocketMapPlusPlus')
     group = parser.add_argument_group('Database')
     group.add_argument(
         '--db-name', help='Name of the database to be used.', required=True)

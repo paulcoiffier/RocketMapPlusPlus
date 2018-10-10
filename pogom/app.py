@@ -744,7 +744,8 @@ class Pogom(Flask):
                                lng=map_lng,
                                gmaps_key=args.gmaps_key,
                                lang=args.locale,
-                               show=visibility_flags
+                               show=visibility_flags,
+                               mapname=args.mapname
                                )
 
     def raw_data(self):
@@ -1220,7 +1221,8 @@ class Pogom(Flask):
                                lat=self.current_location[0],
                                lng=self.current_location[1],
                                gmaps_key=args.gmaps_key,
-                               show=visibility_flags
+                               show=visibility_flags,
+                               mapname=args.mapname
                                )
 
     def get_gymdata(self):
