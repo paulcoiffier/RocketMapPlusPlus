@@ -130,6 +130,8 @@ class Pogom(Flask):
         oNeLat = request.args.get('oNeLat')
         oNeLng = request.args.get('oNeLng')
 
+        lastpokemon = request.args.get('lastpokemon')
+
         if request.args.get('pokemon', 'true') == 'true':
             d['lastpokemon'] = request.args.get('pokemon', 'true')
 
