@@ -42,6 +42,17 @@
         })
     }
 
+    // Pokestop sidebar
+    var $pokestopSidebar = document.querySelector('#pokestop-details')
+    var $pokestopSidebarClose
+
+    if ($pokestopSidebar) {
+        // Event: Prevent clicks/taps inside the gym sidebar from bubbling.
+        addEventsListener($pokestopSidebar, 'click touchend', function (event) {
+            event.stopPropagation()
+        })
+    }
+
     // Event: Hide nav on body click/tap.
     addEventsListener($body, 'click touchend', function (event) {
         // on ios safari, when navToggle is clicked,
@@ -101,6 +112,14 @@
         $gymSidebar.appendChild($gymSidebarClose)
     }
 
+    if ($pokestopSidebar) {
+        $pokestopSidebarClose = document.createElement('a')
+        $pokestopSidebarClose.href = '#'
+        $pokestopSidebarClose.className = 'close'
+        $pokestopSidebarClose.tabIndex = 0
+        $pokestopSidebar.appendChild($pokestopSidebarClose)
+    }
+
     // Event: Hide on ESC.
     window.addEventListener('keydown', function (event) {
         if (event.keyCode === 27) {
@@ -110,6 +129,9 @@
             }
             if ($gymSidebar) {
                 $gymSidebar.classList.remove('visible')
+            }
+            if ($pokestopSidebar) {
+                $pokestopSidebar.classList.remove('visible')
             }
         }
     })
@@ -136,6 +158,15 @@
             event.preventDefault()
             event.stopPropagation()
             $gymSidebar.classList.remove('visible')
+        })
+    }
+
+    if ($pokestopSidebarClose) {
+        // Event: Hide stats on click.
+        $pokestopSidebarClose.addEventListener('click', function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+            $pokestopSidebar.classList.remove('visible')
         })
     }
 })()

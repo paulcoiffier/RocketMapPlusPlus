@@ -41,7 +41,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 42
+db_schema_version = 43
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -416,17 +416,92 @@ class Pokestop(LatLongModel):
         # (potentially) large dict with append().
         gc.disable()
 
-        pokestops = []
+        now_date = datetime.utcnow()
+
+        pokestops = {}
+        pokestop_ids = []
         for p in query:
             if args.china:
                 p['latitude'], p['longitude'] = \
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
-            pokestops.append(p)
+            p['pokemon'] = []
+            pokestops[p['pokestop_id']] = p
+            pokestop_ids.append(p['pokestop_id'])
+
+        if len(pokestop_ids) > 0:
+            pokemon = (PokestopMember
+                       .select(
+                           PokestopMember.encounter_id,
+                           PokestopMember.pokestop_id,
+                           PokestopMember.pokemon_id,
+                           PokestopMember.disappear_time,
+                           PokestopMember.gender,
+                           PokestopMember.costume,
+                           PokestopMember.form,
+                           PokestopMember.weather_boosted_condition,
+                           PokestopMember.last_modified,
+                           PokestopMember.distance)
+                       .where(PokestopMember.pokestop_id << pokestop_ids)
+                       .where(PokestopMember.last_modified <= now_date)
+                       .where(PokestopMember.disappear_time > now_date)
+                       .distinct()
+                       .dicts())
+
+            for p in pokemon:
+                p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
+                pokestops[p['pokestop_id']]['pokemon'].append(p)
 
         # Re-enable the GC.
         gc.enable()
 
         return pokestops
+
+    @staticmethod
+    def get_stop(id):
+        try:
+            result = (Pokestop
+                      .select(Pokestop.pokestop_id,
+                              Pokestop.enabled,
+                              Pokestop.latitude,
+                              Pokestop.longitude,
+                              Pokestop.last_modified,
+                              Pokestop.lure_expiration,
+                              Pokestop.active_fort_modifier,
+                              Pokestop.last_updated)
+                      .where(Pokestop.pokestop_id == id)
+                      .dicts()
+                      .get())
+        except Pokestop.DoesNotExist:
+            return None
+
+        result['pokemon'] = []
+
+        now_date = datetime.utcnow()
+
+        pokemon = (PokestopMember
+                   .select(
+                       PokestopMember.encounter_id,
+                       PokestopMember.pokestop_id,
+                       PokestopMember.pokemon_id,
+                       PokestopMember.disappear_time,
+                       PokestopMember.gender,
+                       PokestopMember.costume,
+                       PokestopMember.form,
+                       PokestopMember.weather_boosted_condition,
+                       PokestopMember.last_modified,
+                       PokestopMember.distance)
+                   .where(PokestopMember.pokestop_id == id)
+                   .where(PokestopMember.last_modified <= now_date)
+                   .where(PokestopMember.disappear_time > now_date)
+                   .distinct()
+                   .dicts())
+
+        for p in pokemon:
+            p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
+
+            result['pokemon'].append(p)
+
+        return result
 
 
 class Gym(LatLongModel):
@@ -1765,6 +1840,25 @@ class GymMember(BaseModel):
 
     class Meta:
         primary_key = False
+
+
+class PokestopMember(BaseModel):
+    encounter_id = UBigIntegerField(primary_key=True)
+    pokestop_id = Utf8mb4CharField(index=True, max_length=100)
+    pokemon_id = SmallIntegerField(index=True)
+    disappear_time = DateTimeField()
+    gender = SmallIntegerField(null=True)
+    costume = SmallIntegerField(null=True)
+    form = SmallIntegerField(null=True)
+    weather_boosted_condition = SmallIntegerField(null=True)
+    last_modified = DateTimeField(
+        null=True, index=True, default=datetime.utcnow)
+    distance = DoubleField()
+
+    class Meta:
+        indexes = (
+            (('disappear_time', 'pokemon_id'), False)
+        )
 
 
 class GymPokemon(BaseModel):
@@ -3122,7 +3216,7 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker]
+              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3138,7 +3232,7 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys]
+              Token, HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3419,6 +3513,9 @@ def database_migrate(db, old_ver):
         migrate(
             migrator.add_column('gym', 'is_ex_raid_eligible', BooleanField(default=False))
         )
+
+    if old_ver < 43:
+        create_tables(db)
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

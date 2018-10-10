@@ -4,6 +4,7 @@
 import calendar
 import logging
 import gc
+import os
 
 import time
 from datetime import datetime, timedelta
@@ -16,7 +17,7 @@ from flask_compress import Compress
 
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
-                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint)
+                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
 from .client_auth import check_auth
@@ -94,6 +95,7 @@ class Pogom(Flask):
             self.post_search_control)
         self.route("/stats", methods=['GET'])(self.get_stats)
         self.route("/gym_data", methods=['GET'])(self.get_gymdata)
+        self.route("/pokestop_data", methods=['GET'])(self.get_pokestopdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
         self.route("/webhook", methods=['POST'])(self.webhook)
@@ -158,6 +160,7 @@ class Pogom(Flask):
         pokestops = request_json.get('pokestops')
         pokemon = request_json.get('pokemon')
         gyms = request_json.get('gyms')
+        nearby_pokemon = request_json.get('nearby_pokemon')
 
         uuid = request_json.get('uuid')
         if uuid == "":
@@ -192,10 +195,11 @@ class Pogom(Flask):
 
         self.db_update_queue.put((DeviceWorker, deviceworkers))
 
-        return self.parse_map(pokemon, pokestops, gyms, deviceworker)
+        return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, deviceworker)
 
-    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, deviceworker):
+    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, deviceworker):
         pokemon = {}
+        nearby_pokemons = {}
         pokestops = {}
         gyms = {}
         gym_details = {}
@@ -301,8 +305,8 @@ class Pogom(Flask):
 
                 start_end = SpawnPoint.start_end(sp, 1)
                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                disappear_time = now_date + \
-                    timedelta(seconds=seconds_until_despawn)
+                #disappear_time = now_date + \
+                #    timedelta(seconds=seconds_until_despawn)
 
                 pokemon_id = p['type']
 
@@ -331,7 +335,8 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-                    'weather_boosted_condition': None
+                    'weather_id': p.get('weather', None),
+                    'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
                     pokemon[p['id']]['costume'] = -1
@@ -361,9 +366,26 @@ class Pogom(Flask):
                             'cp': 0,
                             'cp_multiplier': 0,
                             'height': 0,
-                            'weight': 0,
-                            'weather_boosted_condition': 0
+                            'weight': 0
                         })
+
+                        root_path = self.args.root_path
+                        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
+                        rarities = {
+                            "New Spawn" : 0,
+                            "Common" : 1,
+                            "Uncommon" : 2,
+                            "Rare" : 3,
+                            "Very Rare" : 4,
+                            "Ultra Rare" : 5
+                        }
+                        with open(rarities_path) as f:
+                            data = json.load(f)
+                            rarity = rarities.get(data.get(str(pokemon_id), "New Spawn"), 0)
+                            wh_poke.update({
+                                'rarity' : rarity
+                            })
+
                         self.wh_update_queue.put(('pokemon', wh_poke))
 
         if pokestops_dict:
@@ -535,11 +557,59 @@ class Pogom(Flask):
                             'longitude': f['longitude'],
                             'cp': 0,
                             'move_1': 0,
-                            'move_2': 0
+                            'move_2': 0,
+                            'is_ex_raid_eligible' :
+                                f.get('isExRaidEligible', False)
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
 
             del forts
+
+        if nearby_pokemon_dict:
+            nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
+            # For all the wild Pokemon we found check if an active Pokemon is in
+            # the database.
+            with PokestopMember.database().execution_context():
+                query = (PokestopMember
+                         .select(PokestopMember.encounter_id, PokestopMember.pokestop_id)
+                         .where((PokestopMember.disappear_time >= now_date) &
+                                (PokestopMember.encounter_id << nearby_encounter_ids))
+                         .dicts())
+
+                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                # query.
+                # All of that is needed to make sure it's unique.
+                nearby_encountered_pokemon = [
+                    (p['encounter_id'], p['pokestop_id']) for p in query]
+
+            for p in nearby_pokemon_dict:
+                pokestop_id = p['fort_id']
+                if ((p['encounter_id'], pokestop_id) in nearby_encountered_pokemon):
+                    # If Pokemon has been encountered before don't process it.
+                    skipped += 1
+                    continue
+
+                disappear_time = now_date + timedelta(seconds=600)
+
+                pokemon_id = p['pokemon_id']
+
+                distance = round(p.get('distance', 0), 5)
+
+                nearby_pokemons[p['encounter_id']] = {
+                    'encounter_id': p['encounter_id'],
+                    'pokestop_id' : p['fort_id'],
+                    'pokemon_id': pokemon_id,
+                    'disappear_time': disappear_time,
+                    'gender': p['gender'],
+                    'costume': p['costume'],
+                    'form': p.get('form', 0),
+                    'weather_boosted_condition': p.get('weather', None),
+                    'distance': distance
+                }
+                if nearby_pokemons[p['encounter_id']]['costume'] < -1:
+                    nearby_pokemons[p['encounter_id']]['costume'] = -1
+                if nearby_pokemons[p['encounter_id']]['form'] < -1:
+                    nearby_pokemons[p['encounter_id']]['form'] = -1
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
                  'pokestops: %d, gyms: %d, raids: %d.',
@@ -567,6 +637,8 @@ class Pogom(Flask):
             self.db_update_queue.put((ScanSpawnPoint, scan_spawn_points))
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
+        if nearby_pokemons:
+            self.db_update_queue.put((PokestopMember, nearby_pokemons))
 
         return 'ok'
 
@@ -820,7 +892,7 @@ class Pogom(Flask):
                 d['pokestops'] = Pokestop.get_stops(swLat, swLng, neLat, neLng,
                                                     timestamp=timestamp)
                 if newArea:
-                    d['pokestops'] = d['pokestops'] + (
+                    d['pokestops'].update(
                         Pokestop.get_stops(swLat, swLng, neLat, neLng,
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
@@ -1156,6 +1228,12 @@ class Pogom(Flask):
         gym = Gym.get_gym(gym_id)
 
         return jsonify(gym)
+
+    def get_pokestopdata(self):
+        pokestop_id = request.args.get('id')
+        pokestop = Pokestop.get_stop(pokestop_id)
+
+        return jsonify(pokestop)
 
 
 class CustomJSONEncoder(JSONEncoder):

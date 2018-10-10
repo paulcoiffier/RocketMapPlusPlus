@@ -882,6 +882,10 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showExRaidGymsOnly': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showActiveRaidsOnly': {
         default: false,
         type: StoreTypes.Boolean
@@ -941,6 +945,10 @@ var StoreOptions = {
     'showLuredPokestopsOnly': {
         default: 0,
         type: StoreTypes.Number
+    },
+    'usePokestopSidebar': {
+        default: false,
+        type: StoreTypes.Boolean
     },
     'showScanned': {
         default: false,
