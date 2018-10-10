@@ -557,7 +557,9 @@ class Pogom(Flask):
                             'longitude': f['longitude'],
                             'cp': 0,
                             'move_1': 0,
-                            'move_2': 0
+                            'move_2': 0,
+                            'is_ex_raid_eligible' :
+                                f.get('isExRaidEligible', False)
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
 
