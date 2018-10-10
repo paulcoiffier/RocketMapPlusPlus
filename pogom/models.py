@@ -1855,11 +1855,6 @@ class PokestopMember(BaseModel):
         null=True, index=True, default=datetime.utcnow)
     distance = DoubleField()
 
-    class Meta:
-        indexes = (
-            (('disappear_time', 'pokemon_id'), False)
-        )
-
 
 class GymPokemon(BaseModel):
     pokemon_uid = UBigIntegerField(primary_key=True)

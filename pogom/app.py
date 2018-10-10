@@ -452,7 +452,7 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-                    'weather_id': p.get('weather', None),
+#                    'weather_id': p.get('weather', None),
                     'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
@@ -483,7 +483,8 @@ class Pogom(Flask):
                             'cp': 0,
                             'cp_multiplier': 0,
                             'height': 0,
-                            'weight': 0
+                            'weight': 0,
+                            'weather_id': p.get('weather', None)
                         })
 
                         root_path = self.args.root_path
