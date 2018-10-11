@@ -224,7 +224,7 @@ class Pogom(Flask):
             result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name'])
             now_date = datetime.utcnow()
             ttl = int(round((pokemon['disappear_time'] - now_date).total_seconds() / 60))
-            result += "," + str(ttl) "m"
+            result += "," + str(ttl) + "m"
 
 
         return result.strip()
