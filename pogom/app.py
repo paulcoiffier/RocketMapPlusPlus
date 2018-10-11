@@ -217,7 +217,11 @@ class Pogom(Flask):
                     request.args.get('spawnpoint_id'),
                     int(request.args.get('duration'))))
 
-        return jsonify(d)
+        result = ""
+        for pokemon in d['pokemons']:
+            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name']) + "\n"
+
+        return result
 
     def render_robots_txt(self):
         return render_template('robots.txt')
