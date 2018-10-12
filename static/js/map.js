@@ -95,6 +95,10 @@ const pokemonWithImages = [
     359, 361, 365, 377, 378, 379, 380, 381, 382, 383, 384,
     385, 386
 ]
+const genderSpecificSprites = [
+    3, 12, 19, 20, 25, 26, 41, 42, 44, 45, 64, 65, 84, 85,
+    111, 112, 118, 119, 123, 129, 130
+]
 
 const excludedRaritiesList = [
   [],
@@ -600,6 +604,25 @@ function pokemonLabel(item) {
       ${name} <span class='pokemon name pokedex'><a href='http://pokemon.gameinfo.io/en/pokemon/${id}' target='_blank' title='View in Pokédex'>#${id}</a></span> ${formString} <span class='pokemon gender rarity'>${genderType[gender - 1]} ${rarityDisplay}</span> ${typesDisplay} ${weatherDisplay}
     </div>`
 
+    var iconname = `${id}`
+    if (form > 0) {
+        if (form < 37) {
+            iconname += `_${form}`
+        } else {
+            if (form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(id) !== -1) {
+            if (gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
     if (showStats && cp !== null && cpMultiplier !== null) {
         var pokemonLevel = getPokemonLevel(cpMultiplier)
 
@@ -611,7 +634,7 @@ function pokemonLabel(item) {
           <div class='pokemon container'>
             <div class='pokemon container content-left'>
               <div>
-                <img class='pokemon sprite' src='static/icons/${id}.png'>
+                <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                 <span class='pokemon'>Level: </span><span class='pokemon'>${pokemonLevel}</span>
                 <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
                 <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
@@ -643,7 +666,7 @@ function pokemonLabel(item) {
       <div class='pokemon container'>
         <div class='pokemon container content-left'>
           <div>
-            <img class='pokemon sprite' src='static/icons/${id}.png'>
+            <img class='pokemon sprite' src='static/icons/${iconname}.png'>
             <span class='pokemon'>Level: </span><span class='pokemon no-encounter'>n/a</span>
             <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
             <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
@@ -832,12 +855,31 @@ function gymLabel(gym, includeMembers = true) {
         memberStr = '<div>'
 
         gym.pokemon.forEach((member) => {
+            var iconname = `${member.pokemon_id}`
+            if (member.form > 0) {
+                if (member.form < 37) {
+                    iconname += `_${member.form}`
+                } else {
+                    if (member.form % 2 == 0) {
+                        iconname += `_A`
+                    }
+                }
+            } else {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
+                    if (member.gender == 1) {
+                        iconname += '_M'
+                    } else {
+                        iconname += '_F'
+                    }
+                }
+            }
+
             memberStr += `
             <span class='gym member'>
               <center>
                 <div>
                   <div>
-                    <i class='pokemon-sprite n${member.pokemon_id}'></i>
+                    <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
@@ -880,12 +922,31 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr = '<div>'
 
         pokestop.pokemon.forEach((member) => {
+            var iconname = `${member.pokemon_id}`
+            if (member.form > 0) {
+                if (member.form < 37) {
+                    iconname += `_${member.form}`
+                } else {
+                    if (member.form % 2 == 0) {
+                        iconname += `_A`
+                    }
+                }
+            } else {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
+                    if (member.gender == 1) {
+                        iconname += '_M'
+                    } else {
+                        iconname += '_F'
+                    }
+                }
+            }
+
             memberStr += `
             <span class='pokestop member'>
               <center>
                 <div>
                   <div>
-                    <i class='pokemon-sprite n${member.pokemon_id}'></i>
+                    <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
@@ -908,7 +969,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop//PokestopLured.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/PokestopLured.png'>
               </div>
               ${memberStr}
               <div>
@@ -923,7 +984,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 Pokéstop
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop//Pokestop.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/Pokestop.png'>
               </div>
               ${memberStr}
               <div>
@@ -1194,10 +1255,29 @@ function customizePokemonMarker(marker, item, skipNotification) {
         disableAutoPan: true
     })
 
+    var iconname = item['pokemon_id']
+    if (item['form'] > 0) {
+        if (item['form'] < 37) {
+            iconname += '_' + item['form']
+        } else {
+            if (item['form'] % 2 == 0) {
+                iconname += '_A'
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
+            if (item['gender'] == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
     if (isNotifyPoke(item)) {
         if (!skipNotification) {
             playPokemonSound(item['pokemon_id'], cryFileTypes)
-            sendNotification(notifyText.fav_title, notifyText.fav_text, 'static/icons/' + item['pokemon_id'] + '.png', item['latitude'], item['longitude'])
+            sendNotification(notifyText.fav_title, notifyText.fav_text, 'static/icons/' + iconname + '.png', item['latitude'], item['longitude'])
         }
         if (marker.animationDisabled !== true) {
             marker.setAnimation(google.maps.Animation.BOUNCE)
@@ -2417,7 +2497,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
             pokemonHtml = `
                 <center>
                     Gym Leader:<br>
-                    <i class="pokemon-large-sprite n${result.guard_pokemon_id}"></i><br>
+                    <img class='pokemon sprite' src='static/icons/${result.guard_pokemon_id}.png'><br>
                     <b>${result.guard_pokemon_name}</b>
 
                     <p style="font-size: .75em; margin: 5px;">
@@ -2468,10 +2548,29 @@ function getSidebarGymMember(pokemon) {
         absoluteTime = '<div class="gym pokemon">(' + deploymentTime.format('MMM Do HH:mm') + ')</div>'
     }
 
+    var iconname = `${pokemon.pokemon_id}`
+    if (pokemon.form > 0) {
+        if (pokemon.form < 37) {
+            iconname += `_${pokemon.form}`
+        } else {
+            if (pokemon.form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
+            if (pokemon.gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
     return `
                     <tr onclick=toggleGymPokemonDetails(this)>
                         <td width="30px">
-                            <img class="gym pokemon sprite" src="static/icons/${pokemon.pokemon_id}.png">
+                            <img class="gym pokemon sprite" src="static/icons/${iconname}.png">
                         </td>
                         <td>
                             <div class="gym pokemon"><span class="gym pokemon name">${pokemon.pokemon_name}</span></div>
@@ -2608,10 +2707,29 @@ function getSidebarPokestopMember(pokemon) {
         absoluteTime = '<div class="pokestop pokemon">(' + disappearTime.format('MMM Do HH:mm') + ')</div>'
     }
 
+    var iconname = `${pokemon.pokemon_id}`
+    if (pokemon.form > 0) {
+        if (pokemon.form < 37) {
+            iconname += `_${pokemon.form}`
+        } else {
+            if (pokemon.form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
+            if (pokemon.gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
     return `
                     <tr onclick=togglePokestopPokemonDetails(this)>
                         <td width="30px">
-                            <img class="pokestop pokemon sprite" src="static/icons/${pokemon.pokemon_id}.png">
+                            <img class="pokestop pokemon sprite" src="static/icons/${iconname}.png">
                         </td>
                         <td>
                             <div class="pokestop pokemon"><span class="pokestop pokemon name">${pokemon.pokemon_name}</span></div>
@@ -2985,7 +3103,7 @@ $(function () {
             return state.text
         }
         var $state = $(
-            '<span><i class="pokemon-sprite n' + state.element.value.toString() + '"></i> ' + state.text + '</span>'
+            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString() + '.png"> ' + state.text + '</span>'
         )
         return $state
     }

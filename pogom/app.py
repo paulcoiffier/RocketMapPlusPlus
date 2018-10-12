@@ -639,20 +639,29 @@ class Pogom(Flask):
                     'last_modified':
                         datetime.utcfromtimestamp(
                             f['lastModifiedTimestampMs'] / 1000.0),
-                    'is_in_battle' :
+                    'is_in_battle':
                         f.get('isInBattle', False),
-                    'is_ex_raid_eligible' :
+                    'is_ex_raid_eligible':
                         f.get('isExRaidEligible', False)
                 }
 
                 gym_id = f['gym_id']
+
+                gymdetails = Gym.get_gym_details(gym_id)
+                gym_name = str(f['latitude']) + ',' + str(f['longitude'])
+                gym_description = ""
+                gym_url = f['imageURL']
+                if gymdetails:
+                    gym_name = gymdetails.get("name", gym_name)
+                    gym_description = gymdetails.get("description", gym_description)
+                    gym_url = gymdetails["url"] if gymdetails["url"] != "" else gym_url
+
                 gym_details[gym_id] = {
                     'gym_id': gym_id,
-                    'name': str(f['latitude']) + ',' + str(f['longitude']),
-                    'description': '',
-                    'url': f['imageURL']
+                    'name': gym_name,
+                    'description': gym_description,
+                    'url': gym_url
                 }
-
 
                 if f['raidSpawnMs'] > 0:
                     raids[f['gym_id']] = {
@@ -694,6 +703,7 @@ class Pogom(Flask):
             del forts
 
         if nearby_pokemon_dict:
+            nearby_pokemon = len(nearby_pokemon_dict)
             nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
             # For all the wild Pokemon we found check if an active Pokemon is in
             # the database.
