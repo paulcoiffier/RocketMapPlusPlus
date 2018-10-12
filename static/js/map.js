@@ -843,7 +843,7 @@ function gymLabel(gym, includeMembers = true) {
         memberStr = '<div>'
 
         gym.pokemon.forEach((member) => {
-            var iconname = `${id}`
+            var iconname = `${member.pokemon_id}`
             if (member.form > 0) {
                 if (member.form < 37) {
                     iconname += `_${member.form}`
@@ -902,7 +902,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr = '<div>'
 
         pokestop.pokemon.forEach((member) => {
-            var iconname = `${id}`
+            var iconname = `${member.pokemon_id}`
             if (member.form > 0) {
                 if (member.form < 37) {
                     iconname += `_${member.form}`
