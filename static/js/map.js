@@ -1227,10 +1227,21 @@ function customizePokemonMarker(marker, item, skipNotification) {
         disableAutoPan: true
     })
 
+    var iconname = item['pokemon_id']
+    if (item['form'] > 0) {
+        if (item['form'] < 37) {
+            iconname += '_' + item['form']
+        } else {
+            if (item['form'] % 2 == 0) {
+                iconname += '_A'
+            }
+        }
+    }
+
     if (isNotifyPoke(item)) {
         if (!skipNotification) {
             playPokemonSound(item['pokemon_id'], cryFileTypes)
-            sendNotification(notifyText.fav_title, notifyText.fav_text, 'static/icons/' + item['pokemon_id'] + '.png', item['latitude'], item['longitude'])
+            sendNotification(notifyText.fav_title, notifyText.fav_text, 'static/icons/' + iconname + '.png', item['latitude'], item['longitude'])
         }
         if (marker.animationDisabled !== true) {
             marker.setAnimation(google.maps.Animation.BOUNCE)
@@ -2501,10 +2512,21 @@ function getSidebarGymMember(pokemon) {
         absoluteTime = '<div class="gym pokemon">(' + deploymentTime.format('MMM Do HH:mm') + ')</div>'
     }
 
+    var iconname = `${pokemon.pokemon_id}`
+    if (pokemon.form > 0) {
+        if (pokemon.form < 37) {
+            iconname += `_${pokemon.form}`
+        } else {
+            if (pokemon.form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    }
+
     return `
                     <tr onclick=toggleGymPokemonDetails(this)>
                         <td width="30px">
-                            <img class="gym pokemon sprite" src="static/icons/${pokemon.pokemon_id}.png">
+                            <img class="gym pokemon sprite" src="static/icons/${iconname}.png">
                         </td>
                         <td>
                             <div class="gym pokemon"><span class="gym pokemon name">${pokemon.pokemon_name}</span></div>
@@ -2641,10 +2663,21 @@ function getSidebarPokestopMember(pokemon) {
         absoluteTime = '<div class="pokestop pokemon">(' + disappearTime.format('MMM Do HH:mm') + ')</div>'
     }
 
+    var iconname = `${pokemon.pokemon_id}`
+    if (pokemon.form > 0) {
+        if (pokemon.form < 37) {
+            iconname += `_${pokemon.form}`
+        } else {
+            if (pokemon.form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    }
+
     return `
                     <tr onclick=togglePokestopPokemonDetails(this)>
                         <td width="30px">
-                            <img class="pokestop pokemon sprite" src="static/icons/${pokemon.pokemon_id}.png">
+                            <img class="pokestop pokemon sprite" src="static/icons/${iconname}.png">
                         </td>
                         <td>
                             <div class="pokestop pokemon"><span class="pokestop pokemon name">${pokemon.pokemon_name}</span></div>
