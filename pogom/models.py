@@ -635,7 +635,8 @@ class Gym(LatLongModel):
                            GymDetails.gym_id,
                            GymDetails.name)
                        .where(GymDetails.gym_id == id)
-                       .dicts())
+                       .dicts()
+                       .get())
         except GymDetails.DoesNotExist:
             return None
 
