@@ -1,5 +1,14 @@
 /* eslint no-unused-vars: "off" */
 
+const genderSpecificSprites = [
+    3, 12, 19, 20, 25, 26, 41, 42, 44, 45, 64, 65, 84, 85,
+    111, 112, 118, 119, 123, 129, 130,
+    154, 165, 166, 178, 185, 186, 190, 194, 198, 202, 203,
+    207, 208, 212, 214, 215, 217, 221, 224, 229, 232,
+    256, 257, 267, 269, 272, 274, 275, 307, 308, 315, 316,
+    317, 322, 323, 332, 350, 369
+]
+
 var noLabelsStyle = [{
     featureType: 'poi',
     elementType: 'labels',
@@ -1206,6 +1215,34 @@ function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true, i
         animationDisabled: isBounceDisabled
     })
 
+    var iconname = item['pokemon_id']
+    if (item['form'] > 0) {
+        if (item['form'] < 37) {
+            iconname += item['form']
+        } else {
+            if (item['form'] % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
+            if (item['gender'] == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
+    let markerImage = 'static/icons/' + iconname + '.png'
+
+    marker.setIcon({
+        url: markerImage,
+        scaledSize: new google.maps.Size(48, 48)
+    })
+
+
+
     return marker
 }
 
@@ -1216,6 +1253,34 @@ function updatePokemonMarker(item, map, scaleByRarity = true, isNotifyPkmn = fal
     const marker = item.marker
 
     marker.setIcon(icon)
+
+    var iconname = item['pokemon_id']
+    if (item['form'] > 0) {
+        if (item['form'] < 37) {
+            iconname += item['form']
+        } else {
+            if (item['form'] % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
+            if (item['gender'] == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
+    }
+
+    let markerImage = 'static/icons/' + iconname + '.png'
+
+    marker.setIcon({
+        url: markerImage,
+        scaledSize: new google.maps.Size(48, 48)
+    })
+
+
 }
 
 function updatePokemonLabel(item) {

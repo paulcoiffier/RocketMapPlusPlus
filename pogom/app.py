@@ -103,6 +103,24 @@ class Pogom(Flask):
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
 
+    def get_pokemon_rarity(self, pokemonid):
+        rarity = "New Spawn"
+        root_path = self.args.root_path
+        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
+        rarities = {
+            "New Spawn": 0,
+            "Common": 1,
+            "Uncommon": 2,
+            "Rare": 3,
+            "Very Rare": 4,
+            "Ultra Rare": 5
+        }
+        with open(rarities_path) as f:
+            data = json.load(f)
+            rarity = rarities.get(data.get(str(pokemonid), "New Spawn"), 0)
+
+        return rarity
+
     def feedpokemon(self):
         self.heartbeat[0] = now()
         args = get_args()
@@ -131,6 +149,47 @@ class Pogom(Flask):
         oNeLng = request.args.get('oNeLng')
 
         lastpokemon = request.args.get('lastpokemon')
+
+        weathertypes = {
+            0: {
+                "name": "None"
+            },
+            1: {
+                "name": "Clear",
+                "emoji": u"\u2600",
+                "boost": "grass,ground,fire"
+            },
+            2: {
+                "name": "Rainy",
+                "emoji": u"\u2614",
+                "boost": "water,electric,bug"
+            },
+            3: {
+                "name": "PartlyCloudy",
+                "emoji": u"\U0001F324",
+                "boost": "normal,rock"
+            },
+            4: {
+                "name": "Overcast",
+                "emoji": u"\u2601",
+                "boost": "fairy,fighting,poison"
+            },
+            5: {
+                "name": "Windy",
+                "emoji": u"\U0001F32C",
+                "boost": "dragon,flying,psychic"
+            },
+            6: {
+                "name": "Snow",
+                "emoji": u"\u2744",
+                "boost": "ice,steel"
+            },
+            7: {
+                "name": "Fog",
+                "emoji": u"\U0001F32B",
+                "boost": "dark,ghost"
+            }
+        }
 
         if request.args.get('pokemon', 'true') == 'true':
             d['lastpokemon'] = request.args.get('pokemon', 'true')
@@ -222,10 +281,13 @@ class Pogom(Flask):
             if result != "":
                 result += "\n"
             result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name'])
+            if pokemon['weather_boosted_condition'] > 0 and weathertypes[pokemon['weather_boosted_condition']]:
+                result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"] + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
+            rarity = self.get_pokemon_rarity(pokemon['pokemon_id'])
+            result += ", " + rarity
             now_date = datetime.utcnow()
             ttl = int(round((pokemon['disappear_time'] - now_date).total_seconds() / 60))
-            result += "," + str(ttl) + "m"
-
+            result += ", " + str(ttl) + "m"
 
         return result.strip()
 
@@ -497,22 +559,10 @@ class Pogom(Flask):
                             'weather_id': p.get('weather', None)
                         })
 
-                        root_path = self.args.root_path
-                        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
-                        rarities = {
-                            "New Spawn" : 0,
-                            "Common" : 1,
-                            "Uncommon" : 2,
-                            "Rare" : 3,
-                            "Very Rare" : 4,
-                            "Ultra Rare" : 5
-                        }
-                        with open(rarities_path) as f:
-                            data = json.load(f)
-                            rarity = rarities.get(data.get(str(pokemon_id), "New Spawn"), 0)
-                            wh_poke.update({
-                                'rarity' : rarity
-                            })
+                        rarity = self.get_pokemon_rarity(pokemon_id)
+                        wh_poke.update({
+                            'rarity' : rarity
+                        })
 
                         self.wh_update_queue.put(('pokemon', wh_poke))
 
