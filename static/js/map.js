@@ -600,6 +600,17 @@ function pokemonLabel(item) {
       ${name} <span class='pokemon name pokedex'><a href='http://pokemon.gameinfo.io/en/pokemon/${id}' target='_blank' title='View in Pokédex'>#${id}</a></span> ${formString} <span class='pokemon gender rarity'>${genderType[gender - 1]} ${rarityDisplay}</span> ${typesDisplay} ${weatherDisplay}
     </div>`
 
+    var iconname = `${id}`
+    if (form > 0) {
+        if (form < 37) {
+            iconname += `_${form}`
+        } else {
+            if (form % 2 == 0) {
+                iconname += `_A`
+            }
+        }
+    }
+
     if (showStats && cp !== null && cpMultiplier !== null) {
         var pokemonLevel = getPokemonLevel(cpMultiplier)
 
@@ -611,7 +622,7 @@ function pokemonLabel(item) {
           <div class='pokemon container'>
             <div class='pokemon container content-left'>
               <div>
-                <img class='pokemon sprite' src='static/icons/${id}.png'>
+                <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                 <span class='pokemon'>Level: </span><span class='pokemon'>${pokemonLevel}</span>
                 <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
                 <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
@@ -643,7 +654,7 @@ function pokemonLabel(item) {
       <div class='pokemon container'>
         <div class='pokemon container content-left'>
           <div>
-            <img class='pokemon sprite' src='static/icons/${id}.png'>
+            <img class='pokemon sprite' src='static/icons/${iconname}.png'>
             <span class='pokemon'>Level: </span><span class='pokemon no-encounter'>n/a</span>
             <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
             <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
@@ -832,12 +843,23 @@ function gymLabel(gym, includeMembers = true) {
         memberStr = '<div>'
 
         gym.pokemon.forEach((member) => {
+            var iconname = `${id}`
+            if (member.form > 0) {
+                if (member.form < 37) {
+                    iconname += `_${member.form}`
+                } else {
+                    if (member.form % 2 == 0) {
+                        iconname += `_A`
+                    }
+                }
+            }
+
             memberStr += `
             <span class='gym member'>
               <center>
                 <div>
                   <div>
-                    <img class='pokemon sprite' src='static/icons/${member.pokemon_id}.png'>
+                    <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
@@ -880,12 +902,23 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr = '<div>'
 
         pokestop.pokemon.forEach((member) => {
+            var iconname = `${id}`
+            if (member.form > 0) {
+                if (member.form < 37) {
+                    iconname += `_${member.form}`
+                } else {
+                    if (member.form % 2 == 0) {
+                        iconname += `_A`
+                    }
+                }
+            }
+
             memberStr += `
             <span class='pokestop member'>
               <center>
                 <div>
                   <div>
-                    <img class='pokemon sprite' src='static/icons/${member.pokemon_id}.png'>
+                    <img class='pokemon sprite' src='static/icons/${iconname}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
