@@ -95,6 +95,10 @@ const pokemonWithImages = [
     359, 361, 365, 377, 378, 379, 380, 381, 382, 383, 384,
     385, 386
 ]
+const genderSpecificSprites = [
+    3, 12, 19, 20, 25, 26, 41, 42, 44, 45, 64, 65, 84, 85,
+    111, 112, 118, 119, 123, 129, 130
+]
 
 const excludedRaritiesList = [
   [],
@@ -609,6 +613,14 @@ function pokemonLabel(item) {
                 iconname += `_A`
             }
         }
+    } else {
+        if (genderSpecificSprites.indexOf(id) !== -1) {
+            if (gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
     }
 
     if (showStats && cp !== null && cpMultiplier !== null) {
@@ -852,6 +864,14 @@ function gymLabel(gym, includeMembers = true) {
                         iconname += `_A`
                     }
                 }
+            } else {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
+                    if (member.gender == 1) {
+                        iconname += '_M'
+                    } else {
+                        iconname += '_F'
+                    }
+                }
             }
 
             memberStr += `
@@ -909,6 +929,14 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 } else {
                     if (member.form % 2 == 0) {
                         iconname += `_A`
+                    }
+                }
+            } else {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
+                    if (member.gender == 1) {
+                        iconname += '_M'
+                    } else {
+                        iconname += '_F'
                     }
                 }
             }
@@ -1234,6 +1262,14 @@ function customizePokemonMarker(marker, item, skipNotification) {
         } else {
             if (item['form'] % 2 == 0) {
                 iconname += '_A'
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
+            if (item['gender'] == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
             }
         }
     }
@@ -2521,6 +2557,14 @@ function getSidebarGymMember(pokemon) {
                 iconname += `_A`
             }
         }
+    } else {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
+            if (pokemon.gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
+            }
+        }
     }
 
     return `
@@ -2670,6 +2714,14 @@ function getSidebarPokestopMember(pokemon) {
         } else {
             if (pokemon.form % 2 == 0) {
                 iconname += `_A`
+            }
+        }
+    } else {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
+            if (pokemon.gender == 1) {
+                iconname += '_M'
+            } else {
+                iconname += '_F'
             }
         }
     }
