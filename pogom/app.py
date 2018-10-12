@@ -132,6 +132,47 @@ class Pogom(Flask):
 
         lastpokemon = request.args.get('lastpokemon')
 
+        weathertypes = {
+            0: {
+                "name": "None"
+            },
+            1: {
+                "name": "Clear",
+                "emoji": u"\u2600",
+                "boost": "grass,ground,fire"
+            },
+            2: {
+                "name": "Rainy",
+                "emoji": u"\u2614",
+                "boost": "water,electric,bug"
+            },
+            3: {
+                "name": "PartlyCloudy",
+                "emoji": u"\U0001F324",
+                "boost": "normal,rock"
+            },
+            4: {
+                "name": "Overcast",
+                "emoji": u"\u2601",
+                "boost": "fairy,fighting,poison"
+            },
+            5: {
+                "name": "Windy",
+                "emoji": u"\U0001F32C",
+                "boost": "dragon,flying,psychic"
+            },
+            6: {
+                "name": "Snow",
+                "emoji": u"\u2744",
+                "boost": "ice,steel"
+            },
+            7: {
+                "name": "Fog",
+                "emoji": u"\U0001F32B",
+                "boost": "dark,ghost"
+            }
+        }
+
         if request.args.get('pokemon', 'true') == 'true':
             d['lastpokemon'] = request.args.get('pokemon', 'true')
 
@@ -222,10 +263,11 @@ class Pogom(Flask):
             if result != "":
                 result += "\n"
             result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name'])
+            if pokemon['weather_boosted_condition'] > 0 and weathertypes[pokemon['weather_boosted_condition']]:
+                result += "," + weathertypes[pokemon['weather_boosted_condition']]["emoji"] + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
             now_date = datetime.utcnow()
             ttl = int(round((pokemon['disappear_time'] - now_date).total_seconds() / 60))
             result += "," + str(ttl) + "m"
-
 
         return result.strip()
 
