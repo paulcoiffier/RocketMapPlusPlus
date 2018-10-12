@@ -628,6 +628,20 @@ class Gym(LatLongModel):
         return gyms
 
     @staticmethod
+    def get_gym_details(id):
+        try:
+            details = (GymDetails
+                       .select(
+                           GymDetails.gym_id,
+                           GymDetails.name)
+                       .where(GymDetails.gym_id == id)
+                       .dicts())
+        except GymDetails.DoesNotExist:
+            return None
+
+        return details
+
+    @staticmethod
     def get_gym(id):
 
         try:
