@@ -103,10 +103,8 @@ class Pogom(Flask):
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
 
-    def get_pokemon_rarity(self, pokemonid):
-        rarity = "New Spawn"
-        root_path = self.args.root_path
-        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
+    def get_pokemon_rarity_code(self, pokemonid):
+        rarity = self.get_pokemon_rarity(pokemonid)
         rarities = {
             "New Spawn": 0,
             "Common": 1,
@@ -115,9 +113,15 @@ class Pogom(Flask):
             "Very Rare": 4,
             "Ultra Rare": 5
         }
+        return rarities.get(rarity, 0)
+
+    def get_pokemon_rarity(self, pokemonid):
+        rarity = "New Spawn"
+        root_path = self.args.root_path
+        rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
         with open(rarities_path) as f:
             data = json.load(f)
-            rarity = rarities.get(data.get(str(pokemonid), "New Spawn"), 0)
+            rarity = data.get(str(pokemonid), "New Spawn")
 
         return rarity
 
@@ -559,7 +563,7 @@ class Pogom(Flask):
                             'weather_id': p.get('weather', None)
                         })
 
-                        rarity = self.get_pokemon_rarity(pokemon_id)
+                        rarity = self.get_pokemon_rarity_code(pokemon_id)
                         wh_poke.update({
                             'rarity' : rarity
                         })
