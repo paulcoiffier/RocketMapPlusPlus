@@ -633,7 +633,9 @@ class Gym(LatLongModel):
             details = (GymDetails
                        .select(
                            GymDetails.gym_id,
-                           GymDetails.name)
+                           GymDetails.name,
+                           GymDetails.description,
+                           GymDetails.url)
                        .where(GymDetails.gym_id == id)
                        .dicts()
                        .get())
