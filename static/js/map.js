@@ -837,7 +837,7 @@ function gymLabel(gym, includeMembers = true) {
               <center>
                 <div>
                   <div>
-                    <i class='pokemon-sprite n${member.pokemon_id}'></i>
+                    <img class='pokemon sprite' src='static/icons/${member.pokemon_id}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
@@ -885,7 +885,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
               <center>
                 <div>
                   <div>
-                    <i class='pokemon-sprite n${member.pokemon_id}'></i>
+                    <img class='pokemon sprite' src='static/icons/${member.pokemon_id}.png'>
                   </div>
                   <div>
                     <span class='gym pokemon'>${member.pokemon_name}</span>
@@ -908,7 +908,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop//PokestopLured.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/PokestopLured.png'>
               </div>
               ${memberStr}
               <div>
@@ -923,7 +923,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 Pokéstop
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop//Pokestop.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/Pokestop.png'>
               </div>
               ${memberStr}
               <div>
@@ -2417,7 +2417,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
             pokemonHtml = `
                 <center>
                     Gym Leader:<br>
-                    <i class="pokemon-large-sprite n${result.guard_pokemon_id}"></i><br>
+                    <img class='pokemon sprite' src='static/icons/${result.guard_pokemon_id}.png'><br>
                     <b>${result.guard_pokemon_name}</b>
 
                     <p style="font-size: .75em; margin: 5px;">
@@ -2985,7 +2985,7 @@ $(function () {
             return state.text
         }
         var $state = $(
-            '<span><i class="pokemon-sprite n' + state.element.value.toString() + '"></i> ' + state.text + '</span>'
+            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString() + '.png"> ' + state.text + '</span>'
         )
         return $state
     }

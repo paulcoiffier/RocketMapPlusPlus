@@ -128,12 +128,6 @@ def validate_assets(args):
                 log.critical(assets_error_log)
                 return False
 
-    # You need custom image files now.
-    if not os.path.isfile(
-            os.path.join(root_path, 'static/icons-sprite.png')):
-        log.critical(assets_error_log)
-        return False
-
     # Check if custom.css is used otherwise fall back to default.
     if os.path.exists(os.path.join(root_path, 'static/css/custom.css')):
         args.custom_css = True

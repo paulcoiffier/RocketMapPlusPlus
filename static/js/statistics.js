@@ -58,10 +58,10 @@ function processSeen(seen) {
         $('#stats_table > tbody')
             .append(`<tr class="status_row">
                         <td class="status_cell">
-                            <i class="pokemon-sprite n${pokemonItem.pokemon_id}"</i>
+                            <img class='pokemon sprite' src='static/icons/${pokemonItem.pokemon_id}.png'>
                         </td>
                         <td class="status_cell">
-                            ${pokemonItem.pokemon_id}                        
+                            ${pokemonItem.pokemon_id}
                         </td>
                         <td class="status_cell">
                             <a href="http://pokemon.gameinfo.io/en/pokemon/${pokemonItem.pokemon_id}" target="_blank" title="View in Pokedex">
