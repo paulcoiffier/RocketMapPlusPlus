@@ -1409,7 +1409,7 @@ function updateGymMarker(item, marker) {
 
 function setupPokestopMarker(item) {
     var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
-    var pokemon hasPokestopNearby(item['pokestop_id'])
+    var pokemon = hasPokestopNearby(item['pokestop_id'])
     if (pokemon.length) {
         imagename += "_Nearby"
     }
