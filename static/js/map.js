@@ -1409,6 +1409,9 @@ function updateGymMarker(item, marker) {
 
 function setupPokestopMarker(item) {
     var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
+    if (hasPokestopNearby(item['pokestop_id'])) {
+        imagename += "_Nearby"
+    }
     var image = {
         url: 'static/images/pokestop/' + imagename + '.png',
         scaledSize: new google.maps.Size(32, 32)
@@ -2707,6 +2710,27 @@ function showPokestopDetails(id) { // eslint-disable-line no-unused-vars
             event.stopPropagation()
             sidebar.classList.remove('visible')
         })
+    })
+}
+
+function hasPokestopNearby(id) { // eslint-disable-line no-unused-vars
+    var data = $.ajax({
+        url: 'pokestop_data',
+        type: 'GET',
+        data: {
+            'id': id
+        },
+        dataType: 'json',
+        cache: false
+    })
+
+    data.done(function (result) {
+        var pokemonHtml = ''
+        if (result.pokemon.length) {
+            return true
+        } else {
+            return false
+        }
     })
 }
 
