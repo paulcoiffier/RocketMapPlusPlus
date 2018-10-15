@@ -966,6 +966,10 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr += '</div>'
     }
 
+    if (pokestop.pokemon.length) {
+        hasNearby = true
+    }
+
     var icon = 'Pokestop'
     if (expireTime) {
         icon += 'Lured'
