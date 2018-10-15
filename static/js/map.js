@@ -1409,7 +1409,8 @@ function updateGymMarker(item, marker) {
 
 function setupPokestopMarker(item) {
     var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
-    if (hasPokestopNearby(item['pokestop_id'])) {
+    var pokemon hasPokestopNearby(item['pokestop_id'])
+    if (pokemon.length) {
         imagename += "_Nearby"
     }
     var image = {
@@ -2725,12 +2726,7 @@ function hasPokestopNearby(id) { // eslint-disable-line no-unused-vars
     })
 
     data.done(function (result) {
-        var pokemonHtml = ''
-        if (result.pokemon.length) {
-            return true
-        } else {
-            return false
-        }
+        return result.pokemon
     })
 }
 
