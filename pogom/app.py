@@ -11,15 +11,15 @@ from datetime import datetime, timedelta
 from s2sphere import LatLng
 from bisect import bisect_left
 from flask import Flask, abort, jsonify, render_template, request,\
-    make_response, send_from_directory, json
+    send_from_directory, json
 from flask.json import JSONEncoder
 from flask_compress import Compress
 
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
-                     MainWorker, WorkerStatus, Token, HashKeys,
+                     MainWorker, WorkerStatus,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, clock_between)
+                    now, dottedQuadToNum, date_secs)
 from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
@@ -96,7 +96,6 @@ class Pogom(Flask):
         self.route("/stats", methods=['GET'])(self.get_stats)
         self.route("/gym_data", methods=['GET'])(self.get_gymdata)
         self.route("/pokestop_data", methods=['GET'])(self.get_pokestopdata)
-        self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
         self.route("/webhook", methods=['POST'])(self.webhook)
         self.route("/serviceWorker.min.js", methods=['GET'])(
@@ -400,10 +399,6 @@ class Pogom(Flask):
         skipped = 0
         filtered = 0
         stopsskipped = 0
-        forts = []
-        forts_count = 0
-        wild_pokemon = []
-        wild_pokemon_count = 0
         nearby_pokemon = 0
         spawn_points = {}
         scan_spawn_points = {}
@@ -417,9 +412,7 @@ class Pogom(Flask):
 
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
 
-        done_already = scan_location['done']
         ScannedLocation.update_band(scan_location, now_date)
-        just_completed = not done_already and scan_location['done']
 
         if pokemon_dict:
             encounter_ids = [p['id'] for p in pokemon_dict]
@@ -480,7 +473,7 @@ class Pogom(Flask):
                         sp['latest_seen'] = d_t_secs
                         sp['earliest_unseen'] = d_t_secs
 
-                scan_spawn_points[len(scan_spawn_points)+1] = {
+                scan_spawn_points[len(scan_spawn_points) + 1] = {
                     'spawnpoint': sp['id'],
                     'scannedlocation': scan_location['cellid']}
                 if not sp['last_scanned']:
@@ -498,8 +491,7 @@ class Pogom(Flask):
 
                 start_end = SpawnPoint.start_end(sp, 1)
                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                #disappear_time = now_date + \
-                #    timedelta(seconds=seconds_until_despawn)
+                # disappear_time = now_date + timedelta(seconds=seconds_until_despawn)
 
                 pokemon_id = p['type']
 
@@ -507,8 +499,6 @@ class Pogom(Flask):
                              disappear_time)
 
                 # Scan for IVs/CP and moves.
-                pokemon_info = False
-
                 pokemon[p['id']] = {
                     'encounter_id': p['id'],
                     'spawnpoint_id': spawn_id,
@@ -528,7 +518,6 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-#                    'weather_id': p.get('weather', None),
                     'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
@@ -565,7 +554,7 @@ class Pogom(Flask):
 
                         rarity = self.get_pokemon_rarity_code(pokemon_id)
                         wh_poke.update({
-                            'rarity' : rarity
+                            'rarity': rarity
                         })
 
                         self.wh_update_queue.put(('pokemon', wh_poke))
@@ -749,7 +738,7 @@ class Pogom(Flask):
                             'cp': 0,
                             'move_1': 0,
                             'move_2': 0,
-                            'is_ex_raid_eligible' :
+                            'is_ex_raid_eligible':
                                 f.get('isExRaidEligible', False)
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
@@ -789,7 +778,7 @@ class Pogom(Flask):
 
                 nearby_pokemons[p['encounter_id']] = {
                     'encounter_id': p['encounter_id'],
-                    'pokestop_id' : p['fort_id'],
+                    'pokestop_id': p['fort_id'],
                     'pokemon_id': pokemon_id,
                     'disappear_time': disappear_time,
                     'gender': p['gender'],
@@ -833,17 +822,6 @@ class Pogom(Flask):
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
 
         return 'ok'
-
-    def submit_token(self):
-        response = 'error'
-        if request.form:
-            token = request.form.get('token')
-            query = Token.insert(token=token, last_updated=datetime.utcnow())
-            query.execute()
-            response = 'ok'
-        r = make_response(response)
-        r.headers.add('Access-Control-Allow-Origin', '*')
-        return r
 
     def validate_request(self):
         args = get_args()
@@ -959,7 +937,7 @@ class Pogom(Flask):
 
         auth_redirect = check_auth(args, request, self.user_auth_code_cache)
         if (auth_redirect):
-          return auth_redirect
+            return auth_redirect
 
         # Request time of this request.
         d['timestamp'] = datetime.utcnow()
@@ -1204,7 +1182,7 @@ class Pogom(Flask):
         latitude = round(request_json.get('latitude', 0), 5)
         longitude = round(request_json.get('longitude', 0), 5)
 
-        #if latitude == 0 and longitude == 0:
+        # if latitude == 0 and longitude == 0:
         #    latitude = round(self.current_location[0], 5)
         #    longitude = round(self.current_location[1], 5)
 
@@ -1219,15 +1197,13 @@ class Pogom(Flask):
         radius = deviceworker['radius']
         step = deviceworker['step']
         direction = deviceworker['direction']
-        last_updated = deviceworker['last_updated']
-        last_scanned = deviceworker['last_scanned']
 
         if needtojump:
             if direction == "U":
                 currentlatitude += self.args.teleport_factor * self.args.stepsize
             elif direction == "R":
                 currentlongitude += self.args.teleport_factor * self.args.stepsize
-                if abs(currentlongitude - centerlongitude) <  abs(currentlongitude - (centerlongitude + radius * self.args.stepsize)):
+                if abs(currentlongitude - centerlongitude) < abs(currentlongitude - (centerlongitude + radius * self.args.stepsize)):
                     direction = "U"
                     currentlatitude += self.args.teleport_factor * self.args.stepsize
                     currentlongitude = centerlongitude
@@ -1237,9 +1213,6 @@ class Pogom(Flask):
                 currentlatitude -= self.args.teleport_factor * self.args.stepsize
             elif direction == "L":
                 currentlongitude -= self.args.teleport_factor * self.args.stepsize
-#        if last_updated < last_scanned:
-#        if round(datetime.now().timestamp()) % 3 != 0:
-#            return "No need for a new update"
 
         if latitude != 0 and longitude != 0 and (abs(latitude - currentlatitude) > (radius + self.args.teleport_factor) * self.args.stepsize or abs(longitude - currentlongitude) > (radius + self.args.teleport_factor) * self.args.stepsize):
             centerlatitude = latitude
@@ -1318,8 +1291,6 @@ class Pogom(Flask):
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
         ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
         self.db_update_queue.put((ScannedLocation, {0: scan_location}))
-
-        # log.info(request)
 
         d = {}
         d['latitude'] = deviceworker['latitude']

@@ -4,12 +4,9 @@
 import os
 import sys
 import logging
-import time
 import re
 import ssl
 import requests
-
-from distutils.version import StrictVersion
 
 from threading import Thread, Event
 from queue import Queue
@@ -18,15 +15,15 @@ from flask_cache_bust import init_cache_busting
 
 from pogom.app import Pogom
 from pogom.utils import (get_args, now, log_resource_usage_loop, get_debug_dump_link,
-                         dynamic_rarity_refresher)
+                         dynamic_rarity_refresher, gmaps_reverse_geolocate)
 from pogom.altitude import get_gmaps_altitude
 
 from pogom.models import (init_database, create_tables, drop_tables,
                           db_updater, clean_db_loop,
-                          verify_table_encoding, verify_database_schema)
+                          verify_table_encoding, verify_database_schema, PlayerLocale)
 from pogom.webhook import wh_updater
+from pogom.search import search_overseer_thread
 
-from pogom.osm import update_ex_gyms
 from time import strftime
 
 from geopy.geocoders import GoogleV3
@@ -172,6 +169,7 @@ def startup_db(app, clear_db):
         sys.exit()
     return db
 
+
 def get_pos_by_name(location_name, gmaps_key):
     geolocator = GoogleV3(api_key=gmaps_key)
     loc = geolocator.geocode(location_name, timeout=10)
@@ -182,6 +180,7 @@ def get_pos_by_name(location_name, gmaps_key):
     log.info('Coordinates (lat/long/alt) for location: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
 
 def extract_coordinates(location, gmaps_key):
     # Use lat/lng directly if matches such a pattern.
@@ -277,9 +276,9 @@ def main():
 
     # Control the search status (running or not) across threads.
     control_flags = {
-      'on_demand': Event(),
-      'api_watchdog': Event(),
-      'search_control': Event()
+        'on_demand': Event(),
+        'api_watchdog': Event(),
+        'search_control': Event()
     }
 
     for flag in control_flags.values():
@@ -337,6 +336,40 @@ def main():
                        args=(args, wh_updates_queue, wh_key_cache))
             t.daemon = True
             t.start()
+
+    # Update player locale if not set correctly, yet.
+    args.player_locale = PlayerLocale.get_locale(args.location)
+    if not args.player_locale:
+        args.player_locale = gmaps_reverse_geolocate(
+            args.gmaps_key,
+            args.locale,
+            str(position[0]) + ', ' + str(position[1]))
+        db_player_locale = {
+            'location': args.location,
+            'country': args.player_locale['country'],
+            'language': args.player_locale['country'],
+            'timezone': args.player_locale['timezone'],
+        }
+        db_updates_queue.put((PlayerLocale, {0: db_player_locale}))
+    else:
+        log.debug(
+            'Existing player locale has been retrieved from the DB.')
+
+    log.info('Scanning speed limit %s.',
+             'set to {} km/h'.format(args.kph)
+             if args.kph > 0 else 'disabled')
+    log.info('High-level speed limit %s.',
+             'set to {} km/h'.format(args.hlvl_kph)
+             if args.hlvl_kph > 0 else 'disabled')
+
+    argset = (args, new_location_queue, control_flags,
+              heartbeat, db_updates_queue, wh_updates_queue)
+
+    log.debug('Starting a %s search thread', args.scheduler)
+    search_thread = Thread(target=search_overseer_thread,
+                           name='search-overseer', args=argset)
+    search_thread.daemon = True
+    search_thread.start()
 
     if args.cors:
         CORS(app)

@@ -22,7 +22,6 @@ from datetime import datetime, timedelta
 from cachetools import TTLCache
 from cachetools import cached
 from timeit import default_timer
-from flask import json
 
 from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
@@ -31,9 +30,7 @@ from .utils import (get_pokemon_name, get_pokemon_types,
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
-from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
-from .proxy import get_new_proxy
-from .apiRequests import encounter
+from .account import pokestop_spinnable, spin_pokestop
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +38,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 43
+db_schema_version = 44
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -241,15 +238,12 @@ class Pokemon(LatLongModel):
         # and should use the disappear_time index and hopefully
         # improve performance
         pokemon_count_query = (Pokemon
-                               .select((Pokemon.pokemon_id+0).alias(
-                                           'pokemon_id'),
-                                       fn.COUNT((Pokemon.pokemon_id+0)).alias(
-                                           'count'),
-                                       fn.MAX(Pokemon.disappear_time).alias(
-                                           'lastappeared')
+                               .select((Pokemon.pokemon_id + 0).alias('pokemon_id'),
+                                       fn.COUNT((Pokemon.pokemon_id + 0)).alias('count'),
+                                       fn.MAX(Pokemon.disappear_time).alias('lastappeared')
                                        )
                                .where(Pokemon.disappear_time > timediff)
-                               .group_by((Pokemon.pokemon_id+0))
+                               .group_by((Pokemon.pokemon_id + 0))
                                .alias('counttable')
                                )
         query = (Pokemon
@@ -853,7 +847,7 @@ class DeviceWorker(LatLongModel):
                 'radius': 0,
                 'step': 0,
                 'scans': 0,
-                'direction' : 'U'
+                'direction': 'U'
             }
         return result
 
@@ -1903,40 +1897,6 @@ class GymDetails(BaseModel):
     last_scanned = DateTimeField(default=datetime.utcnow)
 
 
-class Token(BaseModel):
-    token = TextField()
-    last_updated = DateTimeField(default=datetime.utcnow, index=True)
-
-    @staticmethod
-    def get_valid(limit=15):
-        # Make sure we don't grab more than we can process
-        if limit > 15:
-            limit = 15
-        valid_time = datetime.utcnow() - timedelta(seconds=30)
-        token_ids = []
-        tokens = []
-        try:
-            with Token.database().execution_context():
-                query = (Token
-                         .select()
-                         .where(Token.last_updated > valid_time)
-                         .order_by(Token.last_updated.asc())
-                         .limit(limit)
-                         .dicts())
-                for t in query:
-                    token_ids.append(t['id'])
-                    tokens.append(t['token'])
-                if tokens:
-                    log.debug('Retrieved Token IDs: %s.', token_ids)
-                    query = DeleteQuery(Token).where(Token.id << token_ids)
-                    rows = query.execute()
-                    log.debug('Claimed and removed %d captcha tokens.', rows)
-        except OperationalError as e:
-            log.exception('Failed captcha token transactional query: %s.', e)
-
-        return tokens
-
-
 class HashKeys(BaseModel):
     key = Utf8mb4CharField(primary_key=True, max_length=20)
     maximum = IntegerField(default=0)
@@ -2167,9 +2127,6 @@ def parse_map(args, map_dict, scan_coords, scan_location, db_update_queue,
 
             # Scan for IVs/CP and moves.
             pokemon_info = False
-            if args.encounter and (pokemon_id in args.enc_whitelist):
-                pokemon_info = encounter_pokemon(
-                    args, p, account, api, account_sets, status, key_scheduler)
 
             pokemon[p.encounter_id] = {
                 'encounter_id': p.encounter_id,
@@ -2516,144 +2473,6 @@ def parse_map(args, map_dict, scan_coords, scan_location, db_update_queue,
     }
 
 
-def encounter_pokemon(args, pokemon, account, api, account_sets, status,
-                      key_scheduler):
-    using_accountset = False
-    hlvl_account = None
-    pokemon_id = None
-    result = False
-    try:
-        hlvl_api = None
-        pokemon_id = pokemon.pokemon_data.pokemon_id
-        scan_location = [pokemon.latitude, pokemon.longitude]
-        # If the host has L30s in the regular account pool, we
-        # can just use the current account.
-        if account['level'] >= 30:
-            hlvl_account = account
-            hlvl_api = api
-        else:
-            # Get account to use for IV and CP scanning.
-            hlvl_account = account_sets.next('30', scan_location)
-            using_accountset = True
-
-        time.sleep(args.encounter_delay)
-
-        # If we didn't get an account, we can't encounter.
-        if not hlvl_account:
-            log.error('No L30 accounts are available, please' +
-                      ' consider adding more. Skipping encounter.')
-            return False
-
-        # Logging.
-        log.info('Encountering Pokemon ID %s with account %s at %s, %s.',
-                 pokemon_id, hlvl_account['username'], scan_location[0],
-                 scan_location[1])
-
-        # If not args.no_api_store is enabled, we need to
-        # re-use an old API object if it's stored and we're
-        # using an account from the AccountSet.
-        if not args.no_api_store and using_accountset:
-            hlvl_api = hlvl_account.get('api', None)
-
-        # Make new API for this account if we're not using an
-        # API that's already logged in.
-        if not hlvl_api:
-            hlvl_api = setup_api(args, status, hlvl_account)
-
-        # If the already existent API is using a proxy but
-        # it's not alive anymore, we need to get a new proxy.
-        elif (args.proxy and
-              (hlvl_api._session.proxies['http'] not in args.proxy)):
-            proxy_idx, proxy_new = get_new_proxy(args)
-            hlvl_api.set_proxy({
-                'http': proxy_new,
-                'https': proxy_new})
-            hlvl_api._auth_provider.set_proxy({
-                'http': proxy_new,
-                'https': proxy_new})
-
-        # Hashing key.
-        # TODO: Rework inefficient threading.
-        if args.hash_key:
-            key = key_scheduler.next()
-            log.debug('Using hashing key %s for this encounter.', key)
-            hlvl_api.activate_hash_server(key)
-
-        # We have an API object now. If necessary, store it.
-        if using_accountset and not args.no_api_store:
-            hlvl_account['api'] = hlvl_api
-
-        # Set location.
-        hlvl_api.set_position(*scan_location)
-
-        # Log in.
-        check_login(args, hlvl_account, hlvl_api, status['proxy_url'])
-        encounter_level = hlvl_account['level']
-
-        # User error -> we skip freeing the account.
-        if encounter_level < 30:
-            log.warning('Expected account of level 30 or higher, ' +
-                        'but account %s is only level %d',
-                        hlvl_account['username'], encounter_level)
-            return False
-
-        # Encounter Pokémon.
-        encounter_result = encounter(
-            hlvl_api, hlvl_account, pokemon.encounter_id,
-            pokemon.spawn_point_id, scan_location)
-
-        # Handle errors.
-        if encounter_result:
-            enc_responses = encounter_result['responses']
-            # Check for captcha.
-            if 'CHECK_CHALLENGE' in enc_responses:
-                captcha_url = enc_responses['CHECK_CHALLENGE'].challenge_url
-
-                # Throw warning but finish parsing.
-                if len(captcha_url) > 1:
-                    # Flag account.
-                    hlvl_account['captcha'] = True
-                    log.error('Account %s encountered a captcha.' +
-                              ' Account will not be used.',
-                              hlvl_account['username'])
-
-            if ('ENCOUNTER' in enc_responses and
-                    enc_responses['ENCOUNTER'].status != 1):
-                log.error('There was an error encountering Pokemon ID %s with '
-                          + 'account %s: %d.', pokemon_id,
-                          hlvl_account['username'],
-                          enc_responses['ENCOUNTER'].status)
-            else:
-                pokemon_info = enc_responses[
-                    'ENCOUNTER'].wild_pokemon.pokemon_data
-                # Logging: let the user know we succeeded.
-                log.info('Encounter for Pokemon ID %s at %s, %s ' +
-                         'successful: %s/%s/%s, %s CP.', pokemon_id,
-                         pokemon.latitude, pokemon.longitude,
-                         pokemon_info.individual_attack,
-                         pokemon_info.individual_defense,
-                         pokemon_info.individual_stamina, pokemon_info.cp)
-
-                result = pokemon_info
-
-    except Exception as e:
-        # Account may not be selected yet.
-        if hlvl_account:
-            log.warning('Exception occured during encounter with'
-                        ' high-level account %s.',
-                        hlvl_account['username'])
-        log.exception('There was an error encountering Pokemon ID %s: %s.',
-                      pokemon_id,
-                      e)
-
-    # We're done with the encounter. If it's from an
-    # AccountSet, release account back to the pool.
-    if using_accountset:
-        account_sets.release(hlvl_account)
-
-    return result
-
-
 def parse_gyms(args, gym_responses, wh_update_queue, db_update_queue):
     gym_details = {}
     gym_members = {}
@@ -2845,24 +2664,12 @@ def db_cleanup_regular():
     # http://docs.peewee-orm.com/en/latest/peewee/database.html#advanced-connection-management
     # When using an execution context, a separate connection from the pool
     # will be used inside the wrapped block and a transaction will be started.
-    with Token.database().execution_context():
+    with Pokemon.database().execution_context():
         # Remove unusable captcha tokens.
-        query = (Token
-                 .delete()
-                 .where(Token.last_updated < now - timedelta(seconds=120)))
-        query.execute()
-
         # Remove active modifier from expired lured pokestops.
         query = (Pokestop
                  .update(lure_expiration=None, active_fort_modifier=None)
                  .where(Pokestop.lure_expiration < now))
-        query.execute()
-
-        # Remove expired or inactive hashing keys.
-        query = (HashKeys
-                 .delete()
-                 .where((HashKeys.expires < now - timedelta(days=1)) |
-                        (HashKeys.last_updated < now - timedelta(days=7))))
         query.execute()
 
     time_diff = default_timer() - start_timer
@@ -3228,7 +3035,7 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember]
+              LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3244,7 +3051,7 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys, DeviceWorker, PokestopMember]
+              HashKeys, DeviceWorker, PokestopMember]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3528,6 +3335,9 @@ def database_migrate(db, old_ver):
 
     if old_ver < 43:
         create_tables(db)
+
+    if old_ver < 44:
+        db.execute_sql('DROP TABLE `token`;')
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

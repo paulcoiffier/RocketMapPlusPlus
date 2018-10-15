@@ -17,21 +17,6 @@ from .apiRequests import (send_generic_request, fort_details,
 log = logging.getLogger(__name__)
 
 
-class TooManyLoginAttempts(Exception):
-    pass
-
-
-class LoginSequenceFail(Exception):
-    pass
-
-
-# Create the API object that'll be used to scan.
-def setup_api(args, status, account):
-    api = FakePogoApi(args.mock)
-
-    return api
-
-
 # Use API to check the login status, and retry the login if possible.
 def check_login(args, account, api, proxy_url):
     return
