@@ -922,10 +922,13 @@ function pokestopLabel(pokestop, includeMembers = true) {
     var latitude = pokestop['latitude']
     var longitude = pokestop['longitude']
 
+    var hasNearby = false
+
     if (includeMembers) {
         memberStr = '<div>'
 
         pokestop.pokemon.forEach((member) => {
+            hasNearby = true
             var iconname = `${member.pokemon_id}`
             if (member.form > 0) {
                 if (member.form < 37) {
@@ -963,6 +966,14 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr += '</div>'
     }
 
+    var icon = 'Pokestop'
+    if (expireTime) {
+        icon += 'Lured'
+    }
+    if (hasNearby) {
+        icon += '_Nearby'
+    }
+
     if (expireTime) {
         str = `
             <div>
@@ -973,7 +984,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/PokestopLured.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
               </div>
               ${memberStr}
               <div>
@@ -988,7 +999,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 Pokéstop
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/Pokestop.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
               </div>
               ${memberStr}
               <div>
