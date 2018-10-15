@@ -1951,14 +1951,12 @@ function processPokestop(i, item) {
         mapData.pokestops[item['pokestop_id']] = item
     } else { // change existing pokestop marker to unlured/lured
         var item2 = mapData.pokestops[item['pokestop_id']]
-        if (!!item['lure_expiration'] !== !!item2['lure_expiration']) {
-            if (item2.marker && item2.marker.rangeCircle) {
-                item2.marker.rangeCircle.setMap(null)
-            }
-            item2.marker.setMap(null)
-            item.marker = setupPokestopMarker(item)
-            mapData.pokestops[item['pokestop_id']] = item
+        if (item2.marker && item2.marker.rangeCircle) {
+            item2.marker.rangeCircle.setMap(null)
         }
+        item2.marker.setMap(null)
+        item.marker = setupPokestopMarker(item)
+        mapData.pokestops[item['pokestop_id']] = item
     }
 }
 
