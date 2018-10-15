@@ -1409,10 +1409,7 @@ function updateGymMarker(item, marker) {
 
 function setupPokestopMarker(item) {
     var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
-    var pokemon = hasPokestopNearby(item['pokestop_id'])
-    if (pokemon.length) {
-        imagename += "_Nearby"
-    }
+    imagename += hasPokestopNearby(item['pokestop_id'])
     var image = {
         url: 'static/images/pokestop/' + imagename + '.png',
         scaledSize: new google.maps.Size(32, 32)
@@ -2725,9 +2722,13 @@ function hasPokestopNearby(id) { // eslint-disable-line no-unused-vars
         cache: false
     })
 
+    var result = ''
     data.done(function (result) {
-        return result.pokemon
+        if (result.pokemon.length) {
+            result = '_Nearby'
+        }
     })
+    return result
 }
 
 function getSidebarPokestopMember(pokemon) {
