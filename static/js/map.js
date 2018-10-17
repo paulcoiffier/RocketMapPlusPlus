@@ -2724,13 +2724,13 @@ function hasPokestopNearby(id) { // eslint-disable-line no-unused-vars
         cache: false
     })
 
-    var result = ''
+    var output = ''
     data.done(function (result) {
         if (result.pokemon.length) {
-            result = '_Nearby'
+            output = '_Nearby'
         }
     })
-    return result
+    return output
 }
 
 function getSidebarPokestopMember(pokemon) {
