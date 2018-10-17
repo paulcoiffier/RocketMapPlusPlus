@@ -3141,7 +3141,7 @@ $(function () {
             return state.text
         }
         var $state = $(
-            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString() + '.png"> ' + state.text + '</span>'
+            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString().replace("_ExRaidEligible", "") + '.png"> ' + state.text + '</span>'
         )
         return $state
     }
