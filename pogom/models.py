@@ -38,7 +38,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 44
+db_schema_version = 45
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -3336,7 +3336,7 @@ def database_migrate(db, old_ver):
     if old_ver < 43:
         create_tables(db)
 
-    if old_ver < 44:
+    if old_ver < 45:
         db.execute_sql('DROP TABLE `token`;')
 
     # Always log that we're done.
