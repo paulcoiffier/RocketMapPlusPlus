@@ -632,7 +632,7 @@ class Pogom(Flask):
 
         if quests_dict:
             for proto in quests_dict:
-                quest_json_string = b64decode(proto)
+                quest_json_string = b64decode(proto[0])
                 quest_json = json.loads(quest_json_string)
 
                 for quest in quest_json:
