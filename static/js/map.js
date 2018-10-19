@@ -922,10 +922,13 @@ function pokestopLabel(pokestop, includeMembers = true) {
     var latitude = pokestop['latitude']
     var longitude = pokestop['longitude']
 
+    var hasNearby = false
+
     if (includeMembers) {
         memberStr = '<div>'
 
         pokestop.pokemon.forEach((member) => {
+            hasNearby = true
             var iconname = `${member.pokemon_id}`
             if (member.form > 0) {
                 if (member.form < 37) {
@@ -963,6 +966,18 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr += '</div>'
     }
 
+    pokestop.pokemon.forEach((member) => {
+        hasNearby = true
+    })
+
+    var icon = 'Pokestop'
+    if (expireTime) {
+        icon += 'Lured'
+    }
+    if (hasNearby) {
+        icon += '_Nearby'
+    }
+
     if (expireTime) {
         str = `
             <div>
@@ -973,7 +988,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/PokestopLured.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
               </div>
               ${memberStr}
               <div>
@@ -988,7 +1003,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 Pokéstop
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/Pokestop.png'>
+                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
               </div>
               ${memberStr}
               <div>
@@ -1398,6 +1413,7 @@ function updateGymMarker(item, marker) {
 
 function setupPokestopMarker(item) {
     var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
+    imagename += hasPokestopNearby(item['pokestop_id'])
     var image = {
         url: 'static/images/pokestop/' + imagename + '.png',
         scaledSize: new google.maps.Size(32, 32)
@@ -1935,14 +1951,12 @@ function processPokestop(i, item) {
         mapData.pokestops[item['pokestop_id']] = item
     } else { // change existing pokestop marker to unlured/lured
         var item2 = mapData.pokestops[item['pokestop_id']]
-        if (!!item['lure_expiration'] !== !!item2['lure_expiration']) {
-            if (item2.marker && item2.marker.rangeCircle) {
-                item2.marker.rangeCircle.setMap(null)
-            }
-            item2.marker.setMap(null)
-            item.marker = setupPokestopMarker(item)
-            mapData.pokestops[item['pokestop_id']] = item
+        if (item2.marker && item2.marker.rangeCircle) {
+            item2.marker.rangeCircle.setMap(null)
         }
+        item2.marker.setMap(null)
+        item.marker = setupPokestopMarker(item)
+        mapData.pokestops[item['pokestop_id']] = item
     }
 }
 
@@ -2699,6 +2713,26 @@ function showPokestopDetails(id) { // eslint-disable-line no-unused-vars
     })
 }
 
+function hasPokestopNearby(id) { // eslint-disable-line no-unused-vars
+    var data = $.ajax({
+        url: 'pokestop_data',
+        type: 'GET',
+        data: {
+            'id': id
+        },
+        dataType: 'json',
+        cache: false
+    })
+
+    var output = ''
+    data.done(function (result) {
+        if (result.pokemon.length) {
+            output = '_Nearby'
+        }
+    })
+    return output
+}
+
 function getSidebarPokestopMember(pokemon) {
     // Skip getDateStr() so we can re-use the moment.js object.
     var relativeTime = 'Unknown'
@@ -3107,7 +3141,7 @@ $(function () {
             return state.text
         }
         var $state = $(
-            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString() + '.png"> ' + state.text + '</span>'
+            '<span><img class="pokemon sprite" src="static/icons/' + state.element.value.toString().replace("_ExRaidEligible", "") + '.png"> ' + state.text + '</span>'
         )
         return $state
     }
