@@ -359,8 +359,8 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
-        lat = float(request_json.get('latitude', 0))
-        lng = float(request_json.get('longitude', 0))
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
         if lat == 0 and lng == 0:
             lat, lng = self.get_coords(pokemon, pokestops, gyms)
@@ -1201,8 +1201,11 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
-        latitude = round(request_json.get('latitude', 0), 5)
-        longitude = round(request_json.get('longitude', 0), 5)
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
 
         #if latitude == 0 and longitude == 0:
         #    latitude = round(self.current_location[0], 5)
