@@ -11,10 +11,11 @@ from datetime import datetime, timedelta
 from s2sphere import LatLng
 from bisect import bisect_left
 from flask import Flask, abort, jsonify, render_template, request,\
-    make_response, send_from_directory, json
+    make_response, send_from_directory, json, send_file
 from flask.json import JSONEncoder
 from flask_compress import Compress
 
+from pogom.dyn_img import get_gym_icon
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
@@ -102,6 +103,18 @@ class Pogom(Flask):
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
+        self.route("/gym_img", methods=['GET'])(self.gym_img)
+
+    	
+    def gym_img(self):
+        team = request.args.get('team')
+        level = request.args.get('level')
+        raidlevel = request.args.get('raidlevel')
+        pkm = request.args.get('pkm')
+        is_in_battle = 'in_battle' in request.args
+        is_ex_raid_eligible = 'ex_raid' in request.args
+        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible), mimetype='image/png')
+
 
     def get_pokemon_rarity_code(self, pokemonid):
         rarity = self.get_pokemon_rarity(pokemonid)
