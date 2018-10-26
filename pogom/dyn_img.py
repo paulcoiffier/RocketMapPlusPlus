@@ -23,7 +23,7 @@ egg_images = {
 }
 
 
-def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible):
+def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown):
     init_image_dir()
     level = int(level)
 
@@ -68,6 +68,11 @@ def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible)
             os.path.join(path_images, 'exraid.png')))
         out_filename = out_filename.replace('.png', '_Ex.png')
 
+    if is_unknown:
+        subject_lines.append('-gravity center ( {} -resize 50x50 ) -geometry +0+0 -composite'.format(
+            os.path.join(path_images, 'unknown.png')))
+        out_filename = out_filename.replace('.png', '_Unknown.png')
+		
     if not os.path.isfile(out_filename):
         gym_image = os.path.join('static', 'images', 'gym', '{}.png'.format(team))
         font = os.path.join('static', 'Arial Black.ttf')

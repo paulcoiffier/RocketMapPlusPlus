@@ -113,7 +113,8 @@ class Pogom(Flask):
         pkm = request.args.get('pkm')
         is_in_battle = 'in_battle' in request.args
         is_ex_raid_eligible = 'ex_raid' in request.args
-        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible), mimetype='image/png')
+        is_unknown = 'is_unknown' in request.args
+        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown), mimetype='image/png')
 
 
     def get_pokemon_rarity_code(self, pokemonid):
@@ -950,7 +951,8 @@ class Pogom(Flask):
                                gmaps_key=args.gmaps_key,
                                lang=args.locale,
                                show=visibility_flags,
-                               mapname=args.mapname
+                               mapname=args.mapname,
+							   generateImages=str(args.generate_images).lower(),
                                )
 
     def raw_data(self):
