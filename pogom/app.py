@@ -32,7 +32,7 @@ from .customLog import printPokemon
 
 from protobuf_to_dict import protobuf_to_dict
 from . import protos
-# from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
+from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
 
 log = logging.getLogger(__name__)
 compress = Compress()
@@ -639,7 +639,26 @@ class Pogom(Flask):
         if quests_dict:
             for proto in quests_dict:
                 quest_json_string = b64decode(proto['proto'])
-                quest_json = json.loads(quest_json_string)
+                proto_classname = 'POGOProtos.Networking.Responses.fort_search_response_pb2.fort_search_response'
+                subresponse_return = None
+                try:
+                    subresponse_extension = self.get_class(proto_classname)()
+                except Exception:
+                    subresponse_extension = None
+                    error = 'Protobuf definition for {} not found'.format(proto_classname)
+                    subresponse_return = error
+                    self.log.debug(error)
+
+                if subresponse_extension:
+                    try:
+                        subresponse_extension.ParseFromString(quest_json_string)
+                        subresponse_return = protobuf_to_dict(subresponse_extension)
+                    except Exception:
+                        error = "Protobuf definition for {} seems not to match".format(proto_classname)
+                        subresponse_return = error
+                        self.log.debug(error)
+
+                quest_json = json.loads(subresponse_return)
 
                 for quest in quest_json:
                     quest_result[quest['fort_id']] = {
