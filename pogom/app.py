@@ -29,7 +29,7 @@ from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
 
 from google.protobuf.json_format import MessageToJson
-from ..protos.networking.responses.fort_search_response_pb2 import FortSearchResponse
+from protos.networking.responses.fort_search_response_pb2 import FortSearchResponse
 
 #from protobuf_to_dict import protobuf_to_dict
 #from . import protos
