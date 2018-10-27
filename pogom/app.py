@@ -32,7 +32,7 @@ from .customLog import printPokemon
 
 from protobuf_to_dict import protobuf_to_dict
 from . import protos
-from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
+# from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
 
 log = logging.getLogger(__name__)
 compress = Compress()
