@@ -647,12 +647,15 @@ class Pogom(Flask):
 
                 quest_result[fort_search_response_json['fortId']] = {
                     'pokestop_id': fort_search_response_json['fortId'],
-                    'quest_type': fort_search_response_json['challenge_quest']['quest']['quest_type'],
-                    'goal': fort_search_response_json['challenge_quest']['quest']['goal']['target'],
-                    'reward_type': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['type'],
-                    'reward_item': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['item'],
-                    'reward_amount': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['amount'],
                 }
+                if 'challenge_quest' in fort_search_response_json:
+                    quest_result[fort_search_response_json['fortId']]['quest_type'] = fort_search_response_json['challenge_quest']['quest']['quest_type'],
+                    quest_result[fort_search_response_json['fortId']]['goal'] = fort_search_response_json['challenge_quest']['quest']['goal']['target'],
+                    quest_result[fort_search_response_json['fortId']]['reward_type'] = fort_search_response_json['challenge_quest']['quest']['quest_rewards']['type'],
+                    quest_result[fort_search_response_json['fortId']]['reward_item'] = fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['item'],
+                    quest_result[fort_search_response_json['fortId']]['reward_amount'] = fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['amount'],
+
+
 
         if gyms_dict:
             stop_ids = [f['gym_id'] for f in gyms_dict]
