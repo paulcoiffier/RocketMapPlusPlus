@@ -639,21 +639,28 @@ class Pogom(Flask):
 
         if quests_dict:
             for proto in quests_dict:
-                fort_search_response_string = b64decode(proto['proto'])
+                fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
                 frs = FortSearchResponse()
                 frs.ParseFromString(fort_search_response_string)
                 fort_search_response_json = json.loads(MessageToJson(frs))
 
-                if 'challenge_quest' in fort_search_response_json:
-                    quest_result[fort_search_response_json['fortId']] = {
-                        'pokestop_id': fort_search_response_json['fortId'],
-                        'quest_type': fort_search_response_json['challenge_quest']['quest']['quest_type'],
-                        'goal': fort_search_response_json['challenge_quest']['quest']['goal']['target'],
-                        'reward_type': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['type'],
-                        'reward_item': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['item'],
-                        'reward_amount': fort_search_response_json['challenge_quest']['quest']['quest_rewards']['item']['amount'],
+                if 'challengeQuest' in fort_search_response_json:
+                    quest_json = fort_search_response_json["challengeQuest"]["quest"]
+                    quest_result[quest_json['fortId']] = {
+                        'pokestop_id': quest_json['fortId'],
+                        'quest_type': quest_json['questType'],
+                        'goal': quest_json['goal']['target'],
+                        'reward_type': quest_json['questRewards'][0]['type'],
                     }
+                    if quest_json["questRewards"][0]["type"] == "STARDUST":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
+                    elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
+
+                    if 'quest' in self.args.wh_types:
+                        wh_quest = quest_result[quest_json["fortId"]]
+                        self.wh_update_queue.put(('quest', wh_quest))
 
         if gyms_dict:
             stop_ids = [f['gym_id'] for f in gyms_dict]
