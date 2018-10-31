@@ -15,15 +15,25 @@ from flask import Flask, abort, jsonify, render_template, request,\
 from flask.json import JSONEncoder
 from flask_compress import Compress
 
+from base64 import b64decode
+
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token, HashKeys,
-                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember)
+                     SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
+                     Quest)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
 from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
+
+from google.protobuf.json_format import MessageToJson
+from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
+
+#from protobuf_to_dict import protobuf_to_dict
+#from . import protos
+# from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
 
 log = logging.getLogger(__name__)
 compress = Compress()
@@ -354,6 +364,7 @@ class Pogom(Flask):
         pokemon = request_json.get('pokemon')
         gyms = request_json.get('gyms')
         nearby_pokemon = request_json.get('nearby_pokemon')
+        quests = request_json.get('quests')
 
         uuid = request_json.get('uuid')
         if uuid == "":
@@ -388,15 +399,16 @@ class Pogom(Flask):
 
         self.db_update_queue.put((DeviceWorker, deviceworkers))
 
-        return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, deviceworker)
+        return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, quests, deviceworker)
 
-    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, deviceworker):
+    def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker):
         pokemon = {}
         nearby_pokemons = {}
         pokestops = {}
         gyms = {}
         gym_details = {}
         raids = {}
+        quest_result = {}
         skipped = 0
         filtered = 0
         stopsskipped = 0
@@ -625,6 +637,31 @@ class Pogom(Flask):
                     })
                     self.wh_update_queue.put(('pokestop', wh_pokestop))
 
+        if quests_dict:
+            for proto in quests_dict:
+                fort_search_response_string = b64decode(proto['FortSearchResponse'])
+
+                frs = FortSearchResponse()
+                frs.ParseFromString(fort_search_response_string)
+                fort_search_response_json = json.loads(MessageToJson(frs))
+
+                if 'challengeQuest' in fort_search_response_json:
+                    quest_json = fort_search_response_json["challengeQuest"]["quest"]
+                    quest_result[quest_json['fortId']] = {
+                        'pokestop_id': quest_json['fortId'],
+                        'quest_type': quest_json['questType'],
+                        'goal': quest_json['goal']['target'],
+                        'reward_type': quest_json['questRewards'][0]['type'],
+                    }
+                    if quest_json["questRewards"][0]["type"] == "STARDUST":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
+                    elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
+
+                    if 'quest' in self.args.wh_types:
+                        wh_quest = quest_result[quest_json["fortId"]]
+                        self.wh_update_queue.put(('quest', wh_quest))
+
         if gyms_dict:
             stop_ids = [f['gym_id'] for f in gyms_dict]
             for f in gyms_dict:
@@ -831,6 +868,8 @@ class Pogom(Flask):
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
         if nearby_pokemons:
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
+        if quest_result:
+            self.db_update_queue.put((Quest, quest_result))
 
         return 'ok'
 
