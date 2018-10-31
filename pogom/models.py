@@ -335,10 +335,10 @@ class Pokemon(LatLongModel):
 class Quest(BaseModel):
     pokestop_id = Utf8mb4CharField(primary_key=True, max_length=50)
     quest_type = Utf8mb4CharField(max_length=50)
-    goal = IntegerField()
+    goal = IntegerField(null=True)
     reward_type = Utf8mb4CharField(max_length=50)
-    reward_item = Utf8mb4CharField(max_length=50)
-    reward_amount = IntegerField()
+    reward_item = Utf8mb4CharField(max_length=50, null=True)
+    reward_amount = IntegerField(null=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
 
 
