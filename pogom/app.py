@@ -705,7 +705,11 @@ class Pogom(Flask):
                         'last_modified':
                             f['lastModifiedTimestampMs'],
                         'raid_active_until':
-                            raid_active_until
+                            raid_active_until,
+                        'is_in_battle':
+                            f.get('isInBattle', False),
+                        'is_ex_raid_eligible':
+                            f.get('isExRaidEligible', False)
                     }))
 
                 gyms[f['gym_id']] = {
