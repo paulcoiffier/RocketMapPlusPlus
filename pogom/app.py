@@ -657,9 +657,20 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
                     elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
+                    elif quest_json["questRewards"][0]["type"] == "ITEM":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
                     if 'quest' in self.args.wh_types:
                         wh_quest = quest_result[quest_json["fortId"]]
+                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+                        if quest_pokestop:
+                            wh_quest.update(
+                                {
+                                    "latitude": quest_pokestop["latitude"],
+                                    "longitude": quest_pokestop["longitude"]
+                                }
+                            )
                         self.wh_update_queue.put(('quest', wh_quest))
 
         if gyms_dict:
@@ -705,7 +716,11 @@ class Pogom(Flask):
                         'last_modified':
                             f['lastModifiedTimestampMs'],
                         'raid_active_until':
-                            raid_active_until
+                            raid_active_until,
+                        'is_in_battle':
+                            f.get('isInBattle', False),
+                        'is_ex_raid_eligible':
+                            f.get('isExRaidEligible', False)
                     }))
 
                 gyms[f['gym_id']] = {
