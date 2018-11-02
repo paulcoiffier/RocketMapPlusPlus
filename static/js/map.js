@@ -827,7 +827,7 @@ function gymLabel(gym, includeMembers = true) {
                 `
             }
         } else {
-			if (generateImages) {	
+			if (generateImages) {
 			    let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}`
                 if (isInBattle) {
                     gym_url += '&in_battle=1'
@@ -932,7 +932,7 @@ function gymLabel(gym, includeMembers = true) {
         })
         memberStr += '</div>'
     }
-	
+
     return `
         <div>
             <center>
@@ -1477,30 +1477,22 @@ function updateGymMarker(item, marker) {
 }
 
 function setupPokestopMarker(item) {
-    var imagename = item['lure_expiration'] ? 'PokestopLured' : 'Pokestop'
-    imagename += hasPokestopNearby(item['pokestop_id'])
-    var image = {
-        url: 'static/images/pokestop/' + imagename + '.png',
-        scaledSize: new google.maps.Size(32, 32)
-    }
     var marker = new google.maps.Marker({
         position: {
             lat: item['latitude'],
             lng: item['longitude']
         },
         map: map,
-        zIndex: item['lure_expiration'] ? 3 : 2,
-        icon: image
     })
+    marker.infoWindow = new google.maps.InfoWindow({
+        content: '',
+        disableAutoPan: true
+    })
+    updatePokestopMarker(item, marker)
 
     if (!marker.rangeCircle && isRangeActive(map)) {
         marker.rangeCircle = addRangeCircle(marker, map, 'pokestop')
     }
-
-    marker.infoWindow = new google.maps.InfoWindow({
-        content: pokestopLabel(item),
-        disableAutoPan: true
-    })
 
     if (Store.get('usePokestopSidebar')) {
         marker.addListener('click', function () {
@@ -1533,6 +1525,31 @@ function setupPokestopMarker(item) {
     } else {
         addListeners(marker)
     }
+    return marker
+}
+
+function updatePokestopMarker(item, marker) {
+    const hasActiveLure = item['lure_expiration']
+    const hasNearby = Boolean(item.pokemon.length)
+
+    let markerImage = 'static/images/pokestop/Pokestop.png'
+
+    if (hasActiveLure) {
+        markerImage = markerImage.replace('.png', 'Lured.png')
+    }
+
+    if (hasNearby) {
+        markerImage = markerImage.replace('.png', '_Nearby.png')
+    }
+
+    marker.setIcon({
+        url: markerImage,
+        scaledSize: new google.maps.Size(32, 32)
+    })
+
+    marker.setZIndex(hasActiveLure ? 3 : 2)
+
+    marker.infoWindow.setContent(pokestopLabel(item))
     return marker
 }
 
