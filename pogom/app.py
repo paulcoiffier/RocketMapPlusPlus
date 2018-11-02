@@ -31,6 +31,8 @@ from .customLog import printPokemon
 
 from google.protobuf.json_format import MessageToJson
 from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
+from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
+from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
 
 #from protobuf_to_dict import protobuf_to_dict
 #from . import protos
@@ -115,7 +117,7 @@ class Pogom(Flask):
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
         self.route("/gym_img", methods=['GET'])(self.gym_img)
 
-    	
+
     def gym_img(self):
         team = request.args.get('team')
         level = request.args.get('level')
@@ -379,6 +381,8 @@ class Pogom(Flask):
         gyms = request_json.get('gyms')
         nearby_pokemon = request_json.get('nearby_pokemon')
         quests = request_json.get('quests')
+        protos = request_json.get('protos')
+        trainerlvl = request_json.get('trainerlvl', 30)
 
         uuid = request_json.get('uuid')
         if uuid == "":
@@ -413,7 +417,33 @@ class Pogom(Flask):
 
         self.db_update_queue.put((DeviceWorker, deviceworkers))
 
-        return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, quests, deviceworker)
+        if protos:
+            return self.parse_map_protos(protos, trainerlvl, deviceworker)
+        else:
+            return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, quests, deviceworker)
+
+    def parse_map_protos(self, protos_dict, trainerlvl, deviceworker):
+        pokemon_dict = []
+        pokestops_dict = []
+        gyms_dict = []
+        nearby_pokemon_dict = []
+        quests_dict = []
+
+        for proto in protos_dict:
+            if "FortSearchResponse" in proto:
+                quests_dict.append(proto)
+            if "EncounterResponse" in proto:
+                encounter_response_string = b64decode(proto['EncounterResponse'])
+                encounter = EncounterResponse()
+                encounter.ParseFromString(encounter_response_string)
+                encounter_response_json = json.loads(MessageToJson(encounter))
+            if "GetMapObjects" in proto:
+                gmo_response_string = b64decode(proto['GetMapObjects'])
+                gmo = GetMapObjectsResponse()
+                gmo.ParseFromString(gmo_response_string)
+                gmo_response_json = json.loads(MessageToJson(gmo))
+
+        return self.parse_map(pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker)
 
     def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker):
         pokemon = {}
