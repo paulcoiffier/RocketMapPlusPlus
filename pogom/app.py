@@ -663,7 +663,7 @@ class Pogom(Flask):
 
                     if 'quest' in self.args.wh_types:
                         wh_quest = quest_result[quest_json["fortId"]]
-                        quest_pokestop = Pokestop.get_stop(quest_json["fortId"])
+                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
                             wh_quest.update(
                                 {
