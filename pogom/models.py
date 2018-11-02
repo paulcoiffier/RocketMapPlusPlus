@@ -41,7 +41,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 43
+db_schema_version = 44
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -330,6 +330,16 @@ class Pokemon(LatLongModel):
                  )
 
         return list(itertools.chain(*query))
+
+
+class Quest(BaseModel):
+    pokestop_id = Utf8mb4CharField(primary_key=True, max_length=50)
+    quest_type = Utf8mb4CharField(max_length=50)
+    goal = IntegerField(null=True)
+    reward_type = Utf8mb4CharField(max_length=50)
+    reward_item = Utf8mb4CharField(max_length=50, null=True)
+    reward_amount = IntegerField(null=True)
+    last_scanned = DateTimeField(default=datetime.utcnow, index=True)
 
 
 class Pokestop(LatLongModel):
@@ -3228,7 +3238,8 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember]
+              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember,
+              Quest]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3244,7 +3255,8 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys, DeviceWorker, PokestopMember]
+              Token, HashKeys, DeviceWorker, PokestopMember,
+              Quest]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3526,7 +3538,7 @@ def database_migrate(db, old_ver):
             migrator.add_column('gym', 'is_ex_raid_eligible', BooleanField(default=False))
         )
 
-    if old_ver < 43:
+    if old_ver < 44:
         create_tables(db)
 
     # Always log that we're done.
