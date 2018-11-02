@@ -438,6 +438,9 @@ def get_args():
     parser.add_argument('-sn', '--status-name', default=str(os.getpid()),
                         help=('Enable status page database update using ' +
                               'STATUS_NAME as main worker name.'))
+    parser.add_argument('-gen', '--generate-images',
+                        help='Use ImageMagick to generate gym images on demand.',
+                        action='store_true', default=False)
     parser.set_defaults(DEBUG=False)
 
     args = parser.parse_args()

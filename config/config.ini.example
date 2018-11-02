@@ -5,6 +5,10 @@
 # When your configuration is done, rename this file by removing the ".example" extension
 # A different config-files can be included directly in processes by "--config-file" or "-cf" and path
 
+# Image settings
+###################
+
+#generate-images                # Turn on automatic on-demand icon generation useing ImageMagick.
 
 # Required settings
 ###################
