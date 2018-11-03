@@ -459,7 +459,7 @@ class Pogom(Flask):
                                                              for f in query]
                             for fort in mapcell["forts"]:
                                 if fort.get("type") == "CHECKPOINT":
-                                    if ((fort['id'], int(fort['lastModifiedTimestampMs'] / 1000.0))
+                                    if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
                                             in encountered_pokestops):
                                         # If pokestop has been encountered before and hasn't
                                         # changed don't process it.
@@ -470,7 +470,7 @@ class Pogom(Flask):
                                         'latitude': fort['latitude'],
                                         'longitude': fort['longitude'],
                                         'last_modified': datetime.utcfromtimestamp(
-                                            fort['lastModifiedTimestampMs'] / 1000.0),
+                                            float(fort['lastModifiedTimestampMs']) / 1000.0),
                                         'lure_expiration': None,
                                         'active_fort_modifier': None
                                     }
