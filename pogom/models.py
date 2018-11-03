@@ -461,15 +461,15 @@ class Pokestop(LatLongModel):
                 p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
                 pokestops[p['pokestop_id']]['pokemon'].append(p)
 
-        details = (PokestopDetails
-                   .select(
-                       PokestopDetails.pokestop_id,
-                       PokestopDetails.name)
-                   .where(PokestopDetails.pokestop_id << pokestop_ids)
-                   .dicts())
+            details = (PokestopDetails
+                       .select(
+                           PokestopDetails.pokestop_id,
+                           PokestopDetails.name)
+                       .where(PokestopDetails.pokestop_id << pokestop_ids)
+                       .dicts())
 
-        for d in details:
-            pokestops[d['pokestop_id']]['name'] = d['name']
+            for d in details:
+                pokestops[d['pokestop_id']]['name'] = d['name']
 
         # Re-enable the GC.
         gc.enable()

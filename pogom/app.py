@@ -601,7 +601,7 @@ class Pogom(Flask):
                                 form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
                                 weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
-                                printPokemon(pokemon_id, p['lat'], p['lon'],
+                                printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
 
                                 pokemon[p['encounterId']] = {
