@@ -587,7 +587,10 @@ class Pogom(Flask):
                                     skipped += 1
                                     continue
 
-                                disappear_time = datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0)
+                                if float(p['expirationTimestampMs']) == -1:
+                                    disappear_time = now_date + timedelta(seconds=600)
+                                else:
+                                    disappear_time = datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0)
 
                                 start_end = SpawnPoint.start_end(sp, 1)
                                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
