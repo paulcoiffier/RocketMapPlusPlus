@@ -1642,7 +1642,6 @@ class Pogom(Flask):
             del forts
 
         if nearby_pokemon_dict:
-            nearby_pokemon = len(nearby_pokemon_dict)
             nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
             # For all the wild Pokemon we found check if an active Pokemon is in
             # the database.
@@ -1692,7 +1691,7 @@ class Pogom(Flask):
                  'pokestops: %d, gyms: %d, raids: %d, quests: %d.',
                  len(pokemon) + skipped,
                  filtered,
-                 nearby_pokemon,
+                 len(nearby_pokemons),
                  len(pokestops) + stopsskipped,
                  len(gyms),
                  len(raids),
