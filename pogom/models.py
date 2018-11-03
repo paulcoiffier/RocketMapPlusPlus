@@ -41,7 +41,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 44
+db_schema_version = 45
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -461,16 +461,45 @@ class Pokestop(LatLongModel):
                 p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
                 pokestops[p['pokestop_id']]['pokemon'].append(p)
 
+        details = (PokestopDetails
+                   .select(
+                       PokestopDetails.pokestop_id,
+                       PokestopDetails.name)
+                   .where(PokestopDetails.pokestop_id << pokestop_ids)
+                   .dicts())
+
+        for d in details:
+            pokestops[d['pokestop_id']]['name'] = d['name']
+
         # Re-enable the GC.
         gc.enable()
 
         return pokestops
 
     @staticmethod
+    def get_pokestop_details(id):
+        try:
+            details = (PokestopDetails
+                       .select(
+                           PokestopDetails.pokestop_id,
+                           PokestopDetails.name,
+                           PokestopDetails.description,
+                           PokestopDetails.url)
+                       .where(PokestopDetails.pokestop_id == id)
+                       .dicts()
+                       .get())
+        except PokestopDetails.DoesNotExist:
+            return None
+
+        return details
+
+    @staticmethod
     def get_stop(id):
         try:
             result = (Pokestop
                       .select(Pokestop.pokestop_id,
+                              PokestopDetails.name,
+                              PokestopDetails.description,
                               Pokestop.enabled,
                               Pokestop.latitude,
                               Pokestop.longitude,
@@ -478,6 +507,8 @@ class Pokestop(LatLongModel):
                               Pokestop.lure_expiration,
                               Pokestop.active_fort_modifier,
                               Pokestop.last_updated)
+                      .join(PokestopDetails, JOIN.LEFT_OUTER,
+                            on=(Pokestop.pokestop_id == PokestopDetails.pokestop_id))
                       .where(Pokestop.pokestop_id == id)
                       .dicts()
                       .get())
@@ -1913,6 +1944,14 @@ class GymDetails(BaseModel):
     last_scanned = DateTimeField(default=datetime.utcnow)
 
 
+class PokestopDetails(BaseModel):
+    pokestop_id = Utf8mb4CharField(primary_key=True, max_length=50)
+    name = Utf8mb4CharField()
+    description = TextField(null=True, default="")
+    url = Utf8mb4CharField()
+    last_scanned = DateTimeField(default=datetime.utcnow)
+
+
 class Token(BaseModel):
     token = TextField()
     last_updated = DateTimeField(default=datetime.utcnow, index=True)
@@ -3239,7 +3278,7 @@ def create_tables(db):
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
               Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember,
-              Quest]
+              Quest, PokestopDetails]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3256,7 +3295,7 @@ def drop_tables(db):
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
               Token, HashKeys, DeviceWorker, PokestopMember,
-              Quest]
+              Quest, PokestopDetails]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3538,7 +3577,7 @@ def database_migrate(db, old_ver):
             migrator.add_column('gym', 'is_ex_raid_eligible', BooleanField(default=False))
         )
 
-    if old_ver < 44:
+    if old_ver < 45:
         create_tables(db)
 
     # Always log that we're done.

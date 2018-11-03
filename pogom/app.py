@@ -19,9 +19,9 @@ from pogom.dyn_img import get_gym_icon
 from base64 import b64decode
 
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
-                     MainWorker, WorkerStatus, Token, HashKeys,
+                     MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
-                     Quest)
+                     Quest, PokestopDetails)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
 from .client_auth import check_auth
@@ -437,6 +437,7 @@ class Pogom(Flask):
         pokestops = {}
         gyms = {}
         gym_details = {}
+        pokestop_details = {}
         raids = {}
         quest_result = {}
         skipped = 0
@@ -513,6 +514,152 @@ class Pogom(Flask):
 
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
+                        if "catchablePokemons" in mapcell:
+                            encounter_ids = [p['encounterId'] for p in mapcell["catchablePokemons"]]
+                            # For all the wild Pokemon we found check if an active Pokemon is in
+                            # the database.
+                            with Pokemon.database().execution_context():
+                                query = (Pokemon
+                                         .select(Pokemon.encounter_id, Pokemon.spawnpoint_id)
+                                         .where((Pokemon.disappear_time >= now_date) &
+                                                (Pokemon.encounter_id << encounter_ids))
+                                         .dicts())
+
+                                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                                # query.
+                                # All of that is needed to make sure it's unique.
+                                encountered_pokemon = [
+                                    (p['encounter_id'], p['spawnpoint_id']) for p in query]
+
+                            for p in mapcell["catchablePokemons"]:
+                                spawn_id = p['spawnPointId']
+
+                                sp = SpawnPoint.get_by_id(spawn_id, p['lat'], p['lon'])
+                                sp['last_scanned'] = datetime.utcnow()
+                                spawn_points[spawn_id] = sp
+                                sp['missed_count'] = 0
+
+                                sighting = {
+                                    'encounter_id': p['encounterId'],
+                                    'spawnpoint_id': spawn_id,
+                                    'scan_time': now_date,
+                                    'tth_secs': None
+                                }
+
+                                # Keep a list of sp_ids to return.
+                                sp_id_list.append(spawn_id)
+
+                                # time_till_hidden_ms was overflowing causing a negative integer.
+                                # It was also returning a value above 3.6M ms.
+                                if 0 < float(p['expirationTimestampMs']) < 3600000:
+                                    d_t_secs = date_secs(datetime.utcfromtimestamp(
+                                        now() + float(p['expirationTimestampMs']) / 1000.0))
+
+                                    # Cover all bases, make sure we're using values < 3600.
+                                    # Warning: python uses modulo as the least residue, not as
+                                    # remainder, so we don't apply it to the result.
+                                    residue_unseen = sp['earliest_unseen'] % 3600
+                                    residue_seen = sp['latest_seen'] % 3600
+
+                                    if (residue_seen != residue_unseen or
+                                            not sp['last_scanned']):
+                                        log.info('TTH found for spawnpoint %s.', sp['id'])
+                                        sighting['tth_secs'] = d_t_secs
+
+                                        # Only update when TTH is seen for the first time.
+                                        # Just before Pokemon migrations, Niantic sets all TTH
+                                        # to the exact time of the migration, not the normal
+                                        # despawn time.
+                                        sp['latest_seen'] = d_t_secs
+                                        sp['earliest_unseen'] = d_t_secs
+
+                                scan_spawn_points[len(scan_spawn_points)+1] = {
+                                    'spawnpoint': sp['id'],
+                                    'scannedlocation': scan_location['cellid']}
+                                if not sp['last_scanned']:
+                                    log.info('New Spawn Point found.')
+                                    new_spawn_points.append(sp)
+
+                                sp['last_scanned'] = datetime.utcnow()
+
+                                if ((p['encounterId'], spawn_id) in encountered_pokemon):
+                                    # If Pokemon has been encountered before don't process it.
+                                    skipped += 1
+                                    continue
+
+                                disappear_time = datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0)
+
+                                start_end = SpawnPoint.start_end(sp, 1)
+                                seconds_until_despawn = (start_end[1] - now_secs) % 3600
+                                #disappear_time = now_date + \
+                                #    timedelta(seconds=seconds_until_despawn)
+
+                                pokemon_id = _POKEMONID.values_by_name[p['pokemonId']].number
+
+                                gender = _GENDER.values_by_name[p["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
+                                costume = _COSTUME.values_by_name[p["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
+                                form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
+                                weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+
+                                printPokemon(pokemon_id, p['lat'], p['lon'],
+                                             disappear_time)
+
+                                pokemon[p['encounterId']] = {
+                                    'encounter_id': p['encounterId'],
+                                    'spawnpoint_id': spawn_id,
+                                    'pokemon_id': pokemon_id,
+                                    'latitude': p['latitude'],
+                                    'longitude': p['longitude'],
+                                    'disappear_time': disappear_time,
+                                    'individual_attack': None,
+                                    'individual_defense': None,
+                                    'individual_stamina': None,
+                                    'move_1': None,
+                                    'move_2': None,
+                                    'cp': None,
+                                    'cp_multiplier': None,
+                                    'height': None,
+                                    'weight': None,
+                                    'gender': gender,
+                                    'costume': costume,
+                                    'form': form,
+                                    'weather_boosted_condition': weather
+                                }
+
+                                if 'pokemon' in self.args.wh_types:
+                                    if (pokemon_id in self.args.webhook_whitelist or
+                                        (not self.args.webhook_whitelist and pokemon_id
+                                         not in self.args.webhook_blacklist)):
+                                        wh_poke = pokemon[p['encounterId']].copy()
+                                        wh_poke.update({
+                                            'disappear_time': calendar.timegm(
+                                                disappear_time.timetuple()),
+                                            'last_modified_time': now(),
+                                            'time_until_hidden_ms': float(p['expirationTimestampMs']),
+                                            'verified': SpawnPoint.tth_found(sp),
+                                            'seconds_until_despawn': seconds_until_despawn,
+                                            'spawn_start': start_end[0],
+                                            'spawn_end': start_end[1],
+                                            'player_level': 30,
+                                            'individual_attack': 0,
+                                            'individual_defense': 0,
+                                            'individual_stamina': 0,
+                                            'move_1': 0,
+                                            'move_2': 0,
+                                            'cp': 0,
+                                            'cp_multiplier': 0,
+                                            'height': 0,
+                                            'weight': 0,
+                                            'weather_id': weather
+                                        })
+
+                                        rarity = self.get_pokemon_rarity_code(pokemon_id)
+                                        wh_poke.update({
+                                            'rarity': rarity
+                                        })
+
+                                        self.wh_update_queue.put(('pokemon', wh_poke))
+
                         if "nearbyPokemons" in mapcell:
                             nearby_encounter_ids = [p['encounterId'] for p in mapcell["nearbyPokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
@@ -569,6 +716,20 @@ class Pogom(Flask):
                                 if nearby_pokemons[encounter_id]['form'] < -1:
                                     nearby_pokemons[encounter_id]['form'] = -1
 
+                                pokestopdetails = Pokestop.get_pokestop_details(p['fortId'])
+                                pokestop_url = p.get('fortImageUrl', "")
+                                if pokestopdetails:
+                                    pokestop_name = pokestopdetails.get("name")
+                                    pokestop_description = pokestopdetails.get("description")
+                                    pokestop_url = pokestop_url if pokestop_url != "" else pokestopdetails["url"]
+
+                                    pokestop_details[p['fortId']] = {
+                                        'pokestop_id': p['fortId'],
+                                        'name': pokestop_name,
+                                        'description': pokestop_description,
+                                        'url': pokestop_url
+                                    }
+
                         if "forts" in mapcell:
                             stop_ids = [f['id'] for f in mapcell["forts"]]
                             if stop_ids:
@@ -607,6 +768,22 @@ class Pogom(Flask):
                                             float(fort['lastModifiedTimestampMs']) / 1000.0),
                                         'lure_expiration': lure_expiration,
                                         'active_fort_modifier': active_pokemon_id
+                                    }
+
+                                    pokestopdetails = Pokestop.get_pokestop_details(fort['id'])
+                                    pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
+                                    pokestop_description = ""
+                                    pokestop_url = fort.get('imageUrl', "")
+                                    if pokestopdetails:
+                                        pokestop_name = pokestopdetails.get("name", pokestop_name)
+                                        pokestop_description = pokestopdetails.get("description", pokestop_description)
+                                        pokestop_url = pokestop_url if pokestop_url != "" else pokestopdetails["url"]
+
+                                    pokestop_details[fort['id']] = {
+                                        'pokestop_id': fort['id'],
+                                        'name': pokestop_name,
+                                        'description': pokestop_description,
+                                        'url': pokestop_url
                                     }
 
                                     if 'pokestop' in self.args.wh_types or (
@@ -782,6 +959,8 @@ class Pogom(Flask):
             self.db_update_queue.put((Pokemon, pokemon))
         if pokestops:
             self.db_update_queue.put((Pokestop, pokestops))
+        if pokestop_details:
+            self.db_update_queue.put((PokestopDetails, pokestop_details))
         if gyms:
             self.db_update_queue.put((Gym, gyms))
         if gym_details:
