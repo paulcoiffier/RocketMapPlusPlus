@@ -1639,8 +1639,6 @@ class Pogom(Flask):
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
 
-            del forts
-
         if nearby_pokemon_dict:
             nearby_pokemon = len(nearby_pokemon_dict)
             nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
