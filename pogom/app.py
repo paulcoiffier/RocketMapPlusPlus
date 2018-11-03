@@ -534,7 +534,10 @@ class Pogom(Flask):
                                 pokestop_id = p.get('fortId')
                                 if not pokestop_id:
                                     continue
-                                if ((p['encounterId'], pokestop_id) in nearby_encountered_pokemon):
+                                encounter_id = p.get('encounterId')
+                                if not encounter_id:
+                                    continue
+                                if ((encounter_id, pokestop_id) in nearby_encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
                                     continue
@@ -550,8 +553,8 @@ class Pogom(Flask):
                                 form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
                                 weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
-                                nearby_pokemons[p['encounterId']] = {
-                                    'encounter_id': p['encounterId'],
+                                nearby_pokemons[encounter_id] = {
+                                    'encounter_id': encounter_id,
                                     'pokestop_id': p['fortId'],
                                     'pokemon_id': pokemon_id,
                                     'disappear_time': disappear_time,
@@ -561,10 +564,10 @@ class Pogom(Flask):
                                     'weather_boosted_condition': weather,
                                     'distance': distance
                                 }
-                                if nearby_pokemons[p['encounterId']]['costume'] < -1:
-                                    nearby_pokemons[p['encounterId']]['costume'] = -1
-                                if nearby_pokemons[p['encounterId']]['form'] < -1:
-                                    nearby_pokemons[p['encounterId']]['form'] = -1
+                                if nearby_pokemons[encounter_id]['costume'] < -1:
+                                    nearby_pokemons[encounter_id]['costume'] = -1
+                                if nearby_pokemons[encounter_id]['form'] < -1:
+                                    nearby_pokemons[encounter_id]['form'] = -1
 
                         if "forts" in mapcell:
                             stop_ids = [f['id'] for f in mapcell["forts"]]
