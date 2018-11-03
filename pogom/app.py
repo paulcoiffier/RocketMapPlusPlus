@@ -528,7 +528,7 @@ class Pogom(Flask):
                                 # query.
                                 # All of that is needed to make sure it's unique.
                                 nearby_encountered_pokemon = [
-                                    (p['encounterId'], p['fortId']) for p in query]
+                                    (p['encounter_id'], p['pokestop_id']) for p in query]
 
                             for p in mapcell["nearbyPokemons"]:
                                 pokestop_id = p.get('fortId')
