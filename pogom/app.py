@@ -650,7 +650,7 @@ class Pogom(Flask):
                                 # time_till_hidden_ms was overflowing causing a negative integer.
                                 # It was also returning a value above 3.6M ms.
                                 if float(p['expirationTimestampMs']) > 0:
-                                    d_t_secs = date_secs(float(p['expirationTimestampMs']) / 1000.0)
+                                    d_t_secs = date_secs(datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0))
 
                                     # Cover all bases, make sure we're using values < 3600.
                                     # Warning: python uses modulo as the least residue, not as
