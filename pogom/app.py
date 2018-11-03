@@ -614,7 +614,7 @@ class Pogom(Flask):
                                         'gym_id':
                                             fort['id'],
                                         'team_id':
-                                            _TEAMCOLOR.values_by_name[fort['ownedByTeam'].number],
+                                            _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
                                         'park':
                                             park,
                                         'guard_pokemon_id':
