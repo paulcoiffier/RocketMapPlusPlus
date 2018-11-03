@@ -531,7 +531,9 @@ class Pogom(Flask):
                                     (p['encounterId'], p['fortId']) for p in query]
 
                             for p in mapcell["nearbyPokemons"]:
-                                pokestop_id = p['fortId']
+                                pokestop_id = p.get('fortId')
+                                if not pokestop_id:
+                                    continue
                                 if ((p['encounterId'], pokestop_id) in nearby_encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
