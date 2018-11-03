@@ -37,6 +37,7 @@ from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
 from protos.pogoprotos.enums.pokemon_move_pb2 import _POKEMONMOVE
+from protos.pogoprotos.enums.raid_level_pb2 import _RAIDLEVEL
 
 #from protobuf_to_dict import protobuf_to_dict
 #from . import protos
@@ -597,11 +598,11 @@ class Pogom(Flask):
                                             'longitude':
                                                 fort['longitude'],
                                             'lowest_pokemon_motivation':
-                                                fort["gymDisplay"].get('lowestPokemonMotivation', 0),
+                                                float(fort["gymDisplay"].get('lowestPokemonMotivation', 0)),
                                             'occupied_since':
                                                 float(fort["gymDisplay"].get('occupiedMillis', 0)),
                                             'last_modified':
-                                                fort['lastModifiedTimestampMs'],
+                                                float(fort['lastModifiedTimestampMs']),
                                             'raid_active_until':
                                                 raid_active_until,
                                             'is_in_battle':
@@ -631,7 +632,7 @@ class Pogom(Flask):
                                             fort['longitude'],
                                         'last_modified':
                                             datetime.utcfromtimestamp(
-                                                fort['lastModifiedTimestampMs'] / 1000.0),
+                                                float(fort['lastModifiedTimestampMs']) / 1000.0),
                                         'is_in_battle':
                                             fort.get('isInBattle', False),
                                         'is_ex_raid_eligible':
@@ -671,13 +672,13 @@ class Pogom(Flask):
 
                                         raids[fort['id']] = {
                                             'gym_id': fort['id'],
-                                            'level': raidinfo['raidLevel'],
+                                            'level': _RAIDLEVEL.values_by_name[raidinfo['raidLevel']].number,
                                             'spawn': datetime.utcfromtimestamp(
-                                                raidinfo['raidSpawnMs'] / 1000.0),
+                                                float(raidinfo['raidSpawnMs']) / 1000.0),
                                             'start': datetime.utcfromtimestamp(
-                                                raidinfo['raidBattleMs'] / 1000.0),
+                                                float(raidinfo['raidBattleMs']) / 1000.0),
                                             'end': datetime.utcfromtimestamp(
-                                                raidinfo['raidEndMs'] / 1000.0),
+                                                float(raidinfo['raidEndMs']) / 1000.0),
                                             'pokemon_id': raidpokemonid,
                                             'cp': raidpokemoncp,
                                             'move_1': raidpokemonmove1,
@@ -692,9 +693,9 @@ class Pogom(Flask):
                                             wh_raid.update({
                                                 'gym_id': b64_gym_id,
                                                 'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam'].number],
-                                                'spawn': raidinfo['raidSpawnMs'] / 1000,
-                                                'start': raidinfo['raidBattleMs'] / 1000,
-                                                'end': raidinfo['raidEndMs'] / 1000,
+                                                'spawn': float(raidinfo['raidSpawnMs']) / 1000,
+                                                'start': float(raidinfo['raidBattleMs']) / 1000,
+                                                'end': float(raidinfo['raidEndMs']) / 1000,
                                                 'latitude': fort['latitude'],
                                                 'longitude': fort['longitude'],
                                                 'cp': raidpokemoncp,
