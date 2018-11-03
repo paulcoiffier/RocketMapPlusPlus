@@ -429,6 +429,8 @@ class Pogom(Flask):
         nearby_pokemon_dict = []
         quests_dict = []
 
+        pokestops = {}
+
         for proto in protos_dict:
             if "FortSearchResponse" in proto:
                 quests_dict.append(proto)
@@ -442,6 +444,39 @@ class Pogom(Flask):
                 gmo = GetMapObjectsResponse()
                 gmo.ParseFromString(gmo_response_string)
                 gmo_response_json = json.loads(MessageToJson(gmo))
+
+                if "mapCells" in gmo_response_json:
+                    for mapcell in gmo_response_json["mapCells"]:
+                        if "forts" in mapcell:
+                            stop_ids = [f['id'] for f in mapcell["forts"]]
+                            if stop_ids:
+                                with Pokemon.database().execution_context():
+                                    query = (Pokestop.select(
+                                        Pokestop.pokestop_id, Pokestop.last_modified).where(
+                                            (Pokestop.pokestop_id << stop_ids)).dicts())
+                                    encountered_pokestops = [(f['pokestop_id'], int(
+                                        (f['last_modified'] - datetime(1970, 1, 1)).total_seconds()))
+                                                             for f in query]
+                            for fort in mapcell["forts"]:
+                                if fort.get("type") == "CHECKPOINT":
+                                    if ((fort['id'], int(fort['lastModifiedTimestampMs'] / 1000.0))
+                                            in encountered_pokestops):
+                                        # If pokestop has been encountered before and hasn't
+                                        # changed don't process it.
+                                        continue
+                                    pokestops[fort['id']] = {
+                                        'pokestop_id': fort['id'],
+                                        'enabled': fort['enabled'],
+                                        'latitude': fort['latitude'],
+                                        'longitude': fort['longitude'],
+                                        'last_modified': datetime.utcfromtimestamp(
+                                            fort['lastModifiedTimestampMs'] / 1000.0),
+                                        'lure_expiration': None,
+                                        'active_fort_modifier': None
+                                    }
+
+        if pokestops:
+            self.db_update_queue.put((Pokestop, pokestops))
 
         return self.parse_map(pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker)
 
