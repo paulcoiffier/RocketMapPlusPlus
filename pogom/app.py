@@ -594,12 +594,12 @@ class Pogom(Flask):
                                 #disappear_time = now_date + \
                                 #    timedelta(seconds=seconds_until_despawn)
 
-                                pokemon_id = _POKEMONID.values_by_name[p['pokemonId']].number
+                                pokemon_id = _POKEMONID.values_by_name[p['pokemonData']['pokemonId']].number
 
-                                gender = _GENDER.values_by_name[p["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
-                                costume = _COSTUME.values_by_name[p["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
-                                form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
-                                weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+                                gender = _GENDER.values_by_name[p['pokemonData']["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
+                                costume = _COSTUME.values_by_name[p['pokemonData']["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
+                                form = _FORM.values_by_name[p['pokemonData']["pokemonDisplay"].get('form', 'FORM_UNSET')].number
+                                weather = _WEATHERCONDITION.values_by_name[p['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
                                 printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
