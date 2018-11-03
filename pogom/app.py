@@ -443,11 +443,6 @@ class Pogom(Flask):
         skipped = 0
         filtered = 0
         stopsskipped = 0
-        forts = []
-        forts_count = 0
-        wild_pokemon = []
-        wild_pokemon_count = 0
-        nearby_pokemon = 0
         spawn_points = {}
         scan_spawn_points = {}
         sightings = {}
@@ -460,52 +455,9 @@ class Pogom(Flask):
 
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
 
-        done_already = scan_location['done']
         ScannedLocation.update_band(scan_location, now_date)
-        just_completed = not done_already and scan_location['done']
 
         for proto in protos_dict:
-            if "FortSearchResponse" in proto:
-                fort_search_response_string = b64decode(proto['FortSearchResponse'])
-
-                frs = FortSearchResponse()
-                frs.ParseFromString(fort_search_response_string)
-                fort_search_response_json = json.loads(MessageToJson(frs))
-
-                if 'challengeQuest' in fort_search_response_json:
-                    quest_json = fort_search_response_json["challengeQuest"]["quest"]
-                    quest_result[quest_json['fortId']] = {
-                        'pokestop_id': quest_json['fortId'],
-                        'quest_type': quest_json['questType'],
-                        'goal': quest_json['goal']['target'],
-                        'reward_type': quest_json['questRewards'][0]['type'],
-                    }
-                    if quest_json["questRewards"][0]["type"] == "STARDUST":
-                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
-                    elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
-                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
-                    elif quest_json["questRewards"][0]["type"] == "ITEM":
-                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
-                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
-
-                    if 'quest' in self.args.wh_types:
-                        wh_quest = quest_result[quest_json["fortId"]]
-                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
-                        if quest_pokestop:
-                            wh_quest.update(
-                                {
-                                    "latitude": quest_pokestop["latitude"],
-                                    "longitude": quest_pokestop["longitude"]
-                                }
-                            )
-                        self.wh_update_queue.put(('quest', wh_quest))
-
-            if "EncounterResponse" in proto:
-                encounter_response_string = b64decode(proto['EncounterResponse'])
-                encounter = EncounterResponse()
-                encounter.ParseFromString(encounter_response_string)
-                encounter_response_json = json.loads(MessageToJson(encounter))
-
             if "GetMapObjects" in proto:
                 gmo_response_string = b64decode(proto['GetMapObjects'])
                 gmo = GetMapObjectsResponse()
@@ -573,7 +525,7 @@ class Pogom(Flask):
                                         sp['latest_seen'] = d_t_secs
                                         sp['earliest_unseen'] = d_t_secs
 
-                                scan_spawn_points[len(scan_spawn_points)+1] = {
+                                scan_spawn_points[len(scan_spawn_points) + 1] = {
                                     'spawnpoint': sp['id'],
                                     'scannedlocation': scan_location['cellid']}
                                 if not sp['last_scanned']:
@@ -591,7 +543,7 @@ class Pogom(Flask):
 
                                 start_end = SpawnPoint.start_end(sp, 1)
                                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                                #disappear_time = now_date + \
+                                # disappear_time = now_date + \
                                 #    timedelta(seconds=seconds_until_despawn)
 
                                 pokemon_id = _POKEMONID.values_by_name[p['pokemonData']['pokemonId']].number
@@ -635,12 +587,12 @@ class Pogom(Flask):
                                             'disappear_time': calendar.timegm(
                                                 disappear_time.timetuple()),
                                             'last_modified_time': now(),
-                                            'time_until_hidden_ms': float(p['expirationTimestampMs']),
+                                            'time_until_hidden_ms': float(p['timeTillHiddenMs']),
                                             'verified': SpawnPoint.tth_found(sp),
                                             'seconds_until_despawn': seconds_until_despawn,
                                             'spawn_start': start_end[0],
                                             'spawn_end': start_end[1],
-                                            'player_level': 30,
+                                            'player_level': int(trainerlvl),
                                             'individual_attack': 0,
                                             'individual_defense': 0,
                                             'individual_stamina': 0,
@@ -718,7 +670,7 @@ class Pogom(Flask):
                                         sp['latest_seen'] = d_t_secs
                                         sp['earliest_unseen'] = d_t_secs
 
-                                scan_spawn_points[len(scan_spawn_points)+1] = {
+                                scan_spawn_points[len(scan_spawn_points) + 1] = {
                                     'spawnpoint': sp['id'],
                                     'scannedlocation': scan_location['cellid']}
                                 if not sp['last_scanned']:
@@ -739,7 +691,7 @@ class Pogom(Flask):
 
                                 start_end = SpawnPoint.start_end(sp, 1)
                                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                                #disappear_time = now_date + \
+                                # disappear_time = now_date + \
                                 #    timedelta(seconds=seconds_until_despawn)
 
                                 pokemon_id = _POKEMONID.values_by_name[p['pokemonId']].number
@@ -788,7 +740,7 @@ class Pogom(Flask):
                                             'seconds_until_despawn': seconds_until_despawn,
                                             'spawn_start': start_end[0],
                                             'spawn_end': start_end[1],
-                                            'player_level': 30,
+                                            'player_level': int(trainerlvl),
                                             'individual_attack': 0,
                                             'individual_defense': 0,
                                             'individual_stamina': 0,
@@ -887,7 +839,7 @@ class Pogom(Flask):
                                             (Pokestop.pokestop_id << stop_ids)).dicts())
                                     encountered_pokestops = [(f['pokestop_id'], int(
                                         (f['last_modified'] - datetime(1970, 1, 1)).total_seconds()))
-                                                             for f in query]
+                                        for f in query]
                             for fort in mapcell["forts"]:
                                 if fort.get("type") == "CHECKPOINT":
                                     if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
@@ -1091,6 +1043,172 @@ class Pogom(Flask):
                                             })
                                             self.wh_update_queue.put(('raid', wh_raid))
 
+        for proto in protos_dict:
+            if "FortSearchResponse" in proto:
+                fort_search_response_string = b64decode(proto['FortSearchResponse'])
+
+                frs = FortSearchResponse()
+                frs.ParseFromString(fort_search_response_string)
+                fort_search_response_json = json.loads(MessageToJson(frs))
+
+                if 'challengeQuest' in fort_search_response_json:
+                    quest_json = fort_search_response_json["challengeQuest"]["quest"]
+                    quest_result[quest_json['fortId']] = {
+                        'pokestop_id': quest_json['fortId'],
+                        'quest_type': quest_json['questType'],
+                        'goal': quest_json['goal']['target'],
+                        'reward_type': quest_json['questRewards'][0]['type'],
+                    }
+                    if quest_json["questRewards"][0]["type"] == "STARDUST":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
+                    elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
+                    elif quest_json["questRewards"][0]["type"] == "ITEM":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
+
+                    if 'quest' in self.args.wh_types:
+                        wh_quest = quest_result[quest_json["fortId"]]
+                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+                        if quest_pokestop:
+                            wh_quest.update(
+                                {
+                                    "latitude": quest_pokestop["latitude"],
+                                    "longitude": quest_pokestop["longitude"]
+                                }
+                            )
+                        self.wh_update_queue.put(('quest', wh_quest))
+
+            if "EncounterResponse" in proto and int(trainerlvl) >= 30:
+                encounter_response_string = b64decode(proto['EncounterResponse'])
+                encounter = EncounterResponse()
+                encounter.ParseFromString(encounter_response_string)
+                encounter_response_json = json.loads(MessageToJson(encounter))
+
+                if "wildPokemon" in encounter_response_json:
+                    wildpokemon = encounter_response_json["wildPokemon"]
+
+                    encounter_ids = [wildpokemon['encounterId']]
+                    # For all the wild Pokemon we found check if an active Pokemon is in
+                    # the database.
+                    with Pokemon.database().execution_context():
+                        query = (Pokemon
+                                 .select(Pokemon.encounter_id, Pokemon.spawnpoint_id)
+                                 .where((Pokemon.disappear_time >= now_date) &
+                                        (Pokemon.encounter_id << encounter_ids) &
+                                        (Pokemon.cp.is_null(False)))
+                                 .dicts())
+
+                        # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                        # query.
+                        # All of that is needed to make sure it's unique.
+                        encountered_pokemon = [
+                            (p['encounter_id'], p['spawnpoint_id']) for p in query]
+
+                    spawn_id = wildpokemon['spawnPointId']
+
+                    sp = SpawnPoint.get_by_id(spawn_id, wildpokemon['latitude'], wildpokemon['longitude'])
+                    sp['last_scanned'] = datetime.utcnow()
+                    spawn_points[spawn_id] = sp
+                    sp['missed_count'] = 0
+
+                    sighting = {
+                        'encounter_id': wildpokemon['encounterId'],
+                        'spawnpoint_id': spawn_id,
+                        'scan_time': now_date,
+                        'tth_secs': None
+                    }
+
+                    # Keep a list of sp_ids to return.
+                    sp_id_list.append(spawn_id)
+
+                    scan_spawn_points[len(scan_spawn_points) + 1] = {
+                        'spawnpoint': sp['id'],
+                        'scannedlocation': scan_location['cellid']}
+                    if not sp['last_scanned']:
+                        log.info('New Spawn Point found.')
+                        new_spawn_points.append(sp)
+
+                    sp['last_scanned'] = datetime.utcnow()
+
+                    if ((wildpokemon['encounterId'], spawn_id) in encountered_pokemon):
+                        # If Pokemon has been encountered before don't process it.
+                        skipped += 1
+                        continue
+
+                    disappear_time = now_date + timedelta(seconds=600)
+
+                    start_end = SpawnPoint.start_end(sp, 1)
+                    seconds_until_despawn = (start_end[1] - now_secs) % 3600
+                    # disappear_time = now_date + \
+                    #    timedelta(seconds=seconds_until_despawn)
+
+                    pokemon_id = _POKEMONID.values_by_name[wildpokemon['pokemonData']['pokemonId']].number
+
+                    gender = _GENDER.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
+                    costume = _COSTUME.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
+                    form = _FORM.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('form', 'FORM_UNSET')].number
+                    weather = _WEATHERCONDITION.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+
+                    printPokemon(pokemon_id, wildpokemon['latitude'], wildpokemon['longitude'],
+                                 disappear_time)
+
+                    pokemon[wildpokemon['encounterId']] = {
+                        'encounter_id': wildpokemon['encounterId'],
+                        'spawnpoint_id': spawn_id,
+                        'pokemon_id': pokemon_id,
+                        'latitude': wildpokemon['latitude'],
+                        'longitude': wildpokemon['longitude'],
+                        'disappear_time': disappear_time,
+                        'individual_attack': wildpokemon['pokemonData']['individualAttack'],
+                        'individual_defense': wildpokemon['pokemonData']['individualDefense'],
+                        'individual_stamina': wildpokemon['pokemonData']['individualStamina'],
+                        'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move1']].number,
+                        'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move2']].number,
+                        'cp': wildpokemon['pokemonData']['cp'],
+                        'cp_multiplier': wildpokemon['pokemonData']['cpMultiplier'],
+                        'height': wildpokemon['pokemonData']['heightM'],
+                        'weight': wildpokemon['pokemonData']['weightKg'],
+                        'gender': gender,
+                        'costume': costume,
+                        'form': form,
+                        'weather_boosted_condition': weather
+                    }
+
+                    if 'pokemon' in self.args.wh_types:
+                        if (pokemon_id in self.args.webhook_whitelist or
+                            (not self.args.webhook_whitelist and pokemon_id
+                             not in self.args.webhook_blacklist)):
+                            wh_poke = pokemon[wildpokemon['encounterId']].copy()
+                            wh_poke.update({
+                                'disappear_time': calendar.timegm(
+                                    disappear_time.timetuple()),
+                                'last_modified_time': now(),
+                                'time_until_hidden_ms': float(wildpokemon['expirationTimestampMs']),
+                                'verified': SpawnPoint.tth_found(sp),
+                                'seconds_until_despawn': seconds_until_despawn,
+                                'spawn_start': start_end[0],
+                                'spawn_end': start_end[1],
+                                'player_level': int(trainerlvl),
+                                'individual_attack': wildpokemon['pokemonData']['individualAttack'],
+                                'individual_defense': wildpokemon['pokemonData']['individualDefense'],
+                                'individual_stamina': wildpokemon['pokemonData']['individualStamina'],
+                                'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move1']].number,
+                                'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move2']].number,
+                                'cp': wildpokemon['pokemonData']['cp'],
+                                'cp_multiplier': wildpokemon['pokemonData']['cpMultiplier'],
+                                'height': wildpokemon['pokemonData']['heightM'],
+                                'weight': wildpokemon['pokemonData']['weightKg'],
+                                'weather_id': weather
+                            })
+
+                            rarity = self.get_pokemon_rarity_code(pokemon_id)
+                            wh_poke.update({
+                                'rarity': rarity
+                            })
+
+                            self.wh_update_queue.put(('pokemon', wh_poke))
+
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
                  'pokestops: %d, gyms: %d, raids: %d, quests: %d.',
                  len(pokemon) + skipped,
@@ -1138,11 +1256,6 @@ class Pogom(Flask):
         skipped = 0
         filtered = 0
         stopsskipped = 0
-        forts = []
-        forts_count = 0
-        wild_pokemon = []
-        wild_pokemon_count = 0
-        nearby_pokemon = 0
         spawn_points = {}
         scan_spawn_points = {}
         sightings = {}
@@ -1155,9 +1268,7 @@ class Pogom(Flask):
 
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
 
-        done_already = scan_location['done']
         ScannedLocation.update_band(scan_location, now_date)
-        just_completed = not done_already and scan_location['done']
 
         if pokemon_dict:
             encounter_ids = [p['id'] for p in pokemon_dict]
@@ -1218,7 +1329,7 @@ class Pogom(Flask):
                         sp['latest_seen'] = d_t_secs
                         sp['earliest_unseen'] = d_t_secs
 
-                scan_spawn_points[len(scan_spawn_points)+1] = {
+                scan_spawn_points[len(scan_spawn_points) + 1] = {
                     'spawnpoint': sp['id'],
                     'scannedlocation': scan_location['cellid']}
                 if not sp['last_scanned']:
@@ -1236,16 +1347,13 @@ class Pogom(Flask):
 
                 start_end = SpawnPoint.start_end(sp, 1)
                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                #disappear_time = now_date + \
+                # disappear_time = now_date + \
                 #    timedelta(seconds=seconds_until_despawn)
 
                 pokemon_id = p['type']
 
                 printPokemon(pokemon_id, p['lat'], p['lon'],
                              disappear_time)
-
-                # Scan for IVs/CP and moves.
-                pokemon_info = False
 
                 pokemon[p['id']] = {
                     'encounter_id': p['id'],
@@ -1266,7 +1374,6 @@ class Pogom(Flask):
                     'gender': p['gender'],
                     'costume': p['costume'],
                     'form': p.get('form', 0),
-#                    'weather_id': p.get('weather', None),
                     'weather_boosted_condition': p.get('weather', None)
                 }
                 if pokemon[p['id']]['costume'] < -1:
@@ -1303,7 +1410,7 @@ class Pogom(Flask):
 
                         rarity = self.get_pokemon_rarity_code(pokemon_id)
                         wh_poke.update({
-                            'rarity' : rarity
+                            'rarity': rarity
                         })
 
                         self.wh_update_queue.put(('pokemon', wh_poke))
@@ -1317,7 +1424,7 @@ class Pogom(Flask):
                             (Pokestop.pokestop_id << stop_ids)).dicts())
                     encountered_pokestops = [(f['pokestop_id'], int(
                         (f['last_modified'] - datetime(1970, 1, 1)).total_seconds()))
-                                             for f in query]
+                        for f in query]
 
             for f in pokestops_dict:
                 if f['lure_expiration'] > 0:
@@ -1567,7 +1674,7 @@ class Pogom(Flask):
 
                 nearby_pokemons[p['encounter_id']] = {
                     'encounter_id': p['encounter_id'],
-                    'pokestop_id' : p['fort_id'],
+                    'pokestop_id': p['fort_id'],
                     'pokemon_id': pokemon_id,
                     'disappear_time': disappear_time,
                     'gender': p['gender'],
@@ -1582,7 +1689,7 @@ class Pogom(Flask):
                     nearby_pokemons[p['encounter_id']]['form'] = -1
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
-                 'pokestops: %d, gyms: %d, raids: %d., quests: %d',
+                 'pokestops: %d, gyms: %d, raids: %d, quests: %d.',
                  len(pokemon) + skipped,
                  filtered,
                  nearby_pokemon,
