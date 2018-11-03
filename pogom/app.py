@@ -38,6 +38,10 @@ from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
 from protos.pogoprotos.enums.pokemon_move_pb2 import _POKEMONMOVE
 from protos.pogoprotos.enums.raid_level_pb2 import _RAIDLEVEL
+from protos.pogoprotos.enums.gender_pb2 import _GENDER
+from protos.pogoprotos.enums.form_pb2 import _FORM
+from protos.pogoprotos.enums.costume_pb2 import _COSTUME
+from protos.pogoprotos.enums.weather_condition_pb2 import _WEATHERCONDITION
 
 #from protobuf_to_dict import protobuf_to_dict
 #from . import protos
@@ -509,6 +513,57 @@ class Pogom(Flask):
 
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
+                        if "nearbyPokemons" in mapcell:
+                            nearby_encounter_ids = [p['encounterId'] for p in mapcell["nearbyPokemons"]]
+                            # For all the wild Pokemon we found check if an active Pokemon is in
+                            # the database.
+                            with PokestopMember.database().execution_context():
+                                query = (PokestopMember
+                                         .select(PokestopMember.encounter_id, PokestopMember.pokestop_id)
+                                         .where((PokestopMember.disappear_time >= now_date) &
+                                                (PokestopMember.encounter_id << nearby_encounter_ids))
+                                         .dicts())
+
+                                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                                # query.
+                                # All of that is needed to make sure it's unique.
+                                nearby_encountered_pokemon = [
+                                    (p['encounterId'], p['fortId']) for p in query]
+
+                            for p in mapcell["nearbyPokemons"]:
+                                pokestop_id = p['fortId']
+                                if ((p['encounterId'], pokestop_id) in nearby_encountered_pokemon):
+                                    # If Pokemon has been encountered before don't process it.
+                                    skipped += 1
+                                    continue
+
+                                disappear_time = now_date + timedelta(seconds=600)
+
+                                pokemon_id = _POKEMONID.values_by_name[p['pokemonId']].number
+
+                                distance = round(p.get('distanceInMeters', 0), 5)
+
+                                gender = _GENDER.values_by_name[p["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
+                                costume = _COSTUME.values_by_name[p["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
+                                form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
+                                weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+
+                                nearby_pokemons[p['encounterId']] = {
+                                    'encounter_id': p['encounterId'],
+                                    'pokestop_id': p['fortId'],
+                                    'pokemon_id': pokemon_id,
+                                    'disappear_time': disappear_time,
+                                    'gender': gender,
+                                    'costume': costume,
+                                    'form': form,
+                                    'weather_boosted_condition': weather,
+                                    'distance': distance
+                                }
+                                if nearby_pokemons[p['encounterId']]['costume'] < -1:
+                                    nearby_pokemons[p['encounterId']]['costume'] = -1
+                                if nearby_pokemons[p['encounterId']]['form'] < -1:
+                                    nearby_pokemons[p['encounterId']]['form'] = -1
+
                         if "forts" in mapcell:
                             stop_ids = [f['id'] for f in mapcell["forts"]]
                             if stop_ids:
@@ -707,10 +762,10 @@ class Pogom(Flask):
                                             self.wh_update_queue.put(('raid', wh_raid))
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
-                 'pokestops: %d, gyms: %d, raids: %d., quests: %d',
+                 'pokestops: %d, gyms: %d, raids: %d, quests: %d.',
                  len(pokemon) + skipped,
                  filtered,
-                 nearby_pokemon,
+                 len(nearby_pokemons),
                  len(pokestops) + stopsskipped,
                  len(gyms),
                  len(raids),
