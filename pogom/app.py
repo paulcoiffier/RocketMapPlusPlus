@@ -644,7 +644,7 @@ class Pogom(Flask):
                                     gymdetails = Gym.get_gym_details(gym_id)
                                     gym_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     gym_description = ""
-                                    gym_url = fort['imageUrl']
+                                    gym_url = fort.get('imageUrl', "")
                                     if gymdetails:
                                         gym_name = gymdetails.get("name", gym_name)
                                         gym_description = gymdetails.get("description", gym_description)
