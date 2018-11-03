@@ -34,6 +34,10 @@ from protos.pogoprotos.networking.responses.fort_search_response_pb2 import Fort
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
 from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
 
+from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
+from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
+from protos.pogoprotos.enums.pokemon_move_pb2 import _POKEMONMOVE
+
 #from protobuf_to_dict import protobuf_to_dict
 #from . import protos
 # from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
@@ -423,22 +427,79 @@ class Pogom(Flask):
             return self.parse_map(pokemon, pokestops, gyms, nearby_pokemon, quests, deviceworker)
 
     def parse_map_protos(self, protos_dict, trainerlvl, deviceworker):
-        pokemon_dict = []
-        pokestops_dict = []
-        gyms_dict = []
-        nearby_pokemon_dict = []
-        quests_dict = []
-
+        pokemon = {}
+        nearby_pokemons = {}
         pokestops = {}
+        gyms = {}
+        gym_details = {}
+        raids = {}
+        quest_result = {}
+        skipped = 0
+        filtered = 0
+        stopsskipped = 0
+        forts = []
+        forts_count = 0
+        wild_pokemon = []
+        wild_pokemon_count = 0
+        nearby_pokemon = 0
+        spawn_points = {}
+        scan_spawn_points = {}
+        sightings = {}
+        new_spawn_points = []
+        sp_id_list = []
+
+        now_date = datetime.utcnow()
+
+        now_secs = date_secs(now_date)
+
+        scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
+
+        done_already = scan_location['done']
+        ScannedLocation.update_band(scan_location, now_date)
+        just_completed = not done_already and scan_location['done']
 
         for proto in protos_dict:
             if "FortSearchResponse" in proto:
-                quests_dict.append(proto)
+                fort_search_response_string = b64decode(proto['FortSearchResponse'])
+
+                frs = FortSearchResponse()
+                frs.ParseFromString(fort_search_response_string)
+                fort_search_response_json = json.loads(MessageToJson(frs))
+
+                if 'challengeQuest' in fort_search_response_json:
+                    quest_json = fort_search_response_json["challengeQuest"]["quest"]
+                    quest_result[quest_json['fortId']] = {
+                        'pokestop_id': quest_json['fortId'],
+                        'quest_type': quest_json['questType'],
+                        'goal': quest_json['goal']['target'],
+                        'reward_type': quest_json['questRewards'][0]['type'],
+                    }
+                    if quest_json["questRewards"][0]["type"] == "STARDUST":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
+                    elif quest_json["questRewards"][0]["type"] == "POKEMON_ENCOUNTER":
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["pokemonEncounter"]["pokemonId"]
+                    elif quest_json["questRewards"][0]["type"] == "ITEM":
+                        quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
+                        quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
+
+                    if 'quest' in self.args.wh_types:
+                        wh_quest = quest_result[quest_json["fortId"]]
+                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+                        if quest_pokestop:
+                            wh_quest.update(
+                                {
+                                    "latitude": quest_pokestop["latitude"],
+                                    "longitude": quest_pokestop["longitude"]
+                                }
+                            )
+                        self.wh_update_queue.put(('quest', wh_quest))
+
             if "EncounterResponse" in proto:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
                 encounter = EncounterResponse()
                 encounter.ParseFromString(encounter_response_string)
                 encounter_response_json = json.loads(MessageToJson(encounter))
+
             if "GetMapObjects" in proto:
                 gmo_response_string = b64decode(proto['GetMapObjects'])
                 gmo = GetMapObjectsResponse()
@@ -500,11 +561,183 @@ class Pogom(Flask):
                                             'lure_expiration': l_e,
                                         })
                                         self.wh_update_queue.put(('pokestop', wh_pokestop))
+                                else:
+                                    b64_gym_id = str(fort['id'])
+                                    park = Gym.get_gyms_park(fort['id'])
 
+                                    if 'gym' in self.args.wh_types:
+                                        raid_active_until = 0
+                                        if 'raidInfo' in fort:
+                                            raid_battle_ms = fort['raidInfo']['raidBattleMs']
+                                            raid_end_ms = fort['raidInfo']['raidEndMs']
+
+                                            if raid_battle_ms / 1000 > time.time():
+                                                raid_active_until = raid_end_ms / 1000
+
+                                        # Explicitly set 'webhook_data', in case we want to change
+                                        # the information pushed to webhooks.  Similar to above
+                                        # and previous commits.
+                                        self.wh_update_queue.put(('gym', {
+                                            'gym_id':
+                                                b64_gym_id,
+                                            'team_id':
+                                                _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
+                                            'park':
+                                                park,
+                                            'guard_pokemon_id':
+                                                _POKEMONID.values_by_name[fort['guardPokemonId']].number,
+                                            'slots_available':
+                                                fort["gymDisplay"].get('slotsAvailable', 0),
+                                            'total_cp':
+                                                fort["gymDisplay"].get('totalGymCp', 0),
+                                            'enabled':
+                                                fort['enabled'],
+                                            'latitude':
+                                                fort['latitude'],
+                                            'longitude':
+                                                fort['longitude'],
+                                            'lowest_pokemon_motivation':
+                                                fort["gymDisplay"].get('lowestPokemonMotivation', 0),
+                                            'occupied_since':
+                                                float(fort["gymDisplay"].get('occupiedMillis', 0)),
+                                            'last_modified':
+                                                fort['lastModifiedTimestampMs'],
+                                            'raid_active_until':
+                                                raid_active_until,
+                                            'is_in_battle':
+                                                fort.get('isInBattle', False),
+                                            'is_ex_raid_eligible':
+                                                fort.get('isExRaidEligible', False)
+                                        }))
+
+                                    gyms[fort['id']] = {
+                                        'gym_id':
+                                            fort['id'],
+                                        'team_id':
+                                            _TEAMCOLOR.values_by_name[fort['ownedByTeam'].number],
+                                        'park':
+                                            park,
+                                        'guard_pokemon_id':
+                                            _POKEMONID.values_by_name[fort['guardPokemonId']].number,
+                                        'slots_available':
+                                            fort["gymDisplay"].get('slotsAvailable', 0),
+                                        'total_cp':
+                                            fort["gymDisplay"].get('totalGymCp', 0),
+                                        'enabled':
+                                            fort['enabled'],
+                                        'latitude':
+                                            fort['latitude'],
+                                        'longitude':
+                                            fort['longitude'],
+                                        'last_modified':
+                                            datetime.utcfromtimestamp(
+                                                fort['lastModifiedTimestampMs'] / 1000.0),
+                                        'is_in_battle':
+                                            fort.get('isInBattle', False),
+                                        'is_ex_raid_eligible':
+                                            fort.get('isExRaidEligible', False)
+                                    }
+
+                                    gym_id = fort['id']
+
+                                    gymdetails = Gym.get_gym_details(gym_id)
+                                    gym_name = str(fort['latitude']) + ',' + str(fort['longitude'])
+                                    gym_description = ""
+                                    gym_url = fort['imageUrl']
+                                    if gymdetails:
+                                        gym_name = gymdetails.get("name", gym_name)
+                                        gym_description = gymdetails.get("description", gym_description)
+                                        gym_url = gym_url if gym_url != "" else gymdetails["url"]
+
+                                    gym_details[gym_id] = {
+                                        'gym_id': gym_id,
+                                        'name': gym_name,
+                                        'description': gym_description,
+                                        'url': gym_url
+                                    }
+
+                                    if 'raidInfo' in fort:
+                                        raidinfo = fort["raidInfo"]
+                                        raidpokemonid = raidinfo['raidPokemon']['pokemonId'] if 'raidPokemon' in raidinfo and 'pokemonId' in raidinfo['raidPokemon'] else None
+                                        if raidpokemonid:
+                                            raidpokemonid = _POKEMONID.values_by_name[raidpokemonid].number
+                                        raidpokemoncp = raidinfo['raidPokemon']['cp'] if 'raidPokemon' in raidinfo and 'cp' in raidinfo['raidPokemon'] else None
+                                        raidpokemonmove1 = raidinfo['raidPokemon']['move1'] if 'raidPokemon' in raidinfo and 'move1' in raidinfo['raidPokemon'] else None
+                                        if raidpokemonmove1:
+                                            raidpokemonmove1 = _POKEMONMOVE.values_by_name[raidpokemonmove1].number
+                                        raidpokemonmove2 = raidinfo['raidPokemon']['move2'] if 'raidPokemon' in raidinfo and 'move2' in raidinfo['raidPokemon'] else None
+                                        if raidpokemonmove2:
+                                            raidpokemonmove2 = _POKEMONMOVE.values_by_name[raidpokemonmove2].number
+
+                                        raids[fort['id']] = {
+                                            'gym_id': fort['id'],
+                                            'level': raidinfo['raidLevel'],
+                                            'spawn': datetime.utcfromtimestamp(
+                                                raidinfo['raidSpawnMs'] / 1000.0),
+                                            'start': datetime.utcfromtimestamp(
+                                                raidinfo['raidBattleMs'] / 1000.0),
+                                            'end': datetime.utcfromtimestamp(
+                                                raidinfo['raidEndMs'] / 1000.0),
+                                            'pokemon_id': raidpokemonid,
+                                            'cp': raidpokemoncp,
+                                            'move_1': raidpokemonmove1,
+                                            'move_2': raidpokemonmove2
+                                        }
+
+                                        if ('egg' in self.args.wh_types and
+                                                fort['raidPokemon'] == 0) or (
+                                                    'raid' in self.args.wh_types and
+                                                    fort['raidPokemon'] > 0):
+                                            wh_raid = raids[fort['id']].copy()
+                                            wh_raid.update({
+                                                'gym_id': b64_gym_id,
+                                                'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam'].number],
+                                                'spawn': raidinfo['raidSpawnMs'] / 1000,
+                                                'start': raidinfo['raidBattleMs'] / 1000,
+                                                'end': raidinfo['raidEndMs'] / 1000,
+                                                'latitude': fort['latitude'],
+                                                'longitude': fort['longitude'],
+                                                'cp': raidpokemoncp,
+                                                'move_1': raidpokemonmove1 if raidpokemonmove1 else 0,
+                                                'move_2': raidpokemonmove2 if raidpokemonmove2 else 0,
+                                                'is_ex_raid_eligible':
+                                                    fort.get('isExRaidEligible', False)
+                                            })
+                                            self.wh_update_queue.put(('raid', wh_raid))
+
+        log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
+                 'pokestops: %d, gyms: %d, raids: %d., quests: %d',
+                 len(pokemon) + skipped,
+                 filtered,
+                 nearby_pokemon,
+                 len(pokestops) + stopsskipped,
+                 len(gyms),
+                 len(raids),
+                 len(quest_result))
+
+        self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+
+        if pokemon:
+            self.db_update_queue.put((Pokemon, pokemon))
         if pokestops:
             self.db_update_queue.put((Pokestop, pokestops))
+        if gyms:
+            self.db_update_queue.put((Gym, gyms))
+        if gym_details:
+            self.db_update_queue.put((GymDetails, gym_details))
+        if raids:
+            self.db_update_queue.put((Raid, raids))
+        if spawn_points:
+            self.db_update_queue.put((SpawnPoint, spawn_points))
+            self.db_update_queue.put((ScanSpawnPoint, scan_spawn_points))
+            if sightings:
+                self.db_update_queue.put((SpawnpointDetectionData, sightings))
+        if nearby_pokemons:
+            self.db_update_queue.put((PokestopMember, nearby_pokemons))
+        if quest_result:
+            self.db_update_queue.put((Quest, quest_result))
 
-        return self.parse_map(pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker)
+        return 'ok'
 
     def parse_map(self, pokemon_dict, pokestops_dict, gyms_dict, nearby_pokemon_dict, quests_dict, deviceworker):
         pokemon = {}
@@ -906,7 +1139,7 @@ class Pogom(Flask):
                             'cp': 0,
                             'move_1': 0,
                             'move_2': 0,
-                            'is_ex_raid_eligible' :
+                            'is_ex_raid_eligible':
                                 f.get('isExRaidEligible', False)
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
@@ -961,13 +1194,14 @@ class Pogom(Flask):
                     nearby_pokemons[p['encounter_id']]['form'] = -1
 
         log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
-                 'pokestops: %d, gyms: %d, raids: %d.',
+                 'pokestops: %d, gyms: %d, raids: %d., quests: %d',
                  len(pokemon) + skipped,
                  filtered,
                  nearby_pokemon,
                  len(pokestops) + stopsskipped,
                  len(gyms),
-                 len(raids))
+                 len(raids),
+                 len(quest_result))
 
         self.db_update_queue.put((ScannedLocation, {0: scan_location}))
 
