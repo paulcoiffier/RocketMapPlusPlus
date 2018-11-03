@@ -464,6 +464,18 @@ class Pogom(Flask):
                                         # If pokestop has been encountered before and hasn't
                                         # changed don't process it.
                                         continue
+
+                                    if float(fort.get('lure_expiration', 0)) > 0:
+                                        lure_expiration = (datetime.utcfromtimestamp(
+                                            float(fort.get('lure_expiration')) / 1000.0) +
+                                            timedelta(minutes=self.args.lure_duration))
+                                    else:
+                                        lure_expiration = None
+                                    if fort.get('active_pokemon_id', 0) > 0:
+                                        active_pokemon_id = fort.get('active_pokemon_id')
+                                    else:
+                                        active_pokemon_id = None
+
                                     pokestops[fort['id']] = {
                                         'pokestop_id': fort['id'],
                                         'enabled': fort['enabled'],
@@ -471,9 +483,23 @@ class Pogom(Flask):
                                         'longitude': fort['longitude'],
                                         'last_modified': datetime.utcfromtimestamp(
                                             float(fort['lastModifiedTimestampMs']) / 1000.0),
-                                        'lure_expiration': None,
-                                        'active_fort_modifier': None
+                                        'lure_expiration': lure_expiration,
+                                        'active_fort_modifier': active_pokemon_id
                                     }
+
+                                    if 'pokestop' in self.args.wh_types or (
+                                            'lure' in self.args.wh_types and
+                                            lure_expiration is not None):
+                                        l_e = None
+                                        if lure_expiration is not None:
+                                            l_e = calendar.timegm(lure_expiration.timetuple())
+                                        wh_pokestop = pokestops[fort['id']].copy()
+                                        wh_pokestop.update({
+                                            'pokestop_id': fort['id'],
+                                            'last_modified': float(fort['lastModifiedTimestampMs']),
+                                            'lure_expiration': l_e,
+                                        })
+                                        self.wh_update_queue.put(('pokestop', wh_pokestop))
 
         if pokestops:
             self.db_update_queue.put((Pokestop, pokestops))
