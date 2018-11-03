@@ -534,7 +534,7 @@ class Pogom(Flask):
                             for p in mapcell["catchablePokemons"]:
                                 spawn_id = p['spawnPointId']
 
-                                sp = SpawnPoint.get_by_id(spawn_id, p['lat'], p['lon'])
+                                sp = SpawnPoint.get_by_id(spawn_id, p['latitude'], p['longitude'])
                                 sp['last_scanned'] = datetime.utcnow()
                                 spawn_points[spawn_id] = sp
                                 sp['missed_count'] = 0
