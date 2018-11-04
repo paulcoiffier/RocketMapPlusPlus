@@ -1074,22 +1074,6 @@ class Pogom(Flask):
                 if "wildPokemon" in encounter_response_json:
                     wildpokemon = encounter_response_json["wildPokemon"]
 
-                    # For all the wild Pokemon we found check if an active Pokemon is in
-                    # the database.
-                    with Pokemon.database().execution_context():
-                        query = (Pokemon
-                                 .select(Pokemon.encounter_id, Pokemon.spawnpoint_id)
-                                 .where((Pokemon.disappear_time >= now_date) &
-                                        (Pokemon.encounter_id == wildpokemon['encounterId']) &
-                                        (Pokemon.cp.is_null(False)))
-                                 .dicts())
-
-                        # Store all encounter_ids and spawnpoint_ids for the Pokemon in
-                        # query.
-                        # All of that is needed to make sure it's unique.
-                        encountered_pokemon = [
-                            (p['encounter_id'], p['spawnpoint_id']) for p in query]
-
                     spawn_id = wildpokemon['spawnPointId']
 
                     sp = SpawnPoint.get_by_id(spawn_id, wildpokemon['latitude'], wildpokemon['longitude'])
@@ -1115,11 +1099,6 @@ class Pogom(Flask):
                         new_spawn_points.append(sp)
 
                     sp['last_scanned'] = datetime.utcnow()
-
-                    if ((wildpokemon['encounterId'], spawn_id) in encountered_pokemon):
-                        # If Pokemon has been encountered before don't process it.
-                        skipped += 1
-                        continue
 
                     disappear_time = now_date + timedelta(seconds=600)
 
