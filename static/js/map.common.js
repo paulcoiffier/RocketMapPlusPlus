@@ -1241,10 +1241,8 @@ function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true, i
 
     marker.setIcon({
         url: markerImage,
-        scaledSize: new google.maps.Size(48, 48)
+        scaledSize: new google.maps.Size(markerDetails.iconSize, markerDetails.iconSize)
     })
-
-
 
     return marker
 }
@@ -1280,10 +1278,8 @@ function updatePokemonMarker(item, map, scaleByRarity = true, isNotifyPkmn = fal
 
     marker.setIcon({
         url: markerImage,
-        scaledSize: new google.maps.Size(48, 48)
+        scaledSize: new google.maps.Size(markerDetails.iconSize, markerDetails.iconSize)
     })
-
-
 }
 
 function updatePokemonLabel(item) {
