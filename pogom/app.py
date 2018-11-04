@@ -1016,7 +1016,7 @@ class Pogom(Flask):
                                             wh_raid = raids[fort['id']].copy()
                                             wh_raid.update({
                                                 'gym_id': b64_gym_id,
-                                                'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam'].number],
+                                                'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
                                                 'spawn': float(raidinfo['raidSpawnMs']) / 1000,
                                                 'start': float(raidinfo['raidBattleMs']) / 1000,
                                                 'end': float(raidinfo['raidEndMs']) / 1000,
@@ -1624,8 +1624,6 @@ class Pogom(Flask):
                                 f.get('isExRaidEligible', False)
                         })
                         self.wh_update_queue.put(('raid', wh_raid))
-
-            del forts
 
         if nearby_pokemon_dict:
             nearby_encounter_ids = [p['encounter_id'] for p in nearby_pokemon_dict]
