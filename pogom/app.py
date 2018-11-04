@@ -978,7 +978,7 @@ class Pogom(Flask):
                                                 raid_active_until,
                                         })
 
-                                    self.wh_update_queue.put(('gym', wh_gym))
+                                        self.wh_update_queue.put(('gym', wh_gym))
 
 
                                     if 'raidInfo' in fort:
