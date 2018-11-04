@@ -961,7 +961,7 @@ class Pogom(Flask):
                                         # Explicitly set 'webhook_data', in case we want to change
                                         # the information pushed to webhooks.  Similar to above
                                         # and previous commits.
-                                        wh_gym = gyms[fort['id']]
+                                        wh_gym = gyms[fort['id']].copy()
 
                                         wh_gym.update({
                                             'gym_id':
@@ -979,7 +979,6 @@ class Pogom(Flask):
                                         })
 
                                         self.wh_update_queue.put(('gym', wh_gym))
-
 
                                     if 'raidInfo' in fort:
                                         raidinfo = fort["raidInfo"]
