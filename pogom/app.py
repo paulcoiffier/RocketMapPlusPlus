@@ -903,51 +903,6 @@ class Pogom(Flask):
                                     b64_gym_id = str(fort['id'])
                                     park = Gym.get_gyms_park(fort['id'])
 
-                                    if 'gym' in self.args.wh_types:
-                                        raid_active_until = 0
-                                        if 'raidInfo' in fort:
-                                            raid_battle_ms = fort['raidInfo']['raidBattleMs']
-                                            raid_end_ms = fort['raidInfo']['raidEndMs']
-
-                                            if raid_battle_ms / 1000 > time.time():
-                                                raid_active_until = raid_end_ms / 1000
-
-                                        # Explicitly set 'webhook_data', in case we want to change
-                                        # the information pushed to webhooks.  Similar to above
-                                        # and previous commits.
-                                        self.wh_update_queue.put(('gym', {
-                                            'gym_id':
-                                                b64_gym_id,
-                                            'team_id':
-                                                _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
-                                            'park':
-                                                park,
-                                            'guard_pokemon_id':
-                                                _POKEMONID.values_by_name[fort['guardPokemonId']].number,
-                                            'slots_available':
-                                                fort["gymDisplay"].get('slotsAvailable', 0),
-                                            'total_cp':
-                                                fort["gymDisplay"].get('totalGymCp', 0),
-                                            'enabled':
-                                                fort['enabled'],
-                                            'latitude':
-                                                fort['latitude'],
-                                            'longitude':
-                                                fort['longitude'],
-                                            'lowest_pokemon_motivation':
-                                                float(fort["gymDisplay"].get('lowestPokemonMotivation', 0)),
-                                            'occupied_since':
-                                                float(fort["gymDisplay"].get('occupiedMillis', 0)),
-                                            'last_modified':
-                                                float(fort['lastModifiedTimestampMs']),
-                                            'raid_active_until':
-                                                raid_active_until,
-                                            'is_in_battle':
-                                                fort.get('isInBattle', False),
-                                            'is_ex_raid_eligible':
-                                                fort.get('isExRaidEligible', False)
-                                        }))
-
                                     gyms[fort['id']] = {
                                         'gym_id':
                                             fort['id'],
@@ -993,6 +948,38 @@ class Pogom(Flask):
                                         'description': gym_description,
                                         'url': gym_url
                                     }
+
+                                    if 'gym' in self.args.wh_types:
+                                        raid_active_until = 0
+                                        if 'raidInfo' in fort:
+                                            raid_battle_ms = float(fort['raidInfo']['raidBattleMs'])
+                                            raid_end_ms = float(fort['raidInfo']['raidEndMs'])
+
+                                            if raid_battle_ms / 1000 > time.time():
+                                                raid_active_until = raid_end_ms / 1000
+
+                                        # Explicitly set 'webhook_data', in case we want to change
+                                        # the information pushed to webhooks.  Similar to above
+                                        # and previous commits.
+                                        wh_gym = gyms[fort['id']]
+
+                                        wh_gym.update({
+                                            'gym_id':
+                                                b64_gym_id,
+                                            'gym_name':
+                                                gym_name,
+                                            'lowest_pokemon_motivation':
+                                                float(fort["gymDisplay"].get('lowestPokemonMotivation', 0)),
+                                            'occupied_since':
+                                                float(fort["gymDisplay"].get('occupiedMillis', 0)),
+                                            'last_modified':
+                                                float(fort['lastModifiedTimestampMs']),
+                                            'raid_active_until':
+                                                raid_active_until,
+                                        })
+
+                                    self.wh_update_queue.put(('gym', wh_gym))
+
 
                                     if 'raidInfo' in fort:
                                         raidinfo = fort["raidInfo"]
