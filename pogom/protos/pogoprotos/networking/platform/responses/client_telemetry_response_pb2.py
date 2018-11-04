@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.platform.responses',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nHpogoprotos/networking/platform/responses/client_telemetry_response.proto\x12(pogoprotos.networking.platform.responses\"\x8a\x02\n\x17\x43lientTelemetryResponse\x12X\n\x06status\x18\x01 \x01(\x0e\x32H.pogoprotos.networking.platform.responses.ClientTelemetryResponse.Status\x12\x14\n\x0crows_written\x18\x02 \x01(\x05\"\x7f\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x19\n\x15\x45RROR_INVALID_REQUEST\x10\x03\x12\x17\n\x13\x45RROR_INVALID_PROTO\x10\x04\x12\x1c\n\x18\x45RROR_UNSET_TELEMETRY_ID\x10\x05\x62\x06proto3')
+  serialized_pb=_b('\nHpogoprotos/networking/platform/responses/client_telemetry_response.proto\x12(pogoprotos.networking.platform.responses\"\xe2\x01\n\x17\x43lientTelemetryResponse\x12X\n\x06status\x18\x01 \x01(\x0e\x32H.pogoprotos.networking.platform.responses.ClientTelemetryResponse.Status\x12\x14\n\x0crows_written\x18\x02 \x01(\x05\"W\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x13\n\x0fPARTIAL_FAILURE\x10\x03\x12\x13\n\x0fINVALID_REQUEST\x10\x04\x62\x06proto3')
 )
 
 
@@ -43,22 +43,18 @@ _CLIENTTELEMETRYRESPONSE_STATUS = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR_INVALID_REQUEST', index=3, number=3,
+      name='PARTIAL_FAILURE', index=3, number=3,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR_INVALID_PROTO', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ERROR_UNSET_TELEMETRY_ID', index=5, number=5,
+      name='INVALID_REQUEST', index=4, number=4,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=258,
-  serialized_end=385,
+  serialized_end=345,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTTELEMETRYRESPONSE_STATUS)
 
@@ -98,7 +94,7 @@ _CLIENTTELEMETRYRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=119,
-  serialized_end=385,
+  serialized_end=345,
 )
 
 _CLIENTTELEMETRYRESPONSE.fields_by_name['status'].enum_type = _CLIENTTELEMETRYRESPONSE_STATUS

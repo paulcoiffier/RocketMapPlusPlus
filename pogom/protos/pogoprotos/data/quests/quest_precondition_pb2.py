@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.quests',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n/pogoprotos/data/quests/quest_precondition.proto\x12\x16pogoprotos.data.quests\x1a!pogoprotos/enums/badge_type.proto\"\xf2\x06\n\x11QuestPrecondition\x12M\n\x04type\x18\x01 \x01(\x0e\x32?.pogoprotos.data.quests.QuestPrecondition.QuestPreconditionType\x12\x19\n\x11quest_template_id\x18\x02 \x01(\t\x12>\n\x05level\x18\x03 \x01(\x0b\x32/.pogoprotos.data.quests.QuestPrecondition.Level\x12>\n\x05medal\x18\x04 \x01(\x0b\x32/.pogoprotos.data.quests.QuestPrecondition.Medal\x12@\n\x06quests\x18\x05 \x01(\x0b\x32\x30.pogoprotos.data.quests.QuestPrecondition.Quests\x1a$\n\x06Quests\x12\x1a\n\x12quest_template_ids\x18\x01 \x03(\t\x1a\\\n\x05Level\x12\x44\n\x08operator\x18\x01 \x01(\x0e\x32\x32.pogoprotos.data.quests.QuestPrecondition.Operator\x12\r\n\x05level\x18\x02 \x01(\x05\x1a\x8c\x01\n\x05Medal\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x44\n\x08operator\x18\x02 \x01(\x0e\x32\x32.pogoprotos.data.quests.QuestPrecondition.Operator\x12\x12\n\nbadge_rank\x18\x03 \x01(\x05\"B\n\x08Operator\x12\t\n\x05UNSET\x10\x00\x12\n\n\x06\x45QUALS\x10\x01\x12\x10\n\x0cGREATER_THAN\x10\x02\x12\r\n\tLESS_THAN\x10\x03\"\xd9\x01\n\x15QuestPreconditionType\x12\x1c\n\x18QUEST_PRECONDITION_UNSET\x10\x00\x12\x1c\n\x18QUEST_PRECONDITION_QUEST\x10\x01\x12\x1c\n\x18QUEST_PRECONDITION_LEVEL\x10\x02\x12\x1c\n\x18QUEST_PRECONDITION_MEDAL\x10\x03\x12\x1f\n\x1bQUEST_PRECONDITION_IS_MINOR\x10\x04\x12\'\n#QUEST_PRECONDITION_EXCLUSIVE_QUESTS\x10\x05\x62\x06proto3')
+  serialized_pb=_b('\n/pogoprotos/data/quests/quest_precondition.proto\x12\x16pogoprotos.data.quests\x1a!pogoprotos/enums/badge_type.proto\"\x87\x07\n\x11QuestPrecondition\x12M\n\x04type\x18\x01 \x01(\x0e\x32?.pogoprotos.data.quests.QuestPrecondition.QuestPreconditionType\x12\x1b\n\x11quest_template_id\x18\x02 \x01(\tH\x00\x12@\n\x05level\x18\x03 \x01(\x0b\x32/.pogoprotos.data.quests.QuestPrecondition.LevelH\x00\x12@\n\x05medal\x18\x04 \x01(\x0b\x32/.pogoprotos.data.quests.QuestPrecondition.MedalH\x00\x12\x42\n\x06quests\x18\x05 \x01(\x0b\x32\x30.pogoprotos.data.quests.QuestPrecondition.QuestsH\x00\x1a$\n\x06Quests\x12\x1a\n\x12quest_template_ids\x18\x01 \x03(\t\x1a\\\n\x05Level\x12\x44\n\x08operator\x18\x01 \x01(\x0e\x32\x32.pogoprotos.data.quests.QuestPrecondition.Operator\x12\r\n\x05level\x18\x02 \x01(\x05\x1a\x8c\x01\n\x05Medal\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x44\n\x08operator\x18\x02 \x01(\x0e\x32\x32.pogoprotos.data.quests.QuestPrecondition.Operator\x12\x12\n\nbadge_rank\x18\x03 \x01(\x05\"B\n\x08Operator\x12\t\n\x05UNSET\x10\x00\x12\n\n\x06\x45QUALS\x10\x01\x12\x10\n\x0cGREATER_THAN\x10\x02\x12\r\n\tLESS_THAN\x10\x03\"\xd9\x01\n\x15QuestPreconditionType\x12\x1c\n\x18QUEST_PRECONDITION_UNSET\x10\x00\x12\x1c\n\x18QUEST_PRECONDITION_QUEST\x10\x01\x12\x1c\n\x18QUEST_PRECONDITION_LEVEL\x10\x02\x12\x1c\n\x18QUEST_PRECONDITION_MEDAL\x10\x03\x12\x1f\n\x1bQUEST_PRECONDITION_IS_MINOR\x10\x04\x12\'\n#QUEST_PRECONDITION_EXCLUSIVE_QUESTS\x10\x05\x42\x0b\n\tConditionb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_enums_dot_badge__type__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _QUESTPRECONDITION_OPERATOR = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=707,
-  serialized_end=773,
+  serialized_start=715,
+  serialized_end=781,
 )
 _sym_db.RegisterEnumDescriptor(_QUESTPRECONDITION_OPERATOR)
 
@@ -89,8 +89,8 @@ _QUESTPRECONDITION_QUESTPRECONDITIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=776,
-  serialized_end=993,
+  serialized_start=784,
+  serialized_end=1001,
 )
 _sym_db.RegisterEnumDescriptor(_QUESTPRECONDITION_QUESTPRECONDITIONTYPE)
 
@@ -121,8 +121,8 @@ _QUESTPRECONDITION_QUESTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=432,
-  serialized_end=468,
+  serialized_start=440,
+  serialized_end=476,
 )
 
 _QUESTPRECONDITION_LEVEL = _descriptor.Descriptor(
@@ -158,8 +158,8 @@ _QUESTPRECONDITION_LEVEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=470,
-  serialized_end=562,
+  serialized_start=478,
+  serialized_end=570,
 )
 
 _QUESTPRECONDITION_MEDAL = _descriptor.Descriptor(
@@ -202,8 +202,8 @@ _QUESTPRECONDITION_MEDAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=565,
-  serialized_end=705,
+  serialized_start=573,
+  serialized_end=713,
 )
 
 _QUESTPRECONDITION = _descriptor.Descriptor(
@@ -261,9 +261,12 @@ _QUESTPRECONDITION = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Condition', full_name='pogoprotos.data.quests.QuestPrecondition.Condition',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=111,
-  serialized_end=993,
+  serialized_end=1014,
 )
 
 _QUESTPRECONDITION_QUESTS.containing_type = _QUESTPRECONDITION
@@ -278,6 +281,18 @@ _QUESTPRECONDITION.fields_by_name['medal'].message_type = _QUESTPRECONDITION_MED
 _QUESTPRECONDITION.fields_by_name['quests'].message_type = _QUESTPRECONDITION_QUESTS
 _QUESTPRECONDITION_OPERATOR.containing_type = _QUESTPRECONDITION
 _QUESTPRECONDITION_QUESTPRECONDITIONTYPE.containing_type = _QUESTPRECONDITION
+_QUESTPRECONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTPRECONDITION.fields_by_name['quest_template_id'])
+_QUESTPRECONDITION.fields_by_name['quest_template_id'].containing_oneof = _QUESTPRECONDITION.oneofs_by_name['Condition']
+_QUESTPRECONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTPRECONDITION.fields_by_name['level'])
+_QUESTPRECONDITION.fields_by_name['level'].containing_oneof = _QUESTPRECONDITION.oneofs_by_name['Condition']
+_QUESTPRECONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTPRECONDITION.fields_by_name['medal'])
+_QUESTPRECONDITION.fields_by_name['medal'].containing_oneof = _QUESTPRECONDITION.oneofs_by_name['Condition']
+_QUESTPRECONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTPRECONDITION.fields_by_name['quests'])
+_QUESTPRECONDITION.fields_by_name['quests'].containing_oneof = _QUESTPRECONDITION.oneofs_by_name['Condition']
 DESCRIPTOR.message_types_by_name['QuestPrecondition'] = _QUESTPRECONDITION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

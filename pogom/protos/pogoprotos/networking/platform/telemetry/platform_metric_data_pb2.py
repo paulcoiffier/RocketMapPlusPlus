@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.platform.telemetry',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nCpogoprotos/networking/platform/telemetry/platform_metric_data.proto\x12(pogoprotos.networking.platform.telemetry\x1a;pogoprotos/networking/platform/telemetry/distribution.proto\x1a?pogoprotos/networking/platform/telemetry/telemetry_common.proto\"\x8f\x03\n\x12PlatformMetricData\x12S\n\x10\x63ommon_telemetry\x18\x01 \x01(\x0b\x32\x39.pogoprotos.networking.platform.telemetry.TelemetryCommon\x12\x12\n\nlong_value\x18\x02 \x01(\x03\x12\x14\n\x0c\x64ouble_value\x18\x03 \x01(\x01\x12\x15\n\rboolean_value\x18\x04 \x01(\x08\x12L\n\x0c\x64istribution\x18\x05 \x01(\x0b\x32\x36.pogoprotos.networking.platform.telemetry.Distribution\x12V\n\x0bmetric_kind\x18\x06 \x01(\x0e\x32\x41.pogoprotos.networking.platform.telemetry.PlatformMetricData.Kind\"=\n\x04Kind\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\t\n\x05GAUGE\x10\x01\x12\t\n\x05\x44\x45LTA\x10\x02\x12\x0e\n\nCUMULATIVE\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\nCpogoprotos/networking/platform/telemetry/platform_metric_data.proto\x12(pogoprotos.networking.platform.telemetry\x1a;pogoprotos/networking/platform/telemetry/distribution.proto\x1a?pogoprotos/networking/platform/telemetry/telemetry_common.proto\"\xa9\x03\n\x12PlatformMetricData\x12S\n\x10\x63ommon_telemetry\x18\x01 \x01(\x0b\x32\x39.pogoprotos.networking.platform.telemetry.TelemetryCommon\x12\x14\n\nlong_value\x18\x02 \x01(\x03H\x00\x12\x16\n\x0c\x64ouble_value\x18\x03 \x01(\x01H\x00\x12\x17\n\rboolean_value\x18\x04 \x01(\x08H\x00\x12N\n\x0c\x64istribution\x18\x05 \x01(\x0b\x32\x36.pogoprotos.networking.platform.telemetry.DistributionH\x00\x12V\n\x0bmetric_kind\x18\x06 \x01(\x0e\x32\x41.pogoprotos.networking.platform.telemetry.PlatformMetricData.Kind\"=\n\x04Kind\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\t\n\x05GAUGE\x10\x01\x12\t\n\x05\x44\x45LTA\x10\x02\x12\x0e\n\nCUMULATIVE\x10\x03\x42\x10\n\x0e\x44\x61tapointValueb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_distribution__pb2.DESCRIPTOR,pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_telemetry__common__pb2.DESCRIPTOR,])
 
@@ -52,8 +52,8 @@ _PLATFORMMETRICDATA_KIND = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=578,
-  serialized_end=639,
+  serialized_start=586,
+  serialized_end=647,
 )
 _sym_db.RegisterEnumDescriptor(_PLATFORMMETRICDATA_KIND)
 
@@ -119,15 +119,30 @@ _PLATFORMMETRICDATA = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='DatapointValue', full_name='pogoprotos.networking.platform.telemetry.PlatformMetricData.DatapointValue',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=240,
-  serialized_end=639,
+  serialized_end=665,
 )
 
 _PLATFORMMETRICDATA.fields_by_name['common_telemetry'].message_type = pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_telemetry__common__pb2._TELEMETRYCOMMON
 _PLATFORMMETRICDATA.fields_by_name['distribution'].message_type = pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_distribution__pb2._DISTRIBUTION
 _PLATFORMMETRICDATA.fields_by_name['metric_kind'].enum_type = _PLATFORMMETRICDATA_KIND
 _PLATFORMMETRICDATA_KIND.containing_type = _PLATFORMMETRICDATA
+_PLATFORMMETRICDATA.oneofs_by_name['DatapointValue'].fields.append(
+  _PLATFORMMETRICDATA.fields_by_name['long_value'])
+_PLATFORMMETRICDATA.fields_by_name['long_value'].containing_oneof = _PLATFORMMETRICDATA.oneofs_by_name['DatapointValue']
+_PLATFORMMETRICDATA.oneofs_by_name['DatapointValue'].fields.append(
+  _PLATFORMMETRICDATA.fields_by_name['double_value'])
+_PLATFORMMETRICDATA.fields_by_name['double_value'].containing_oneof = _PLATFORMMETRICDATA.oneofs_by_name['DatapointValue']
+_PLATFORMMETRICDATA.oneofs_by_name['DatapointValue'].fields.append(
+  _PLATFORMMETRICDATA.fields_by_name['boolean_value'])
+_PLATFORMMETRICDATA.fields_by_name['boolean_value'].containing_oneof = _PLATFORMMETRICDATA.oneofs_by_name['DatapointValue']
+_PLATFORMMETRICDATA.oneofs_by_name['DatapointValue'].fields.append(
+  _PLATFORMMETRICDATA.fields_by_name['distribution'])
+_PLATFORMMETRICDATA.fields_by_name['distribution'].containing_oneof = _PLATFORMMETRICDATA.oneofs_by_name['DatapointValue']
 DESCRIPTOR.message_types_by_name['PlatformMetricData'] = _PLATFORMMETRICDATA
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

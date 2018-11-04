@@ -19,40 +19,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.platform.telemetry',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n;pogoprotos/networking/platform/telemetry/distribution.proto\x12(pogoprotos.networking.platform.telemetry\"\xd5\x08\n\x0c\x44istribution\x12\r\n\x05\x63ount\x18\x01 \x01(\x03\x12\x0c\n\x04mean\x18\x02 \x01(\x02\x12 \n\x18sum_of_squared_deviation\x18\x03 \x01(\x01\x12K\n\x05range\x18\x04 \x01(\x0b\x32<.pogoprotos.networking.platform.telemetry.Distribution.Range\x12\\\n\x0e\x62ucket_options\x18\x05 \x01(\x0b\x32\x44.pogoprotos.networking.platform.telemetry.Distribution.BucketOptions\x12\x15\n\rbucket_counts\x18\x06 \x03(\x03\x1a\xfe\x03\n\rBucketOptions\x12\\\n\x0elinear_buckets\x18\x01 \x01(\x0b\x32\x44.pogoprotos.networking.platform.telemetry.Distribution.LinearBuckets\x12\x66\n\x13\x65xponential_buckets\x18\x02 \x01(\x0b\x32I.pogoprotos.networking.platform.telemetry.Distribution.ExponentialBuckets\x12`\n\x10\x65xplicit_buckets\x18\x03 \x01(\x0b\x32\x46.pogoprotos.networking.platform.telemetry.Distribution.ExplicitBuckets\x1a!\n\x0f\x45xplicitBuckets\x12\x0e\n\x06\x62ounds\x18\x01 \x03(\x03\x1aV\n\x12\x45xponentialBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\x15\n\rgrowth_factor\x18\x02 \x01(\x02\x12\r\n\x05scale\x18\x03 \x01(\x02\x1aJ\n\rLinearBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\r\n\x05width\x18\x02 \x01(\x03\x12\x0e\n\x06offset\x18\x03 \x01(\x03\x1a!\n\x0f\x45xplicitBuckets\x12\x0e\n\x06\x62ounds\x18\x01 \x03(\x03\x1aV\n\x12\x45xponentialBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\x15\n\rgrowth_factor\x18\x02 \x01(\x02\x12\r\n\x05scale\x18\x03 \x01(\x02\x1aJ\n\rLinearBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\r\n\x05width\x18\x02 \x01(\x03\x12\x0e\n\x06offset\x18\x03 \x01(\x03\x1a!\n\x05Range\x12\x0b\n\x03min\x18\x01 \x01(\x03\x12\x0b\n\x03max\x18\x02 \x01(\x03\"Y\n\nBucketType\x12\x08\n\x04none\x10\x00\x12\x12\n\x0elinear_buckets\x10\x01\x12\x17\n\x13\x65xponential_buckets\x10\x02\x12\x14\n\x10\x65xplicit_buckets\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\n;pogoprotos/networking/platform/telemetry/distribution.proto\x12(pogoprotos.networking.platform.telemetry\"\x8e\x08\n\x0c\x44istribution\x12\r\n\x05\x63ount\x18\x01 \x01(\x03\x12\x0c\n\x04mean\x18\x02 \x01(\x02\x12 \n\x18sum_of_squared_deviation\x18\x03 \x01(\x01\x12K\n\x05range\x18\x04 \x01(\x0b\x32<.pogoprotos.networking.platform.telemetry.Distribution.Range\x12\\\n\x0e\x62ucket_options\x18\x05 \x01(\x0b\x32\x44.pogoprotos.networking.platform.telemetry.Distribution.BucketOptions\x12\x15\n\rbucket_counts\x18\x06 \x03(\x03\x1a\x92\x04\n\rBucketOptions\x12^\n\x0elinear_buckets\x18\x01 \x01(\x0b\x32\x44.pogoprotos.networking.platform.telemetry.Distribution.LinearBucketsH\x00\x12h\n\x13\x65xponential_buckets\x18\x02 \x01(\x0b\x32I.pogoprotos.networking.platform.telemetry.Distribution.ExponentialBucketsH\x00\x12\x62\n\x10\x65xplicit_buckets\x18\x03 \x01(\x0b\x32\x46.pogoprotos.networking.platform.telemetry.Distribution.ExplicitBucketsH\x00\x1a!\n\x0f\x45xplicitBuckets\x12\x0e\n\x06\x62ounds\x18\x01 \x03(\x03\x1aV\n\x12\x45xponentialBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\x15\n\rgrowth_factor\x18\x02 \x01(\x02\x12\r\n\x05scale\x18\x03 \x01(\x02\x1aJ\n\rLinearBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\r\n\x05width\x18\x02 \x01(\x03\x12\x0e\n\x06offset\x18\x03 \x01(\x03\x42\x0c\n\nBucketType\x1a!\n\x0f\x45xplicitBuckets\x12\x0e\n\x06\x62ounds\x18\x01 \x03(\x03\x1aV\n\x12\x45xponentialBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\x15\n\rgrowth_factor\x18\x02 \x01(\x02\x12\r\n\x05scale\x18\x03 \x01(\x02\x1aJ\n\rLinearBuckets\x12\x1a\n\x12num_finite_buckets\x18\x01 \x01(\x03\x12\r\n\x05width\x18\x02 \x01(\x03\x12\x0e\n\x06offset\x18\x03 \x01(\x03\x1a!\n\x05Range\x12\x0b\n\x03min\x18\x01 \x01(\x03\x12\x0b\n\x03max\x18\x02 \x01(\x03\x62\x06proto3')
 )
 
 
-
-_DISTRIBUTION_BUCKETTYPE = _descriptor.EnumDescriptor(
-  name='BucketType',
-  full_name='pogoprotos.networking.platform.telemetry.Distribution.BucketType',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='none', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='linear_buckets', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='exponential_buckets', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='explicit_buckets', index=3, number=3,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1126,
-  serialized_end=1215,
-)
-_sym_db.RegisterEnumDescriptor(_DISTRIBUTION_BUCKETTYPE)
 
 
 _DISTRIBUTION_BUCKETOPTIONS_EXPLICITBUCKETS = _descriptor.Descriptor(
@@ -81,8 +51,8 @@ _DISTRIBUTION_BUCKETOPTIONS_EXPLICITBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=693,
-  serialized_end=726,
+  serialized_start=699,
+  serialized_end=732,
 )
 
 _DISTRIBUTION_BUCKETOPTIONS_EXPONENTIALBUCKETS = _descriptor.Descriptor(
@@ -125,8 +95,8 @@ _DISTRIBUTION_BUCKETOPTIONS_EXPONENTIALBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=728,
-  serialized_end=814,
+  serialized_start=734,
+  serialized_end=820,
 )
 
 _DISTRIBUTION_BUCKETOPTIONS_LINEARBUCKETS = _descriptor.Descriptor(
@@ -169,8 +139,8 @@ _DISTRIBUTION_BUCKETOPTIONS_LINEARBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=816,
-  serialized_end=890,
+  serialized_start=822,
+  serialized_end=896,
 )
 
 _DISTRIBUTION_BUCKETOPTIONS = _descriptor.Descriptor(
@@ -212,9 +182,12 @@ _DISTRIBUTION_BUCKETOPTIONS = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='BucketType', full_name='pogoprotos.networking.platform.telemetry.Distribution.BucketOptions.BucketType',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=380,
-  serialized_end=890,
+  serialized_end=910,
 )
 
 _DISTRIBUTION_EXPLICITBUCKETS = _descriptor.Descriptor(
@@ -243,8 +216,8 @@ _DISTRIBUTION_EXPLICITBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=693,
-  serialized_end=726,
+  serialized_start=699,
+  serialized_end=732,
 )
 
 _DISTRIBUTION_EXPONENTIALBUCKETS = _descriptor.Descriptor(
@@ -287,8 +260,8 @@ _DISTRIBUTION_EXPONENTIALBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=728,
-  serialized_end=814,
+  serialized_start=734,
+  serialized_end=820,
 )
 
 _DISTRIBUTION_LINEARBUCKETS = _descriptor.Descriptor(
@@ -331,8 +304,8 @@ _DISTRIBUTION_LINEARBUCKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=816,
-  serialized_end=890,
+  serialized_start=822,
+  serialized_end=896,
 )
 
 _DISTRIBUTION_RANGE = _descriptor.Descriptor(
@@ -368,8 +341,8 @@ _DISTRIBUTION_RANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1091,
-  serialized_end=1124,
+  serialized_start=1111,
+  serialized_end=1144,
 )
 
 _DISTRIBUTION = _descriptor.Descriptor(
@@ -426,7 +399,6 @@ _DISTRIBUTION = _descriptor.Descriptor(
   ],
   nested_types=[_DISTRIBUTION_BUCKETOPTIONS, _DISTRIBUTION_EXPLICITBUCKETS, _DISTRIBUTION_EXPONENTIALBUCKETS, _DISTRIBUTION_LINEARBUCKETS, _DISTRIBUTION_RANGE, ],
   enum_types=[
-    _DISTRIBUTION_BUCKETTYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -435,7 +407,7 @@ _DISTRIBUTION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=106,
-  serialized_end=1215,
+  serialized_end=1144,
 )
 
 _DISTRIBUTION_BUCKETOPTIONS_EXPLICITBUCKETS.containing_type = _DISTRIBUTION_BUCKETOPTIONS
@@ -445,13 +417,21 @@ _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['linear_buckets'].message_type = _DIS
 _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['exponential_buckets'].message_type = _DISTRIBUTION_EXPONENTIALBUCKETS
 _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['explicit_buckets'].message_type = _DISTRIBUTION_EXPLICITBUCKETS
 _DISTRIBUTION_BUCKETOPTIONS.containing_type = _DISTRIBUTION
+_DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType'].fields.append(
+  _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['linear_buckets'])
+_DISTRIBUTION_BUCKETOPTIONS.fields_by_name['linear_buckets'].containing_oneof = _DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType']
+_DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType'].fields.append(
+  _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['exponential_buckets'])
+_DISTRIBUTION_BUCKETOPTIONS.fields_by_name['exponential_buckets'].containing_oneof = _DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType']
+_DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType'].fields.append(
+  _DISTRIBUTION_BUCKETOPTIONS.fields_by_name['explicit_buckets'])
+_DISTRIBUTION_BUCKETOPTIONS.fields_by_name['explicit_buckets'].containing_oneof = _DISTRIBUTION_BUCKETOPTIONS.oneofs_by_name['BucketType']
 _DISTRIBUTION_EXPLICITBUCKETS.containing_type = _DISTRIBUTION
 _DISTRIBUTION_EXPONENTIALBUCKETS.containing_type = _DISTRIBUTION
 _DISTRIBUTION_LINEARBUCKETS.containing_type = _DISTRIBUTION
 _DISTRIBUTION_RANGE.containing_type = _DISTRIBUTION
 _DISTRIBUTION.fields_by_name['range'].message_type = _DISTRIBUTION_RANGE
 _DISTRIBUTION.fields_by_name['bucket_options'].message_type = _DISTRIBUTION_BUCKETOPTIONS
-_DISTRIBUTION_BUCKETTYPE.containing_type = _DISTRIBUTION
 DESCRIPTOR.message_types_by_name['Distribution'] = _DISTRIBUTION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

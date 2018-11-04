@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.enums',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n,pogoprotos/enums/notification_category.proto\x12\x10pogoprotos.enums*\x8d\x03\n\x14NotificationCategory\x12\x1e\n\x1aUNSET_NotificationCategory\x10\x00\x12\x0f\n\x0bGYM_REMOVAL\x10\x01\x12\x12\n\x0ePOKEMON_HUNGRY\x10\x02\x12\x0f\n\x0bPOKEMON_WON\x10\x03\x12\x19\n\x15\x45XCLUSIVE_RAID_INVITE\x10\x04\x12\x1f\n\x1b\x45XCLUSIVE_RAID_CANCELLATION\x10\x05\x12\x14\n\x10GIFTBOX_INCOMING\x10\x06\x12\x15\n\x11GIFTBOX_DELIVERED\x10\x07\x12\x1f\n\x1b\x46RIENDSHIP_MILESTONE_REWARD\x10\x08\x12#\n\x1fGYM_BATTLE_FRIENDSHIP_INCREMENT\x10\t\x12 \n\x1cSHARED_EXCLUSIVE_RAID_INVITE\x10\n\x12\x14\n\x10\x42GMODE_EGG_HATCH\x10\x0b\x12\x16\n\x12\x42GMODE_BUDDY_CANDY\x10\x0c\x12 \n\x1c\x42GMODE_WEEKLY_FITNESS_REPORT\x10\rb\x06proto3')
+  serialized_pb=_b('\n,pogoprotos/enums/notification_category.proto\x12\x10pogoprotos.enums*\xb5\x03\n\x14NotificationCategory\x12\x1f\n\x1bUNSET_NOTIFICATION_CATEGORY\x10\x00\x12\x0f\n\x0bGYM_REMOVAL\x10\x01\x12\x12\n\x0ePOKEMON_HUNGRY\x10\x02\x12\x19\n\x15\x45XCLUSIVE_RAID_INVITE\x10\x03\x12\x1f\n\x1b\x45XCLUSIVE_RAID_CANCELLATION\x10\x04\x12 \n\x1cSHARED_EXCLUSIVE_RAID_INVITE\x10\x05\x12\x14\n\x10GIFTBOX_INCOMING\x10\x06\x12\x15\n\x11GIFTBOX_DELIVERED\x10\x07\x12\x1f\n\x1b\x46RIENDSHIP_MILESTONE_REWARD\x10\x08\x12#\n\x1fGYM_BATTLE_FRIENDSHIP_INCREMENT\x10\t\x12\x14\n\x10\x42GMODE_EGG_HATCH\x10\n\x12\x16\n\x12\x42GMODE_BUDDY_CANDY\x10\x0b\x12 \n\x1c\x42GMODE_WEEKLY_FITNESS_REPORT\x10\x0c\x12\x1a\n\x16\x46RIEND_INVITE_RECEIVED\x10\r\x12\x1a\n\x16\x46RIEND_INVITE_ACCEPTED\x10\x0e\x62\x06proto3')
 )
 
 _NOTIFICATIONCATEGORY = _descriptor.EnumDescriptor(
@@ -30,7 +30,7 @@ _NOTIFICATIONCATEGORY = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='UNSET_NotificationCategory', index=0, number=0,
+      name='UNSET_NOTIFICATION_CATEGORY', index=0, number=0,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -42,15 +42,15 @@ _NOTIFICATIONCATEGORY = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='POKEMON_WON', index=3, number=3,
+      name='EXCLUSIVE_RAID_INVITE', index=3, number=3,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='EXCLUSIVE_RAID_INVITE', index=4, number=4,
+      name='EXCLUSIVE_RAID_CANCELLATION', index=4, number=4,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='EXCLUSIVE_RAID_CANCELLATION', index=5, number=5,
+      name='SHARED_EXCLUSIVE_RAID_INVITE', index=5, number=5,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -70,44 +70,49 @@ _NOTIFICATIONCATEGORY = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SHARED_EXCLUSIVE_RAID_INVITE', index=10, number=10,
+      name='BGMODE_EGG_HATCH', index=10, number=10,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='BGMODE_EGG_HATCH', index=11, number=11,
+      name='BGMODE_BUDDY_CANDY', index=11, number=11,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='BGMODE_BUDDY_CANDY', index=12, number=12,
+      name='BGMODE_WEEKLY_FITNESS_REPORT', index=12, number=12,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='BGMODE_WEEKLY_FITNESS_REPORT', index=13, number=13,
+      name='FRIEND_INVITE_RECEIVED', index=13, number=13,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FRIEND_INVITE_ACCEPTED', index=14, number=14,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=67,
-  serialized_end=464,
+  serialized_end=504,
 )
 _sym_db.RegisterEnumDescriptor(_NOTIFICATIONCATEGORY)
 
 NotificationCategory = enum_type_wrapper.EnumTypeWrapper(_NOTIFICATIONCATEGORY)
-UNSET_NotificationCategory = 0
+UNSET_NOTIFICATION_CATEGORY = 0
 GYM_REMOVAL = 1
 POKEMON_HUNGRY = 2
-POKEMON_WON = 3
-EXCLUSIVE_RAID_INVITE = 4
-EXCLUSIVE_RAID_CANCELLATION = 5
+EXCLUSIVE_RAID_INVITE = 3
+EXCLUSIVE_RAID_CANCELLATION = 4
+SHARED_EXCLUSIVE_RAID_INVITE = 5
 GIFTBOX_INCOMING = 6
 GIFTBOX_DELIVERED = 7
 FRIENDSHIP_MILESTONE_REWARD = 8
 GYM_BATTLE_FRIENDSHIP_INCREMENT = 9
-SHARED_EXCLUSIVE_RAID_INVITE = 10
-BGMODE_EGG_HATCH = 11
-BGMODE_BUDDY_CANDY = 12
-BGMODE_WEEKLY_FITNESS_REPORT = 13
+BGMODE_EGG_HATCH = 10
+BGMODE_BUDDY_CANDY = 11
+BGMODE_WEEKLY_FITNESS_REPORT = 12
+FRIEND_INVITE_RECEIVED = 13
+FRIEND_INVITE_ACCEPTED = 14
 
 
 DESCRIPTOR.enum_types_by_name['NotificationCategory'] = _NOTIFICATIONCATEGORY

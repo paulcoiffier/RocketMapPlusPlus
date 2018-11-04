@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.inventory',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n(pogoprotos/inventory/inventory_key.proto\x12\x14pogoprotos.inventory\x1a!pogoprotos/enums/quest_type.proto\x1a(pogoprotos/enums/pokemon_family_id.proto\x1a\'pogoprotos/inventory/item/item_id.proto\"\xc3\x03\n\x0cInventoryKey\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\x12/\n\x04item\x18\x02 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemId\x12\x18\n\x10pokedex_entry_id\x18\x03 \x01(\x05\x12\x14\n\x0cplayer_stats\x18\x04 \x01(\x08\x12\x17\n\x0fplayer_currency\x18\x05 \x01(\x08\x12\x15\n\rplayer_camera\x18\x06 \x01(\x08\x12\x1a\n\x12inventory_upgrades\x18\x07 \x01(\x08\x12\x15\n\rapplied_items\x18\x08 \x01(\x08\x12\x16\n\x0e\x65gg_incubators\x18\t \x01(\x08\x12<\n\x11pokemon_family_id\x18\n \x01(\x0e\x32!.pogoprotos.enums.PokemonFamilyId\x12/\n\nquest_type\x18\x0b \x01(\x0e\x32\x1b.pogoprotos.enums.QuestType\x12\x1a\n\x12\x61vatar_template_id\x18\x0c \x01(\t\x12\x14\n\x0craid_tickets\x18\r \x01(\x08\x12\x0e\n\x06quests\x18\x0e \x01(\x08\x12\x12\n\ngift_boxes\x18\x0f \x01(\x08\x62\x06proto3')
+  serialized_pb=_b('\n(pogoprotos/inventory/inventory_key.proto\x12\x14pogoprotos.inventory\x1a!pogoprotos/enums/quest_type.proto\x1a(pogoprotos/enums/pokemon_family_id.proto\x1a\'pogoprotos/inventory/item/item_id.proto\"\xe9\x03\n\x0cInventoryKey\x12\x14\n\npokemon_id\x18\x01 \x01(\x06H\x00\x12\x31\n\x04item\x18\x02 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemIdH\x00\x12\x1a\n\x10pokedex_entry_id\x18\x03 \x01(\x05H\x00\x12\x16\n\x0cplayer_stats\x18\x04 \x01(\x08H\x00\x12\x19\n\x0fplayer_currency\x18\x05 \x01(\x08H\x00\x12\x17\n\rplayer_camera\x18\x06 \x01(\x08H\x00\x12\x1c\n\x12inventory_upgrades\x18\x07 \x01(\x08H\x00\x12\x17\n\rapplied_items\x18\x08 \x01(\x08H\x00\x12\x18\n\x0e\x65gg_incubators\x18\t \x01(\x08H\x00\x12>\n\x11pokemon_family_id\x18\n \x01(\x0e\x32!.pogoprotos.enums.PokemonFamilyIdH\x00\x12\x31\n\nquest_type\x18\x0b \x01(\x0e\x32\x1b.pogoprotos.enums.QuestTypeH\x00\x12\x1c\n\x12\x61vatar_template_id\x18\x0c \x01(\tH\x00\x12\x16\n\x0craid_tickets\x18\r \x01(\x08H\x00\x12\x10\n\x06quests\x18\x0e \x01(\x08H\x00\x12\x14\n\ngift_boxes\x18\x0f \x01(\x08H\x00\x42\x06\n\x04Typeb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_enums_dot_quest__type__pb2.DESCRIPTOR,pogoprotos_dot_enums_dot_pokemon__family__id__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_item_dot_item__id__pb2.DESCRIPTOR,])
 
@@ -152,14 +152,62 @@ _INVENTORYKEY = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Type', full_name='pogoprotos.inventory.InventoryKey.Type',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=185,
-  serialized_end=636,
+  serialized_end=674,
 )
 
 _INVENTORYKEY.fields_by_name['item'].enum_type = pogoprotos_dot_inventory_dot_item_dot_item__id__pb2._ITEMID
 _INVENTORYKEY.fields_by_name['pokemon_family_id'].enum_type = pogoprotos_dot_enums_dot_pokemon__family__id__pb2._POKEMONFAMILYID
 _INVENTORYKEY.fields_by_name['quest_type'].enum_type = pogoprotos_dot_enums_dot_quest__type__pb2._QUESTTYPE
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['pokemon_id'])
+_INVENTORYKEY.fields_by_name['pokemon_id'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['item'])
+_INVENTORYKEY.fields_by_name['item'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['pokedex_entry_id'])
+_INVENTORYKEY.fields_by_name['pokedex_entry_id'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['player_stats'])
+_INVENTORYKEY.fields_by_name['player_stats'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['player_currency'])
+_INVENTORYKEY.fields_by_name['player_currency'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['player_camera'])
+_INVENTORYKEY.fields_by_name['player_camera'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['inventory_upgrades'])
+_INVENTORYKEY.fields_by_name['inventory_upgrades'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['applied_items'])
+_INVENTORYKEY.fields_by_name['applied_items'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['egg_incubators'])
+_INVENTORYKEY.fields_by_name['egg_incubators'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['pokemon_family_id'])
+_INVENTORYKEY.fields_by_name['pokemon_family_id'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['quest_type'])
+_INVENTORYKEY.fields_by_name['quest_type'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['avatar_template_id'])
+_INVENTORYKEY.fields_by_name['avatar_template_id'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['raid_tickets'])
+_INVENTORYKEY.fields_by_name['raid_tickets'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['quests'])
+_INVENTORYKEY.fields_by_name['quests'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
+_INVENTORYKEY.oneofs_by_name['Type'].fields.append(
+  _INVENTORYKEY.fields_by_name['gift_boxes'])
+_INVENTORYKEY.fields_by_name['gift_boxes'].containing_oneof = _INVENTORYKEY.oneofs_by_name['Type']
 DESCRIPTOR.message_types_by_name['InventoryKey'] = _INVENTORYKEY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
