@@ -1023,9 +1023,9 @@ class Pogom(Flask):
                                         }
 
                                         if ('egg' in self.args.wh_types and
-                                                fort['raidPokemon'] == 0) or (
+                                                ('raidPokemon' not in raidinfo or 'pokemonId' not in raidinfo['raidPokemon'])) or (
                                                     'raid' in self.args.wh_types and
-                                                    fort['raidPokemon'] > 0):
+                                                    'raidPokemon' in raidinfo and 'pokemonId' in raidinfo['raidPokemon']):
                                             wh_raid = raids[fort['id']].copy()
                                             wh_raid.update({
                                                 'gym_id': b64_gym_id,
@@ -1088,14 +1088,13 @@ class Pogom(Flask):
                 if "wildPokemon" in encounter_response_json:
                     wildpokemon = encounter_response_json["wildPokemon"]
 
-                    encounter_ids = [wildpokemon['encounterId']]
                     # For all the wild Pokemon we found check if an active Pokemon is in
                     # the database.
                     with Pokemon.database().execution_context():
                         query = (Pokemon
                                  .select(Pokemon.encounter_id, Pokemon.spawnpoint_id)
                                  .where((Pokemon.disappear_time >= now_date) &
-                                        (Pokemon.encounter_id << encounter_ids) &
+                                        (Pokemon.encounter_id == wildpokemon['encounterId']) &
                                         (Pokemon.cp.is_null(False)))
                                  .dicts())
 
