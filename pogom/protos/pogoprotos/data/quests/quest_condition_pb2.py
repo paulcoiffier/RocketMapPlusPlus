@@ -25,7 +25,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.quests',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n,pogoprotos/data/quests/quest_condition.proto\x12\x16pogoprotos.data.quests\x1a$pogoprotos/enums/activity_type.proto\x1a!pogoprotos/enums/badge_type.proto\x1a!pogoprotos/enums/pokemon_id.proto\x1a#pogoprotos/enums/pokemon_type.proto\x1a!pogoprotos/enums/raid_level.proto\x1a\'pogoprotos/inventory/item/item_id.proto\"\xcb\x16\n\x0eQuestCondition\x12\x42\n\x04type\x18\x01 \x01(\x0e\x32\x34.pogoprotos.data.quests.QuestCondition.ConditionType\x12Q\n\x11with_pokemon_type\x18\x02 \x01(\x0b\x32\x36.pogoprotos.data.quests.QuestCondition.WithPokemonType\x12Y\n\x15with_pokemon_category\x18\x03 \x01(\x0b\x32:.pogoprotos.data.quests.QuestCondition.WithPokemonCategory\x12S\n\x12with_weather_boost\x18\x04 \x01(\x0b\x32\x37.pogoprotos.data.quests.QuestCondition.WithWeatherBoost\x12^\n\x18with_daily_capture_bonus\x18\x05 \x01(\x0b\x32<.pogoprotos.data.quests.QuestCondition.WithDailyCaptureBonus\x12X\n\x15with_daily_spin_bonus\x18\x06 \x01(\x0b\x32\x39.pogoprotos.data.quests.QuestCondition.WithDailySpinBonus\x12V\n\x14with_win_raid_status\x18\x07 \x01(\x0b\x32\x38.pogoprotos.data.quests.QuestCondition.WithWinRaidStatus\x12M\n\x0fwith_raid_level\x18\x08 \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithRaidLevel\x12M\n\x0fwith_throw_type\x18\t \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithThrowType\x12\x61\n\x1awith_win_gym_battle_status\x18\n \x01(\x0b\x32=.pogoprotos.data.quests.QuestCondition.WithWinGymBattleStatus\x12m\n with_super_effective_charge_move\x18\x0b \x01(\x0b\x32\x43.pogoprotos.data.quests.QuestCondition.WithSuperEffectiveChargeMove\x12\x42\n\twith_item\x18\x0c \x01(\x0b\x32/.pogoprotos.data.quests.QuestCondition.WithItem\x12W\n\x14with_unique_pokestop\x18\r \x01(\x0b\x32\x39.pogoprotos.data.quests.QuestCondition.WithUniquePokestop\x12S\n\x12with_quest_context\x18\x0e \x01(\x0b\x32\x37.pogoprotos.data.quests.QuestCondition.WithQuestContext\x12M\n\x0fwith_badge_type\x18\x0f \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithBadgeType\x12Q\n\x11with_player_level\x18\x10 \x01(\x0b\x32\x36.pogoprotos.data.quests.QuestCondition.WithPlayerLevel\x12Z\n\x16with_win_battle_status\x18\x11 \x01(\x0b\x32:.pogoprotos.data.quests.QuestCondition.WithWinBattleStatus\x1a\x46\n\x0fWithPokemonType\x12\x33\n\x0cpokemon_type\x18\x01 \x03(\x0e\x32\x1d.pogoprotos.enums.PokemonType\x1a\x12\n\x10WithWeatherBoost\x1a^\n\x13WithPokemonCategory\x12\x15\n\rcategory_name\x18\x01 \x01(\t\x12\x30\n\x0bpokemon_ids\x18\x02 \x03(\x0e\x32\x1b.pogoprotos.enums.PokemonId\x1a\x17\n\x15WithDailyCaptureBonus\x1a\x14\n\x12WithDailySpinBonus\x1a\x13\n\x11WithWinRaidStatus\x1a@\n\rWithRaidLevel\x12/\n\nraid_level\x18\x01 \x03(\x0e\x32\x1b.pogoprotos.enums.RaidLevel\x1aP\n\rWithThrowType\x12\x32\n\nthrow_type\x18\x01 \x01(\x0e\x32\x1e.pogoprotos.enums.ActivityType\x12\x0b\n\x03hit\x18\x02 \x01(\x08\x1a\x0f\n\rWithCurveBall\x1a\x18\n\x16WithWinGymBattleStatus\x1a\x1e\n\x1cWithSuperEffectiveChargeMove\x1a;\n\x08WithItem\x12/\n\x04item\x18\x01 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemId\x1a\x14\n\x12WithUniquePokestop\x1a\xa0\x01\n\x10WithQuestContext\x12P\n\x07\x63ontext\x18\x01 \x01(\x0e\x32?.pogoprotos.data.quests.QuestCondition.WithQuestContext.Context\":\n\x07\x43ontext\x12\t\n\x05UNSET\x10\x00\x12\x0f\n\x0bSTORY_QUEST\x10\x01\x12\x13\n\x0f\x43HALLENGE_QUEST\x10\x02\x1a\x64\n\rWithBadgeType\x12/\n\nbadge_type\x18\x01 \x03(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x05\x1a \n\x0fWithPlayerLevel\x12\r\n\x05level\x18\x01 \x01(\x05\x1a\x15\n\x13WithWinBattleStatus\"\x8b\x04\n\rConditionType\x12\t\n\x05UNSET\x10\x00\x12\x15\n\x11WITH_POKEMON_TYPE\x10\x01\x12\x19\n\x15WITH_POKEMON_CATEGORY\x10\x02\x12\x16\n\x12WITH_WEATHER_BOOST\x10\x03\x12\x1c\n\x18WITH_DAILY_CAPTURE_BONUS\x10\x04\x12\x19\n\x15WITH_DAILY_SPIN_BONUS\x10\x05\x12\x18\n\x14WITH_WIN_RAID_STATUS\x10\x06\x12\x13\n\x0fWITH_RAID_LEVEL\x10\x07\x12\x13\n\x0fWITH_THROW_TYPE\x10\x08\x12\x1e\n\x1aWITH_WIN_GYM_BATTLE_STATUS\x10\t\x12\x1f\n\x1bWITH_SUPER_EFFECTIVE_CHARGE\x10\n\x12\r\n\tWITH_ITEM\x10\x0b\x12\x18\n\x14WITH_UNIQUE_POKESTOP\x10\x0c\x12\x16\n\x12WITH_QUEST_CONTEXT\x10\r\x12\x1c\n\x18WITH_THROW_TYPE_IN_A_ROW\x10\x0e\x12\x13\n\x0fWITH_CURVE_BALL\x10\x0f\x12\x13\n\x0fWITH_BADGE_TYPE\x10\x10\x12\x15\n\x11WITH_PLAYER_LEVEL\x10\x11\x12\x1a\n\x16WITH_WIN_BATTLE_STATUS\x10\x12\x12\x13\n\x0fWITH_NEW_FRIEND\x10\x13\x12\x16\n\x12WITH_DAYS_IN_A_ROW\x10\x14\x62\x06proto3')
+  serialized_pb=_b('\n,pogoprotos/data/quests/quest_condition.proto\x12\x16pogoprotos.data.quests\x1a$pogoprotos/enums/activity_type.proto\x1a!pogoprotos/enums/badge_type.proto\x1a!pogoprotos/enums/pokemon_id.proto\x1a#pogoprotos/enums/pokemon_type.proto\x1a!pogoprotos/enums/raid_level.proto\x1a\'pogoprotos/inventory/item/item_id.proto\"\x85\x17\n\x0eQuestCondition\x12\x42\n\x04type\x18\x01 \x01(\x0e\x32\x34.pogoprotos.data.quests.QuestCondition.ConditionType\x12S\n\x11with_pokemon_type\x18\x02 \x01(\x0b\x32\x36.pogoprotos.data.quests.QuestCondition.WithPokemonTypeH\x00\x12[\n\x15with_pokemon_category\x18\x03 \x01(\x0b\x32:.pogoprotos.data.quests.QuestCondition.WithPokemonCategoryH\x00\x12U\n\x12with_weather_boost\x18\x04 \x01(\x0b\x32\x37.pogoprotos.data.quests.QuestCondition.WithWeatherBoostH\x00\x12`\n\x18with_daily_capture_bonus\x18\x05 \x01(\x0b\x32<.pogoprotos.data.quests.QuestCondition.WithDailyCaptureBonusH\x00\x12Z\n\x15with_daily_spin_bonus\x18\x06 \x01(\x0b\x32\x39.pogoprotos.data.quests.QuestCondition.WithDailySpinBonusH\x00\x12X\n\x14with_win_raid_status\x18\x07 \x01(\x0b\x32\x38.pogoprotos.data.quests.QuestCondition.WithWinRaidStatusH\x00\x12O\n\x0fwith_raid_level\x18\x08 \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithRaidLevelH\x00\x12O\n\x0fwith_throw_type\x18\t \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithThrowTypeH\x00\x12\x63\n\x1awith_win_gym_battle_status\x18\n \x01(\x0b\x32=.pogoprotos.data.quests.QuestCondition.WithWinGymBattleStatusH\x00\x12o\n with_super_effective_charge_move\x18\x0b \x01(\x0b\x32\x43.pogoprotos.data.quests.QuestCondition.WithSuperEffectiveChargeMoveH\x00\x12\x44\n\twith_item\x18\x0c \x01(\x0b\x32/.pogoprotos.data.quests.QuestCondition.WithItemH\x00\x12Y\n\x14with_unique_pokestop\x18\r \x01(\x0b\x32\x39.pogoprotos.data.quests.QuestCondition.WithUniquePokestopH\x00\x12U\n\x12with_quest_context\x18\x0e \x01(\x0b\x32\x37.pogoprotos.data.quests.QuestCondition.WithQuestContextH\x00\x12O\n\x0fwith_badge_type\x18\x0f \x01(\x0b\x32\x34.pogoprotos.data.quests.QuestCondition.WithBadgeTypeH\x00\x12S\n\x11with_player_level\x18\x10 \x01(\x0b\x32\x36.pogoprotos.data.quests.QuestCondition.WithPlayerLevelH\x00\x12\\\n\x16with_win_battle_status\x18\x11 \x01(\x0b\x32:.pogoprotos.data.quests.QuestCondition.WithWinBattleStatusH\x00\x1a\x46\n\x0fWithPokemonType\x12\x33\n\x0cpokemon_type\x18\x01 \x03(\x0e\x32\x1d.pogoprotos.enums.PokemonType\x1a\x12\n\x10WithWeatherBoost\x1a^\n\x13WithPokemonCategory\x12\x15\n\rcategory_name\x18\x01 \x01(\t\x12\x30\n\x0bpokemon_ids\x18\x02 \x03(\x0e\x32\x1b.pogoprotos.enums.PokemonId\x1a\x17\n\x15WithDailyCaptureBonus\x1a\x14\n\x12WithDailySpinBonus\x1a\x13\n\x11WithWinRaidStatus\x1a@\n\rWithRaidLevel\x12/\n\nraid_level\x18\x01 \x03(\x0e\x32\x1b.pogoprotos.enums.RaidLevel\x1a]\n\rWithThrowType\x12\x34\n\nthrow_type\x18\x01 \x01(\x0e\x32\x1e.pogoprotos.enums.ActivityTypeH\x00\x12\r\n\x03hit\x18\x02 \x01(\x08H\x00\x42\x07\n\x05Throw\x1a\x0f\n\rWithCurveBall\x1a\x18\n\x16WithWinGymBattleStatus\x1a\x1e\n\x1cWithSuperEffectiveChargeMove\x1a;\n\x08WithItem\x12/\n\x04item\x18\x01 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemId\x1a\x14\n\x12WithUniquePokestop\x1a\xa0\x01\n\x10WithQuestContext\x12P\n\x07\x63ontext\x18\x01 \x01(\x0e\x32?.pogoprotos.data.quests.QuestCondition.WithQuestContext.Context\":\n\x07\x43ontext\x12\t\n\x05UNSET\x10\x00\x12\x0f\n\x0bSTORY_QUEST\x10\x01\x12\x13\n\x0f\x43HALLENGE_QUEST\x10\x02\x1a\x64\n\rWithBadgeType\x12/\n\nbadge_type\x18\x01 \x03(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x05\x1a \n\x0fWithPlayerLevel\x12\r\n\x05level\x18\x01 \x01(\x05\x1a\x15\n\x13WithWinBattleStatus\"\x8b\x04\n\rConditionType\x12\t\n\x05UNSET\x10\x00\x12\x15\n\x11WITH_POKEMON_TYPE\x10\x01\x12\x19\n\x15WITH_POKEMON_CATEGORY\x10\x02\x12\x16\n\x12WITH_WEATHER_BOOST\x10\x03\x12\x1c\n\x18WITH_DAILY_CAPTURE_BONUS\x10\x04\x12\x19\n\x15WITH_DAILY_SPIN_BONUS\x10\x05\x12\x18\n\x14WITH_WIN_RAID_STATUS\x10\x06\x12\x13\n\x0fWITH_RAID_LEVEL\x10\x07\x12\x13\n\x0fWITH_THROW_TYPE\x10\x08\x12\x1e\n\x1aWITH_WIN_GYM_BATTLE_STATUS\x10\t\x12\x1f\n\x1bWITH_SUPER_EFFECTIVE_CHARGE\x10\n\x12\r\n\tWITH_ITEM\x10\x0b\x12\x18\n\x14WITH_UNIQUE_POKESTOP\x10\x0c\x12\x16\n\x12WITH_QUEST_CONTEXT\x10\r\x12\x1c\n\x18WITH_THROW_TYPE_IN_A_ROW\x10\x0e\x12\x13\n\x0fWITH_CURVE_BALL\x10\x0f\x12\x13\n\x0fWITH_BADGE_TYPE\x10\x10\x12\x15\n\x11WITH_PLAYER_LEVEL\x10\x11\x12\x1a\n\x16WITH_WIN_BATTLE_STATUS\x10\x12\x12\x13\n\x0fWITH_NEW_FRIEND\x10\x13\x12\x16\n\x12WITH_DAYS_IN_A_ROW\x10\x14\x42\x0b\n\tConditionb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_enums_dot_activity__type__pb2.DESCRIPTOR,pogoprotos_dot_enums_dot_badge__type__pb2.DESCRIPTOR,pogoprotos_dot_enums_dot_pokemon__id__pb2.DESCRIPTOR,pogoprotos_dot_enums_dot_pokemon__type__pb2.DESCRIPTOR,pogoprotos_dot_enums_dot_raid__level__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_item_dot_item__id__pb2.DESCRIPTOR,])
 
@@ -52,8 +52,8 @@ _QUESTCONDITION_WITHQUESTCONTEXT_CONTEXT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2442,
-  serialized_end=2500,
+  serialized_start=2487,
+  serialized_end=2545,
 )
 _sym_db.RegisterEnumDescriptor(_QUESTCONDITION_WITHQUESTCONTEXT_CONTEXT)
 
@@ -150,8 +150,8 @@ _QUESTCONDITION_CONDITIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2662,
-  serialized_end=3185,
+  serialized_start=2707,
+  serialized_end=3230,
 )
 _sym_db.RegisterEnumDescriptor(_QUESTCONDITION_CONDITIONTYPE)
 
@@ -182,8 +182,8 @@ _QUESTCONDITION_WITHPOKEMONTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1777,
-  serialized_end=1847,
+  serialized_start=1809,
+  serialized_end=1879,
 )
 
 _QUESTCONDITION_WITHWEATHERBOOST = _descriptor.Descriptor(
@@ -205,8 +205,8 @@ _QUESTCONDITION_WITHWEATHERBOOST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1849,
-  serialized_end=1867,
+  serialized_start=1881,
+  serialized_end=1899,
 )
 
 _QUESTCONDITION_WITHPOKEMONCATEGORY = _descriptor.Descriptor(
@@ -242,8 +242,8 @@ _QUESTCONDITION_WITHPOKEMONCATEGORY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1869,
-  serialized_end=1963,
+  serialized_start=1901,
+  serialized_end=1995,
 )
 
 _QUESTCONDITION_WITHDAILYCAPTUREBONUS = _descriptor.Descriptor(
@@ -265,8 +265,8 @@ _QUESTCONDITION_WITHDAILYCAPTUREBONUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1965,
-  serialized_end=1988,
+  serialized_start=1997,
+  serialized_end=2020,
 )
 
 _QUESTCONDITION_WITHDAILYSPINBONUS = _descriptor.Descriptor(
@@ -288,8 +288,8 @@ _QUESTCONDITION_WITHDAILYSPINBONUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1990,
-  serialized_end=2010,
+  serialized_start=2022,
+  serialized_end=2042,
 )
 
 _QUESTCONDITION_WITHWINRAIDSTATUS = _descriptor.Descriptor(
@@ -311,8 +311,8 @@ _QUESTCONDITION_WITHWINRAIDSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2012,
-  serialized_end=2031,
+  serialized_start=2044,
+  serialized_end=2063,
 )
 
 _QUESTCONDITION_WITHRAIDLEVEL = _descriptor.Descriptor(
@@ -341,8 +341,8 @@ _QUESTCONDITION_WITHRAIDLEVEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2033,
-  serialized_end=2097,
+  serialized_start=2065,
+  serialized_end=2129,
 )
 
 _QUESTCONDITION_WITHTHROWTYPE = _descriptor.Descriptor(
@@ -377,9 +377,12 @@ _QUESTCONDITION_WITHTHROWTYPE = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Throw', full_name='pogoprotos.data.quests.QuestCondition.WithThrowType.Throw',
+      index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=2099,
-  serialized_end=2179,
+  serialized_start=2131,
+  serialized_end=2224,
 )
 
 _QUESTCONDITION_WITHCURVEBALL = _descriptor.Descriptor(
@@ -401,8 +404,8 @@ _QUESTCONDITION_WITHCURVEBALL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2181,
-  serialized_end=2196,
+  serialized_start=2226,
+  serialized_end=2241,
 )
 
 _QUESTCONDITION_WITHWINGYMBATTLESTATUS = _descriptor.Descriptor(
@@ -424,8 +427,8 @@ _QUESTCONDITION_WITHWINGYMBATTLESTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2198,
-  serialized_end=2222,
+  serialized_start=2243,
+  serialized_end=2267,
 )
 
 _QUESTCONDITION_WITHSUPEREFFECTIVECHARGEMOVE = _descriptor.Descriptor(
@@ -447,8 +450,8 @@ _QUESTCONDITION_WITHSUPEREFFECTIVECHARGEMOVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2224,
-  serialized_end=2254,
+  serialized_start=2269,
+  serialized_end=2299,
 )
 
 _QUESTCONDITION_WITHITEM = _descriptor.Descriptor(
@@ -477,8 +480,8 @@ _QUESTCONDITION_WITHITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2256,
-  serialized_end=2315,
+  serialized_start=2301,
+  serialized_end=2360,
 )
 
 _QUESTCONDITION_WITHUNIQUEPOKESTOP = _descriptor.Descriptor(
@@ -500,8 +503,8 @@ _QUESTCONDITION_WITHUNIQUEPOKESTOP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2317,
-  serialized_end=2337,
+  serialized_start=2362,
+  serialized_end=2382,
 )
 
 _QUESTCONDITION_WITHQUESTCONTEXT = _descriptor.Descriptor(
@@ -531,8 +534,8 @@ _QUESTCONDITION_WITHQUESTCONTEXT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2340,
-  serialized_end=2500,
+  serialized_start=2385,
+  serialized_end=2545,
 )
 
 _QUESTCONDITION_WITHBADGETYPE = _descriptor.Descriptor(
@@ -575,8 +578,8 @@ _QUESTCONDITION_WITHBADGETYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2502,
-  serialized_end=2602,
+  serialized_start=2547,
+  serialized_end=2647,
 )
 
 _QUESTCONDITION_WITHPLAYERLEVEL = _descriptor.Descriptor(
@@ -605,8 +608,8 @@ _QUESTCONDITION_WITHPLAYERLEVEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2604,
-  serialized_end=2636,
+  serialized_start=2649,
+  serialized_end=2681,
 )
 
 _QUESTCONDITION_WITHWINBATTLESTATUS = _descriptor.Descriptor(
@@ -628,8 +631,8 @@ _QUESTCONDITION_WITHWINBATTLESTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2638,
-  serialized_end=2659,
+  serialized_start=2683,
+  serialized_end=2704,
 )
 
 _QUESTCONDITION = _descriptor.Descriptor(
@@ -770,9 +773,12 @@ _QUESTCONDITION = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Condition', full_name='pogoprotos.data.quests.QuestCondition.Condition',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=294,
-  serialized_end=3185,
+  serialized_end=3243,
 )
 
 _QUESTCONDITION_WITHPOKEMONTYPE.fields_by_name['pokemon_type'].enum_type = pogoprotos_dot_enums_dot_pokemon__type__pb2._POKEMONTYPE
@@ -787,6 +793,12 @@ _QUESTCONDITION_WITHRAIDLEVEL.fields_by_name['raid_level'].enum_type = pogoproto
 _QUESTCONDITION_WITHRAIDLEVEL.containing_type = _QUESTCONDITION
 _QUESTCONDITION_WITHTHROWTYPE.fields_by_name['throw_type'].enum_type = pogoprotos_dot_enums_dot_activity__type__pb2._ACTIVITYTYPE
 _QUESTCONDITION_WITHTHROWTYPE.containing_type = _QUESTCONDITION
+_QUESTCONDITION_WITHTHROWTYPE.oneofs_by_name['Throw'].fields.append(
+  _QUESTCONDITION_WITHTHROWTYPE.fields_by_name['throw_type'])
+_QUESTCONDITION_WITHTHROWTYPE.fields_by_name['throw_type'].containing_oneof = _QUESTCONDITION_WITHTHROWTYPE.oneofs_by_name['Throw']
+_QUESTCONDITION_WITHTHROWTYPE.oneofs_by_name['Throw'].fields.append(
+  _QUESTCONDITION_WITHTHROWTYPE.fields_by_name['hit'])
+_QUESTCONDITION_WITHTHROWTYPE.fields_by_name['hit'].containing_oneof = _QUESTCONDITION_WITHTHROWTYPE.oneofs_by_name['Throw']
 _QUESTCONDITION_WITHCURVEBALL.containing_type = _QUESTCONDITION
 _QUESTCONDITION_WITHWINGYMBATTLESTATUS.containing_type = _QUESTCONDITION
 _QUESTCONDITION_WITHSUPEREFFECTIVECHARGEMOVE.containing_type = _QUESTCONDITION
@@ -818,6 +830,54 @@ _QUESTCONDITION.fields_by_name['with_badge_type'].message_type = _QUESTCONDITION
 _QUESTCONDITION.fields_by_name['with_player_level'].message_type = _QUESTCONDITION_WITHPLAYERLEVEL
 _QUESTCONDITION.fields_by_name['with_win_battle_status'].message_type = _QUESTCONDITION_WITHWINBATTLESTATUS
 _QUESTCONDITION_CONDITIONTYPE.containing_type = _QUESTCONDITION
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_pokemon_type'])
+_QUESTCONDITION.fields_by_name['with_pokemon_type'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_pokemon_category'])
+_QUESTCONDITION.fields_by_name['with_pokemon_category'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_weather_boost'])
+_QUESTCONDITION.fields_by_name['with_weather_boost'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_daily_capture_bonus'])
+_QUESTCONDITION.fields_by_name['with_daily_capture_bonus'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_daily_spin_bonus'])
+_QUESTCONDITION.fields_by_name['with_daily_spin_bonus'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_win_raid_status'])
+_QUESTCONDITION.fields_by_name['with_win_raid_status'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_raid_level'])
+_QUESTCONDITION.fields_by_name['with_raid_level'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_throw_type'])
+_QUESTCONDITION.fields_by_name['with_throw_type'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_win_gym_battle_status'])
+_QUESTCONDITION.fields_by_name['with_win_gym_battle_status'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_super_effective_charge_move'])
+_QUESTCONDITION.fields_by_name['with_super_effective_charge_move'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_item'])
+_QUESTCONDITION.fields_by_name['with_item'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_unique_pokestop'])
+_QUESTCONDITION.fields_by_name['with_unique_pokestop'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_quest_context'])
+_QUESTCONDITION.fields_by_name['with_quest_context'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_badge_type'])
+_QUESTCONDITION.fields_by_name['with_badge_type'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_player_level'])
+_QUESTCONDITION.fields_by_name['with_player_level'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
+_QUESTCONDITION.oneofs_by_name['Condition'].fields.append(
+  _QUESTCONDITION.fields_by_name['with_win_battle_status'])
+_QUESTCONDITION.fields_by_name['with_win_battle_status'].containing_oneof = _QUESTCONDITION.oneofs_by_name['Condition']
 DESCRIPTOR.message_types_by_name['QuestCondition'] = _QUESTCONDITION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

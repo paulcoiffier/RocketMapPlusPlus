@@ -27,7 +27,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.quests',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\"pogoprotos/data/quests/quest.proto\x12\x16pogoprotos.data.quests\x1a!pogoprotos/enums/quest_type.proto\x1a*pogoprotos/data/player/daily_counter.proto\x1a(pogoprotos/data/quests/daily_quest.proto\x1a\x30pogoprotos/data/quests/catch_pokemon_quest.proto\x1a)pogoprotos/data/quests/quest_reward.proto\x1a\'pogoprotos/data/quests/quest_goal.proto\x1a-pogoprotos/data/quests/add_friend_quest.proto\x1a\x30pogoprotos/data/quests/trade_pokemon_quest.proto\"\xd4\t\n\x05Quest\x12/\n\nquest_type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.QuestType\x12\x37\n\x0b\x64\x61ily_quest\x18\x02 \x01(\x0b\x32\".pogoprotos.data.quests.DailyQuest\x12@\n\nmulti_part\x18\x03 \x01(\x0b\x32,.pogoprotos.data.quests.Quest.MultiPartQuest\x12@\n\rcatch_pokemon\x18\x04 \x01(\x0b\x32).pogoprotos.data.quests.CatchPokemonQuest\x12:\n\nadd_friend\x18\x05 \x01(\x0b\x32&.pogoprotos.data.quests.AddFriendQuest\x12@\n\rtrade_pokemon\x18\x06 \x01(\x0b\x32).pogoprotos.data.quests.TradePokemonQuest\x12\x10\n\x08quest_id\x18\x64 \x01(\t\x12\x12\n\nquest_seed\x18\x65 \x01(\x03\x12<\n\rquest_context\x18\x66 \x01(\x0e\x32%.pogoprotos.data.quests.Quest.Context\x12\x13\n\x0btemplate_id\x18g \x01(\t\x12\x10\n\x08progress\x18h \x01(\x05\x12/\n\x04goal\x18i \x01(\x0b\x32!.pogoprotos.data.quests.QuestGoal\x12\x34\n\x06status\x18j \x01(\x0e\x32$.pogoprotos.data.quests.Quest.Status\x12:\n\rquest_rewards\x18k \x03(\x0b\x32#.pogoprotos.data.quests.QuestReward\x12\x1d\n\x15\x63reation_timestamp_ms\x18l \x01(\x03\x12 \n\x18last_update_timestamp_ms\x18m \x01(\x03\x12 \n\x18\x63ompeletion_timestamp_ms\x18n \x01(\x03\x12\x0f\n\x07\x66ort_id\x18o \x01(\t\x12\x17\n\x0f\x61\x64min_generated\x18p \x01(\x08\x12$\n\x1cstamp_count_override_enabled\x18q \x01(\x08\x12\x1c\n\x14stamp_count_override\x18r \x01(\x05\x12\x12\n\ns2_cell_id\x18s \x01(\x03\x12$\n\x1cstory_quest_template_version\x18t \x01(\x05\x12;\n\rdaily_counter\x18u \x01(\x0b\x32$.pogoprotos.data.player.DailyCounter\x12\x1f\n\x17reward_pokemon_icon_url\x18v \x01(\t\x1a\x43\n\x0eMultiPartQuest\x12\x31\n\nsub_quests\x18\x01 \x03(\x0b\x32\x1d.pogoprotos.data.quests.Quest\":\n\x07\x43ontext\x12\t\n\x05UNSET\x10\x00\x12\x0f\n\x0bSTORY_QUEST\x10\x01\x12\x13\n\x0f\x43HALLENGE_QUEST\x10\x02\"G\n\x06Status\x12\x14\n\x10STATUS_UNDEFINED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x14\n\x10STATUS_COMPLETED\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\n\"pogoprotos/data/quests/quest.proto\x12\x16pogoprotos.data.quests\x1a!pogoprotos/enums/quest_type.proto\x1a*pogoprotos/data/player/daily_counter.proto\x1a(pogoprotos/data/quests/daily_quest.proto\x1a\x30pogoprotos/data/quests/catch_pokemon_quest.proto\x1a)pogoprotos/data/quests/quest_reward.proto\x1a\'pogoprotos/data/quests/quest_goal.proto\x1a-pogoprotos/data/quests/add_friend_quest.proto\x1a\x30pogoprotos/data/quests/trade_pokemon_quest.proto\"\xe7\t\n\x05Quest\x12/\n\nquest_type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.QuestType\x12\x39\n\x0b\x64\x61ily_quest\x18\x02 \x01(\x0b\x32\".pogoprotos.data.quests.DailyQuestH\x00\x12\x42\n\nmulti_part\x18\x03 \x01(\x0b\x32,.pogoprotos.data.quests.Quest.MultiPartQuestH\x00\x12\x42\n\rcatch_pokemon\x18\x04 \x01(\x0b\x32).pogoprotos.data.quests.CatchPokemonQuestH\x00\x12<\n\nadd_friend\x18\x05 \x01(\x0b\x32&.pogoprotos.data.quests.AddFriendQuestH\x00\x12\x42\n\rtrade_pokemon\x18\x06 \x01(\x0b\x32).pogoprotos.data.quests.TradePokemonQuestH\x00\x12\x10\n\x08quest_id\x18\x64 \x01(\t\x12\x12\n\nquest_seed\x18\x65 \x01(\x03\x12<\n\rquest_context\x18\x66 \x01(\x0e\x32%.pogoprotos.data.quests.Quest.Context\x12\x13\n\x0btemplate_id\x18g \x01(\t\x12\x10\n\x08progress\x18h \x01(\x05\x12/\n\x04goal\x18i \x01(\x0b\x32!.pogoprotos.data.quests.QuestGoal\x12\x34\n\x06status\x18j \x01(\x0e\x32$.pogoprotos.data.quests.Quest.Status\x12:\n\rquest_rewards\x18k \x03(\x0b\x32#.pogoprotos.data.quests.QuestReward\x12\x1d\n\x15\x63reation_timestamp_ms\x18l \x01(\x03\x12 \n\x18last_update_timestamp_ms\x18m \x01(\x03\x12 \n\x18\x63ompeletion_timestamp_ms\x18n \x01(\x03\x12\x0f\n\x07\x66ort_id\x18o \x01(\t\x12\x17\n\x0f\x61\x64min_generated\x18p \x01(\x08\x12$\n\x1cstamp_count_override_enabled\x18q \x01(\x08\x12\x1c\n\x14stamp_count_override\x18r \x01(\x05\x12\x12\n\ns2_cell_id\x18s \x01(\x03\x12$\n\x1cstory_quest_template_version\x18t \x01(\x05\x12;\n\rdaily_counter\x18u \x01(\x0b\x32$.pogoprotos.data.player.DailyCounter\x12\x1f\n\x17reward_pokemon_icon_url\x18v \x01(\t\x1a\x43\n\x0eMultiPartQuest\x12\x31\n\nsub_quests\x18\x01 \x03(\x0b\x32\x1d.pogoprotos.data.quests.Quest\":\n\x07\x43ontext\x12\t\n\x05UNSET\x10\x00\x12\x0f\n\x0bSTORY_QUEST\x10\x01\x12\x13\n\x0f\x43HALLENGE_QUEST\x10\x02\"G\n\x06Status\x12\x14\n\x10STATUS_UNDEFINED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x14\n\x10STATUS_COMPLETED\x10\x02\x42\x07\n\x05Questb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_enums_dot_quest__type__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_daily__counter__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_daily__quest__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_catch__pokemon__quest__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quest__reward__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quest__goal__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_add__friend__quest__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_trade__pokemon__quest__pb2.DESCRIPTOR,])
 
@@ -54,8 +54,8 @@ _QUEST_CONTEXT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1520,
-  serialized_end=1578,
+  serialized_start=1530,
+  serialized_end=1588,
 )
 _sym_db.RegisterEnumDescriptor(_QUEST_CONTEXT)
 
@@ -80,8 +80,8 @@ _QUEST_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1580,
-  serialized_end=1651,
+  serialized_start=1590,
+  serialized_end=1661,
 )
 _sym_db.RegisterEnumDescriptor(_QUEST_STATUS)
 
@@ -112,8 +112,8 @@ _QUEST_MULTIPARTQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1451,
-  serialized_end=1518,
+  serialized_start=1461,
+  serialized_end=1528,
 )
 
 _QUEST = _descriptor.Descriptor(
@@ -311,9 +311,12 @@ _QUEST = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Quest', full_name='pogoprotos.data.quests.Quest.Quest',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=415,
-  serialized_end=1651,
+  serialized_end=1670,
 )
 
 _QUEST_MULTIPARTQUEST.fields_by_name['sub_quests'].message_type = _QUEST
@@ -331,6 +334,21 @@ _QUEST.fields_by_name['quest_rewards'].message_type = pogoprotos_dot_data_dot_qu
 _QUEST.fields_by_name['daily_counter'].message_type = pogoprotos_dot_data_dot_player_dot_daily__counter__pb2._DAILYCOUNTER
 _QUEST_CONTEXT.containing_type = _QUEST
 _QUEST_STATUS.containing_type = _QUEST
+_QUEST.oneofs_by_name['Quest'].fields.append(
+  _QUEST.fields_by_name['daily_quest'])
+_QUEST.fields_by_name['daily_quest'].containing_oneof = _QUEST.oneofs_by_name['Quest']
+_QUEST.oneofs_by_name['Quest'].fields.append(
+  _QUEST.fields_by_name['multi_part'])
+_QUEST.fields_by_name['multi_part'].containing_oneof = _QUEST.oneofs_by_name['Quest']
+_QUEST.oneofs_by_name['Quest'].fields.append(
+  _QUEST.fields_by_name['catch_pokemon'])
+_QUEST.fields_by_name['catch_pokemon'].containing_oneof = _QUEST.oneofs_by_name['Quest']
+_QUEST.oneofs_by_name['Quest'].fields.append(
+  _QUEST.fields_by_name['add_friend'])
+_QUEST.fields_by_name['add_friend'].containing_oneof = _QUEST.oneofs_by_name['Quest']
+_QUEST.oneofs_by_name['Quest'].fields.append(
+  _QUEST.fields_by_name['trade_pokemon'])
+_QUEST.fields_by_name['trade_pokemon'].containing_oneof = _QUEST.oneofs_by_name['Quest']
 DESCRIPTOR.message_types_by_name['Quest'] = _QUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

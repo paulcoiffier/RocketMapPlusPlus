@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.enums',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n$pogoprotos/enums/social_action.proto\x12\x10pogoprotos.enums*\x8e\x04\n\x0cSocialAction\x12\x19\n\x15UNKNOWN_SOCIAL_ACTION\x10\x00\x12\x12\n\rSEARCH_PLAYER\x10\x90N\x12\x17\n\x12SEND_FRIEND_INVITE\x10\x92N\x12\x19\n\x14\x43\x41NCEL_FRIEND_INVITE\x10\x93N\x12\x19\n\x14\x41\x43\x43\x45PT_FRIEND_INVITE\x10\x94N\x12\x1a\n\x15\x44\x45\x43LINE_FRIEND_INVITE\x10\x95N\x12\x11\n\x0cLIST_FRIENDS\x10\x96N\x12!\n\x1cLIST_OUTGOING_FRIEND_INVITES\x10\x97N\x12!\n\x1cLIST_INCOMING_FRIEND_INVITES\x10\x98N\x12\x12\n\rREMOVE_FRIEND\x10\x99N\x12\x17\n\x12LIST_FRIEND_STATUS\x10\x9aN\x12\x1b\n\x16INVITE_FACEBOOK_FRIEND\x10\x9bN\x12\x11\n\x0cIS_MY_FRIEND\x10\x9cN\x12\x17\n\x12\x43REATE_INVITE_CODE\x10\x9dN\x12\x1f\n\x1aREGISTER_PUSH_NOTIFICATION\x10\xf5N\x12!\n\x1cUNREGISTER_PUSH_NOTIFICATION\x10\xf6N\x12\x18\n\x13UPDATE_NOTIFICATION\x10\xf7N\x12\'\n\"OPT_OUT_PUSH_NOTIFICATION_CATEGORY\x10\xf8N\x12\x0e\n\tGET_INBOX\x10\xf9Nb\x06proto3')
+  serialized_pb=_b('\n$pogoprotos/enums/social_action.proto\x12\x10pogoprotos.enums*\xb8\x04\n\x0cSocialAction\x12\x19\n\x15UNKNOWN_SOCIAL_ACTION\x10\x00\x12\x12\n\rSEARCH_PLAYER\x10\x90N\x12\x17\n\x12SEND_FRIEND_INVITE\x10\x92N\x12\x19\n\x14\x43\x41NCEL_FRIEND_INVITE\x10\x93N\x12\x19\n\x14\x41\x43\x43\x45PT_FRIEND_INVITE\x10\x94N\x12\x1a\n\x15\x44\x45\x43LINE_FRIEND_INVITE\x10\x95N\x12\x11\n\x0cLIST_FRIENDS\x10\x96N\x12!\n\x1cLIST_OUTGOING_FRIEND_INVITES\x10\x97N\x12!\n\x1cLIST_INCOMING_FRIEND_INVITES\x10\x98N\x12\x12\n\rREMOVE_FRIEND\x10\x99N\x12\x17\n\x12LIST_FRIEND_STATUS\x10\x9aN\x12\x1b\n\x16INVITE_FACEBOOK_FRIEND\x10\x9bN\x12\x11\n\x0cIS_MY_FRIEND\x10\x9cN\x12\x17\n\x12\x43REATE_INVITE_CODE\x10\x9dN\x12-\n(REGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION\x10\xf5N\x12/\n*UNREGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION\x10\xf6N\x12\x18\n\x13UPDATE_NOTIFICATION\x10\xf7N\x12\x35\n0OPT_OUT_PUSH_NOTIFICATION_CATEGORY_SOCIAL_ACTION\x10\xf8N\x12\x0e\n\tGET_INBOX\x10\xf9Nb\x06proto3')
 )
 
 _SOCIALACTION = _descriptor.EnumDescriptor(
@@ -86,11 +86,11 @@ _SOCIALACTION = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_PUSH_NOTIFICATION', index=14, number=10101,
+      name='REGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION', index=14, number=10101,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='UNREGISTER_PUSH_NOTIFICATION', index=15, number=10102,
+      name='UNREGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION', index=15, number=10102,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -98,7 +98,7 @@ _SOCIALACTION = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='OPT_OUT_PUSH_NOTIFICATION_CATEGORY', index=17, number=10104,
+      name='OPT_OUT_PUSH_NOTIFICATION_CATEGORY_SOCIAL_ACTION', index=17, number=10104,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -109,7 +109,7 @@ _SOCIALACTION = _descriptor.EnumDescriptor(
   containing_type=None,
   serialized_options=None,
   serialized_start=59,
-  serialized_end=585,
+  serialized_end=627,
 )
 _sym_db.RegisterEnumDescriptor(_SOCIALACTION)
 
@@ -128,10 +128,10 @@ LIST_FRIEND_STATUS = 10010
 INVITE_FACEBOOK_FRIEND = 10011
 IS_MY_FRIEND = 10012
 CREATE_INVITE_CODE = 10013
-REGISTER_PUSH_NOTIFICATION = 10101
-UNREGISTER_PUSH_NOTIFICATION = 10102
+REGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION = 10101
+UNREGISTER_PUSH_NOTIFICATION_SOCIAL_ACTION = 10102
 UPDATE_NOTIFICATION = 10103
-OPT_OUT_PUSH_NOTIFICATION_CATEGORY = 10104
+OPT_OUT_PUSH_NOTIFICATION_CATEGORY_SOCIAL_ACTION = 10104
 GET_INBOX = 10105
 
 

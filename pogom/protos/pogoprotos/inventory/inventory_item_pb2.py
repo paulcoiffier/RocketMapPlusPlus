@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.inventory',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n)pogoprotos/inventory/inventory_item.proto\x12\x14pogoprotos.inventory\x1a.pogoprotos/inventory/inventory_item_data.proto\"\xde\x01\n\rInventoryItem\x12\x1d\n\x15modified_timestamp_ms\x18\x01 \x01(\x03\x12\x45\n\x0c\x64\x65leted_item\x18\x02 \x01(\x0b\x32/.pogoprotos.inventory.InventoryItem.DeletedItem\x12\x44\n\x13inventory_item_data\x18\x03 \x01(\x0b\x32\'.pogoprotos.inventory.InventoryItemData\x1a!\n\x0b\x44\x65letedItem\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\x62\x06proto3')
+  serialized_pb=_b('\n)pogoprotos/inventory/inventory_item.proto\x12\x14pogoprotos.inventory\x1a.pogoprotos/inventory/inventory_item_data.proto\"\xf3\x01\n\rInventoryItem\x12\x1d\n\x15modified_timestamp_ms\x18\x01 \x01(\x03\x12G\n\x0c\x64\x65leted_item\x18\x02 \x01(\x0b\x32/.pogoprotos.inventory.InventoryItem.DeletedItemH\x00\x12\x46\n\x13inventory_item_data\x18\x03 \x01(\x0b\x32\'.pogoprotos.inventory.InventoryItemDataH\x00\x1a!\n\x0b\x44\x65letedItem\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\x42\x0f\n\rInventoryItemb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_inventory_dot_inventory__item__data__pb2.DESCRIPTOR,])
 
@@ -53,8 +53,8 @@ _INVENTORYITEM_DELETEDITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=305,
-  serialized_end=338,
+  serialized_start=309,
+  serialized_end=342,
 )
 
 _INVENTORYITEM = _descriptor.Descriptor(
@@ -96,14 +96,23 @@ _INVENTORYITEM = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='InventoryItem', full_name='pogoprotos.inventory.InventoryItem.InventoryItem',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=116,
-  serialized_end=338,
+  serialized_end=359,
 )
 
 _INVENTORYITEM_DELETEDITEM.containing_type = _INVENTORYITEM
 _INVENTORYITEM.fields_by_name['deleted_item'].message_type = _INVENTORYITEM_DELETEDITEM
 _INVENTORYITEM.fields_by_name['inventory_item_data'].message_type = pogoprotos_dot_inventory_dot_inventory__item__data__pb2._INVENTORYITEMDATA
+_INVENTORYITEM.oneofs_by_name['InventoryItem'].fields.append(
+  _INVENTORYITEM.fields_by_name['deleted_item'])
+_INVENTORYITEM.fields_by_name['deleted_item'].containing_oneof = _INVENTORYITEM.oneofs_by_name['InventoryItem']
+_INVENTORYITEM.oneofs_by_name['InventoryItem'].fields.append(
+  _INVENTORYITEM.fields_by_name['inventory_item_data'])
+_INVENTORYITEM.fields_by_name['inventory_item_data'].containing_oneof = _INVENTORYITEM.oneofs_by_name['InventoryItem']
 DESCRIPTOR.message_types_by_name['InventoryItem'] = _INVENTORYITEM
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

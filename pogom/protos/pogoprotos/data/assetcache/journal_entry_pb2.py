@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.assetcache',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n.pogoprotos/data/assetcache/journal_entry.proto\x12\x1apogoprotos.data.assetcache\x1a\x32pogoprotos/data/assetcache/journal_add_entry.proto\x1a\x33pogoprotos/data/assetcache/journal_read_entry.proto\x1a\x35pogoprotos/data/assetcache/journal_remove_entry.proto\"\xd6\x01\n\x0cJournalEntry\x12>\n\tadd_entry\x18\x01 \x01(\x0b\x32+.pogoprotos.data.assetcache.JournalAddEntry\x12@\n\nread_entry\x18\x02 \x01(\x0b\x32,.pogoprotos.data.assetcache.JournalReadEntry\x12\x44\n\x0cremove_entry\x18\x03 \x01(\x0b\x32..pogoprotos.data.assetcache.JournalRemoveEntryb\x06proto3')
+  serialized_pb=_b('\n.pogoprotos/data/assetcache/journal_entry.proto\x12\x1apogoprotos.data.assetcache\x1a\x32pogoprotos/data/assetcache/journal_add_entry.proto\x1a\x33pogoprotos/data/assetcache/journal_read_entry.proto\x1a\x35pogoprotos/data/assetcache/journal_remove_entry.proto\"\xe8\x01\n\x0cJournalEntry\x12@\n\tadd_entry\x18\x01 \x01(\x0b\x32+.pogoprotos.data.assetcache.JournalAddEntryH\x00\x12\x42\n\nread_entry\x18\x02 \x01(\x0b\x32,.pogoprotos.data.assetcache.JournalReadEntryH\x00\x12\x46\n\x0cremove_entry\x18\x03 \x01(\x0b\x32..pogoprotos.data.assetcache.JournalRemoveEntryH\x00\x42\n\n\x08Subentryb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_data_dot_assetcache_dot_journal__add__entry__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_assetcache_dot_journal__read__entry__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_assetcache_dot_journal__remove__entry__pb2.DESCRIPTOR,])
 
@@ -68,14 +68,26 @@ _JOURNALENTRY = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='Subentry', full_name='pogoprotos.data.assetcache.JournalEntry.Subentry',
+      index=0, containing_type=None, fields=[]),
   ],
   serialized_start=239,
-  serialized_end=453,
+  serialized_end=471,
 )
 
 _JOURNALENTRY.fields_by_name['add_entry'].message_type = pogoprotos_dot_data_dot_assetcache_dot_journal__add__entry__pb2._JOURNALADDENTRY
 _JOURNALENTRY.fields_by_name['read_entry'].message_type = pogoprotos_dot_data_dot_assetcache_dot_journal__read__entry__pb2._JOURNALREADENTRY
 _JOURNALENTRY.fields_by_name['remove_entry'].message_type = pogoprotos_dot_data_dot_assetcache_dot_journal__remove__entry__pb2._JOURNALREMOVEENTRY
+_JOURNALENTRY.oneofs_by_name['Subentry'].fields.append(
+  _JOURNALENTRY.fields_by_name['add_entry'])
+_JOURNALENTRY.fields_by_name['add_entry'].containing_oneof = _JOURNALENTRY.oneofs_by_name['Subentry']
+_JOURNALENTRY.oneofs_by_name['Subentry'].fields.append(
+  _JOURNALENTRY.fields_by_name['read_entry'])
+_JOURNALENTRY.fields_by_name['read_entry'].containing_oneof = _JOURNALENTRY.oneofs_by_name['Subentry']
+_JOURNALENTRY.oneofs_by_name['Subentry'].fields.append(
+  _JOURNALENTRY.fields_by_name['remove_entry'])
+_JOURNALENTRY.fields_by_name['remove_entry'].containing_oneof = _JOURNALENTRY.oneofs_by_name['Subentry']
 DESCRIPTOR.message_types_by_name['JournalEntry'] = _JOURNALENTRY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
