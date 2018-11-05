@@ -1591,6 +1591,9 @@ class Pogom(Flask):
             else:
                 nextlongitude = nexttarget[1]
 
+        if latitude == nexttarget[0] and longitude == nexttarget[1]:
+            del self.deviceschedules[uuid][0]
+
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
