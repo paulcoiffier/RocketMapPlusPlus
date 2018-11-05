@@ -907,7 +907,7 @@ class Pogom(Flask):
                                         'gym_id':
                                             fort['id'],
                                         'team_id':
-                                            _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
+                                            _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
                                         'park':
                                             park,
                                         'guard_pokemon_id':
@@ -1015,7 +1015,7 @@ class Pogom(Flask):
                                             wh_raid = raids[fort['id']].copy()
                                             wh_raid.update({
                                                 'gym_id': b64_gym_id,
-                                                'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
+                                                'team_id': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
                                                 'spawn': float(raidinfo['raidSpawnMs']) / 1000,
                                                 'start': float(raidinfo['raidBattleMs']) / 1000,
                                                 'end': float(raidinfo['raidEndMs']) / 1000,
