@@ -914,7 +914,7 @@ class Pogom(Flask):
                                         'park':
                                             park,
                                         'guard_pokemon_id':
-                                            _POKEMONID.values_by_name[fort['guardPokemonId']].number,
+                                            _POKEMONID.values_by_name[fort.get('guardPokemonId', 'MISSINGNO')].number,
                                         'slots_available':
                                             fort["gymDisplay"].get('slotsAvailable', 0),
                                         'total_cp':
@@ -1042,7 +1042,11 @@ class Pogom(Flask):
                                                 'move_1': raidpokemonmove1 if raidpokemonmove1 else 0,
                                                 'move_2': raidpokemonmove2 if raidpokemonmove2 else 0,
                                                 'is_ex_raid_eligible':
-                                                    fort.get('isExRaidEligible', False)
+                                                    fort.get('isExRaidEligible', False),
+                                                'name': gym_name,
+                                                'description': gym_description,
+                                                'url': gym_url,
+
                                             })
                                             self.wh_update_queue.put(('raid', wh_raid))
 
