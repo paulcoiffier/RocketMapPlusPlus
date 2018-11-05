@@ -461,8 +461,11 @@ class Pogom(Flask):
             if "GetMapObjects" in proto:
                 gmo_response_string = b64decode(proto['GetMapObjects'])
                 gmo = GetMapObjectsResponse()
-                gmo.ParseFromString(gmo_response_string)
-                gmo_response_json = json.loads(MessageToJson(gmo))
+                try:
+                    gmo.ParseFromString(gmo_response_string)
+                    gmo_response_json = json.loads(MessageToJson(gmo))
+                except:
+                    continue
 
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
@@ -907,7 +910,7 @@ class Pogom(Flask):
                                         'gym_id':
                                             fort['id'],
                                         'team_id':
-                                            _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
+                                            _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
                                         'park':
                                             park,
                                         'guard_pokemon_id':
@@ -980,7 +983,21 @@ class Pogom(Flask):
 
                                         self.wh_update_queue.put(('gym', wh_gym))
 
-                                    if 'raidInfo' in fort:
+                                    if 'gym-info' in self.args.wh_types:
+                                        webhook_data = {
+                                            'id': str(gym_id),
+                                            'latitude': fort['latitude'],
+                                            'longitude': fort['longitude'],
+                                            'team': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
+                                            'name': gym_name,
+                                            'description': gym_description,
+                                            'url': gym_url,
+                                            'pokemon': [],
+                                        }
+
+                                        self.wh_update_queue.put(('gym_details', webhook_data))
+
+                                    if 'raidInfo' in fort and not fort["raidInfo"].get('complete', False):
                                         raidinfo = fort["raidInfo"]
                                         raidpokemonid = raidinfo['raidPokemon']['pokemonId'] if 'raidPokemon' in raidinfo and 'pokemonId' in raidinfo['raidPokemon'] else None
                                         if raidpokemonid:
@@ -1015,7 +1032,7 @@ class Pogom(Flask):
                                             wh_raid = raids[fort['id']].copy()
                                             wh_raid.update({
                                                 'gym_id': b64_gym_id,
-                                                'team_id': _TEAMCOLOR.values_by_name[fort['ownedByTeam']].number,
+                                                'team_id': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
                                                 'spawn': float(raidinfo['raidSpawnMs']) / 1000,
                                                 'start': float(raidinfo['raidBattleMs']) / 1000,
                                                 'end': float(raidinfo['raidEndMs']) / 1000,
@@ -1034,8 +1051,12 @@ class Pogom(Flask):
                 fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
                 frs = FortSearchResponse()
-                frs.ParseFromString(fort_search_response_string)
-                fort_search_response_json = json.loads(MessageToJson(frs))
+
+                try:
+                    frs.ParseFromString(fort_search_response_string)
+                    fort_search_response_json = json.loads(MessageToJson(frs))
+                except:
+                    continue
 
                 if 'challengeQuest' in fort_search_response_json:
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
@@ -1054,7 +1075,7 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
                     if 'quest' in self.args.wh_types:
-                        wh_quest = quest_result[quest_json["fortId"]]
+                        wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
                             wh_quest.update(
@@ -1068,8 +1089,11 @@ class Pogom(Flask):
             if "EncounterResponse" in proto and int(trainerlvl) >= 30:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
                 encounter = EncounterResponse()
-                encounter.ParseFromString(encounter_response_string)
-                encounter_response_json = json.loads(MessageToJson(encounter))
+                try:
+                    encounter.ParseFromString(encounter_response_string)
+                    encounter_response_json = json.loads(MessageToJson(encounter))
+                except:
+                    continue
 
                 if "wildPokemon" in encounter_response_json:
                     wildpokemon = encounter_response_json["wildPokemon"]
