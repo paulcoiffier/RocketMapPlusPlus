@@ -980,7 +980,21 @@ class Pogom(Flask):
 
                                         self.wh_update_queue.put(('gym', wh_gym))
 
-                                    if 'raidInfo' in fort:
+                                    if 'gym-info' in self.args.wh_types:
+                                        webhook_data = {
+                                            'id': str(gym_id),
+                                            'latitude': fort['latitude'],
+                                            'longitude': fort['longitude'],
+                                            'team': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
+                                            'name': gym_name,
+                                            'description': gym_description,
+                                            'url': gym_url,
+                                            'pokemon': [],
+                                        }
+
+                                        self.wh_update_queue.put(('gym_details', webhook_data))
+
+                                    if 'raidInfo' in fort and not fort["raidInfo"].get('complete', False):
                                         raidinfo = fort["raidInfo"]
                                         raidpokemonid = raidinfo['raidPokemon']['pokemonId'] if 'raidPokemon' in raidinfo and 'pokemonId' in raidinfo['raidPokemon'] else None
                                         if raidpokemonid:
@@ -1054,7 +1068,7 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
                     if 'quest' in self.args.wh_types:
-                        wh_quest = quest_result[quest_json["fortId"]]
+                        wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
                             wh_quest.update(
