@@ -1176,7 +1176,7 @@ class Pogom(Flask):
                                 'disappear_time': calendar.timegm(
                                     disappear_time.timetuple()),
                                 'last_modified_time': now(),
-                                'time_until_hidden_ms': float(wildpokemon['expirationTimestampMs']),
+                                'time_until_hidden_ms': float(wildpokemon.get('timeTillHiddenMs', 0)),
                                 'verified': SpawnPoint.tth_found(sp),
                                 'seconds_until_despawn': seconds_until_despawn,
                                 'spawn_start': start_end[0],
