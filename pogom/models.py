@@ -23,6 +23,8 @@ from cachetools import TTLCache
 from cachetools import cached
 from timeit import default_timer
 from flask import json
+import geopy
+from collections import OrderedDict
 
 from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
@@ -1481,6 +1483,50 @@ class SpawnPoint(LatLongModel):
             del sp['earliest_unseen']
 
         return list(spawnpoints.values())
+
+    @staticmethod
+    def get_nearby_spawnpoints(lat, lng, dist):
+        spawnpoints = {}
+        with SpawnPoint.database().execution_context():
+            query = (SpawnPoint.select(
+                SpawnPoint.latitude, SpawnPoint.longitude, SpawnPoint.id,
+                SpawnPoint.links, SpawnPoint.kind, SpawnPoint.latest_seen,
+                SpawnPoint.earliest_unseen, ScannedLocation.done)
+                .join(ScanSpawnPoint).join(ScannedLocation).dicts())
+
+            lat1 = lat - 0.1
+            lat2 = lat + 0.1
+            lng1 = lng - 0.1
+            lng2 = lng + 0.1
+            minlat = min(lat1, lat2)
+            maxlat = max(lat1, lat2)
+            minlng = min(lng1, lng2)
+            maxlng = max(lng1, lng2)
+
+            query = (query
+                     .where((((SpawnPoint.latitude >= minlat) &
+                              (SpawnPoint.longitude >= minlng) &
+                              (SpawnPoint.latitude <= maxlat) &
+                              (SpawnPoint.longitude <= maxlng))))
+                     .dicts())
+
+            queryDict = query.dicts()
+            for sp in queryDict:
+                key = sp['id']
+                distance = geopy.distance.vincenty((lat, lng), (sp['latitude'], sp['longitude'])).km
+                if distance <= dist:
+                    spawnpoints[key] = {
+                        'latitude': sp['latitude'],
+                        'longitude': sp['longitude'],
+                        'distance': distance
+                    }
+            orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x['distance']))
+
+            result = []
+            for key, value in orderedspawnpoints.items():
+                result.append((value['latitude'], value['longitude']))
+
+        return result
 
     # Confirm if TTH has been found.
     @staticmethod
