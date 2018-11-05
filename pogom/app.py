@@ -461,8 +461,11 @@ class Pogom(Flask):
             if "GetMapObjects" in proto:
                 gmo_response_string = b64decode(proto['GetMapObjects'])
                 gmo = GetMapObjectsResponse()
-                gmo.ParseFromString(gmo_response_string)
-                gmo_response_json = json.loads(MessageToJson(gmo))
+                try:
+                    gmo.ParseFromString(gmo_response_string)
+                    gmo_response_json = json.loads(MessageToJson(gmo))
+                except:
+                    continue
 
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
@@ -1048,8 +1051,12 @@ class Pogom(Flask):
                 fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
                 frs = FortSearchResponse()
-                frs.ParseFromString(fort_search_response_string)
-                fort_search_response_json = json.loads(MessageToJson(frs))
+
+                try:
+                    frs.ParseFromString(fort_search_response_string)
+                    fort_search_response_json = json.loads(MessageToJson(frs))
+                except:
+                    continue
 
                 if 'challengeQuest' in fort_search_response_json:
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
@@ -1082,8 +1089,11 @@ class Pogom(Flask):
             if "EncounterResponse" in proto and int(trainerlvl) >= 30:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
                 encounter = EncounterResponse()
-                encounter.ParseFromString(encounter_response_string)
-                encounter_response_json = json.loads(MessageToJson(encounter))
+                try:
+                    encounter.ParseFromString(encounter_response_string)
+                    encounter_response_json = json.loads(MessageToJson(encounter))
+                except:
+                    continue
 
                 if "wildPokemon" in encounter_response_json:
                     wildpokemon = encounter_response_json["wildPokemon"]
