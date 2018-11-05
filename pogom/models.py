@@ -1520,7 +1520,7 @@ class SpawnPoint(LatLongModel):
                         'longitude': sp['longitude'],
                         'distance': distance
                     }
-            orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[2]))
+            orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
 
             result = []
             for key, value in orderedspawnpoints.items():
