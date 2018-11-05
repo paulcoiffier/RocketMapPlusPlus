@@ -1487,7 +1487,7 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
                     if 'quest' in self.args.wh_types:
-                        wh_quest = quest_result[quest_json["fortId"]]
+                        wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
                             wh_quest.update(
