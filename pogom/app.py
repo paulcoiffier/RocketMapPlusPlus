@@ -1596,6 +1596,7 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
+        deviceworker['algo'] = "walk_spawnpoint"
 
         deviceworkers = {}
         deviceworkers[uuid] = deviceworker
@@ -1730,6 +1731,7 @@ class Pogom(Flask):
         deviceworker['step'] = step
         deviceworker['direction'] = direction
         deviceworker['last_updated'] = datetime.utcnow()
+        deviceworker['algo'] = "teleport_loc" if needtojump else "scan_loc"
 
         deviceworkers = {}
         deviceworkers[uuid] = deviceworker
