@@ -1552,42 +1552,49 @@ class Pogom(Flask):
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
+            log.info(uuid + " need to add to list")
 
         if len(self.deviceschedules[uuid]) == 0:
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, 5)
+            log.info(uuid + " needed to look in db for nearby spawnpoints. " + str(len(self.deviceschedules[uuid])) + " spawnpoints found.")
+            nextlatitude = latitude
+            nextlongitude = longitude
+        else:
+            nextlatitude = deviceworker['latitude']
+            nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
+        log.info(uuid + " moving towards (" + str(nexttarget[0]) + "," + str(nexttarget[1]) + ") from (" + str(nextlatitude) + "," + str(nextlongitude) + ")")
 
-        nextlatitude = latitude
-        nextlongitude = longitude
-
-        if latitude == nexttarget[0] and longitude == nexttarget[1]:
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
             del self.deviceschedules[uuid][0]
+            log.info(uuid + " at target")
 
-        if latitude < nexttarget[0]:
-            if nexttarget[0] - latitude >= self.args.stepsize:
-                nextlatitude = latitude + self.args.stepsize
+        if nextlatitude < nexttarget[0]:
+            if nexttarget[0] - nextlatitude >= self.args.stepsize:
+                nextlatitude = nextlatitude + self.args.stepsize
             else:
                 nextlatitude = nexttarget[0]
         else:
-            if latitude - nexttarget[0] >= self.args.stepsize:
-                nextlatitude = latitude - self.args.stepsize
+            if nextlatitude - nexttarget[0] >= self.args.stepsize:
+                nextlatitude = nextlatitude - self.args.stepsize
             else:
                 nextlatitude = nexttarget[0]
 
-        if longitude < nexttarget[1]:
-            if nexttarget[1] - longitude >= self.args.stepsize:
-                nextlongitude = longitude + self.args.stepsize
+        if nextlongitude < nexttarget[1]:
+            if nexttarget[1] - nextlongitude >= self.args.stepsize:
+                nextlongitude = nextlongitude + self.args.stepsize
             else:
                 nextlongitude = nexttarget[1]
         else:
-            if longitude - nexttarget[1] >= self.args.stepsize:
-                nextlongitude = longitude - self.args.stepsize
+            if nextlongitude - nexttarget[1] >= self.args.stepsize:
+                nextlongitude = nextlongitude - self.args.stepsize
             else:
                 nextlongitude = nexttarget[1]
 
-        if latitude == nexttarget[0] and longitude == nexttarget[1]:
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
             del self.deviceschedules[uuid][0]
+            log.info(uuid + " target reached now")
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
