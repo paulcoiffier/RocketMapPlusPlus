@@ -367,6 +367,8 @@ class Pogom(Flask):
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
             return self.parse_map_protos(protos, trainerlvl, deviceworker)
+        else:
+            return 'wrong'
 
     def parse_map_protos(self, protos_dict, trainerlvl, deviceworker):
         pokemon = {}
