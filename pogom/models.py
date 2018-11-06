@@ -1527,10 +1527,13 @@ class SpawnPoint(LatLongModel):
             result = []
             while len(orderedspawnpoints) > 0:
                 value = orderedspawnpoints.items()[0][1]
+                print("checking %s" % (value,))
                 result.append((value['latitude'], value['longitude']))
                 newlat = value['latitude']
                 newlong = value['longitude']
                 orderedspawnpoints.popitem()
+                value = orderedspawnpoints.items()[0][1]
+                print("next first item %s" % (value,))
                 orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
             print("Result:\n" + "\n".join("%s" % (e,) for e in result))
         return result
