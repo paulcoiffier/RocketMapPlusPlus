@@ -1547,6 +1547,7 @@ class SpawnPoint(LatLongModel):
             result = []
             while len(orderedspawnpoints) > 0:
                 value = orderedspawnpoints.items()[0][1]
+                print("checking %s" % (value,))
                 result.append((value['latitude'], value['longitude']))
                 newlat = value['latitude']
                 newlong = value['longitude']
