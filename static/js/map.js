@@ -1018,7 +1018,11 @@ function pokestopLabel(pokestop, includeMembers = true) {
         imgSrc = pokestop.url
     } else {
         if (expireTime) {
-            imgSrc = 'static/images/pokestop/PokestopLured.png'
+            if (hasNearby) {
+                imgSrc = 'static/images/pokestop/PokestopLured_Nearby.png'
+            } else {
+                imgSrc = 'static/images/pokestop/PokestopLured.png'
+            }
         }
         if (hasNearby) {
             imgSrc = 'static/images/pokestop/Pokestop_Nearby.png'
@@ -1029,7 +1033,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
         str = `
             <div>
               <div class='pokestop name lure'>
-                ${titleText}
+                ${titleText} (Lured)
               </div>
               <div class='pokestop-expire'>
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
