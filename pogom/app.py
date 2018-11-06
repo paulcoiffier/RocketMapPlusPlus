@@ -62,7 +62,8 @@ def convert_pokemon_list(pokemon):
         p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
         p['pokemon_types'] = get_pokemon_types(p['pokemon_id'])
         p['encounter_id'] = str(p['encounter_id'])
-        p['cp'] = float(p.get('cp', 0))
+        if p['cp'] is None:
+            p['cp'] = 0
         if args.china:
             p['latitude'], p['longitude'] = \
                 transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
@@ -471,6 +472,11 @@ class Pogom(Flask):
                                     log.info('New Spawn Point found.')
                                     new_spawn_points.append(sp)
 
+                                if (not SpawnPoint.tth_found(sp) or sighting['tth_secs']):
+                                    SpawnpointDetectionData.classify(sp, scan_location, now_secs,
+                                                                     sighting)
+                                    sightings[p.encounter_id] = sighting
+
                                 sp['last_scanned'] = datetime.utcnow()
 
                                 if ((p['encounterId'], spawn_id) in encountered_pokemon):
@@ -478,12 +484,9 @@ class Pogom(Flask):
                                     skipped += 1
                                     continue
 
-                                disappear_time = now_date + timedelta(seconds=600)
-
                                 start_end = SpawnPoint.start_end(sp, 1)
                                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                                # disappear_time = now_date + \
-                                #    timedelta(seconds=seconds_until_despawn)
+                                disappear_time = now_date + timedelta(seconds=seconds_until_despawn)
 
                                 pokemon_id = _POKEMONID.values_by_name[p['pokemonData']['pokemonId']].number
 
@@ -616,6 +619,11 @@ class Pogom(Flask):
                                     log.info('New Spawn Point found.')
                                     new_spawn_points.append(sp)
 
+                                if (not SpawnPoint.tth_found(sp) or sighting['tth_secs']):
+                                    SpawnpointDetectionData.classify(sp, scan_location, now_secs,
+                                                                     sighting)
+                                    sightings[p.encounter_id] = sighting
+
                                 sp['last_scanned'] = datetime.utcnow()
 
                                 if ((p['encounterId'], spawn_id) in encountered_pokemon):
@@ -623,15 +631,9 @@ class Pogom(Flask):
                                     skipped += 1
                                     continue
 
-                                if float(p['expirationTimestampMs']) == -1:
-                                    disappear_time = now_date + timedelta(seconds=600)
-                                else:
-                                    disappear_time = datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0)
-
                                 start_end = SpawnPoint.start_end(sp, 1)
                                 seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                                # disappear_time = now_date + \
-                                #    timedelta(seconds=seconds_until_despawn)
+                                disappear_time = now_date + timedelta(seconds=seconds_until_despawn)
 
                                 pokemon_id = _POKEMONID.values_by_name[p['pokemonId']].number
 
@@ -1062,14 +1064,16 @@ class Pogom(Flask):
                         log.info('New Spawn Point found.')
                         new_spawn_points.append(sp)
 
-                    sp['last_scanned'] = datetime.utcnow()
+                    if (not SpawnPoint.tth_found(sp) or sighting['tth_secs']):
+                        SpawnpointDetectionData.classify(sp, scan_location, now_secs,
+                                                         sighting)
+                        sightings[p.encounter_id] = sighting
 
-                    disappear_time = now_date + timedelta(seconds=600)
+                    sp['last_scanned'] = datetime.utcnow()
 
                     start_end = SpawnPoint.start_end(sp, 1)
                     seconds_until_despawn = (start_end[1] - now_secs) % 3600
-                    # disappear_time = now_date + \
-                    #    timedelta(seconds=seconds_until_despawn)
+                    disappear_time = now_date + timedelta(seconds=seconds_until_despawn)
 
                     pokemon_id = _POKEMONID.values_by_name[wildpokemon['pokemonData']['pokemonId']].number
 
