@@ -1552,11 +1552,9 @@ class Pogom(Flask):
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
-            log.info(uuid + " need to add to list")
 
         if len(self.deviceschedules[uuid]) == 0:
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, 5)
-            log.info(uuid + " needed to look in db for nearby spawnpoints. " + str(len(self.deviceschedules[uuid])) + " spawnpoints found.")
             nextlatitude = latitude
             nextlongitude = longitude
         else:
@@ -1564,12 +1562,10 @@ class Pogom(Flask):
             nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-        # log.info(uuid + " moving towards (" + str(nexttarget[0]) + "," + str(nexttarget[1]) + ") from (" + str(nextlatitude) + "," + str(nextlongitude) + ")")
 
         if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
-            log.info(uuid + " at target")
 
         if nextlatitude < nexttarget[0]:
             if nexttarget[0] - nextlatitude >= self.args.stepsize:
@@ -1596,7 +1592,6 @@ class Pogom(Flask):
         if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
-            log.info(uuid + " target reached now")
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
