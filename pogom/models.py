@@ -1532,7 +1532,6 @@ class SpawnPoint(LatLongModel):
                 newlong = value['longitude']
                 orderedspawnpoints.popitem(last=False)
                 orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-            print("Result:\n" + "\n".join("%s" % (e,) for e in result))
         return result
 
     # Confirm if TTH has been found.
