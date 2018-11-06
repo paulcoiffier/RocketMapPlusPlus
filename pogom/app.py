@@ -1564,10 +1564,11 @@ class Pogom(Flask):
             nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-        log.info(uuid + " moving towards (" + str(nexttarget[0]) + "," + str(nexttarget[1]) + ") from (" + str(nextlatitude) + "," + str(nextlongitude) + ")")
+        # log.info(uuid + " moving towards (" + str(nexttarget[0]) + "," + str(nexttarget[1]) + ") from (" + str(nextlatitude) + "," + str(nextlongitude) + ")")
 
         if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            del self.deviceschedules[uuid][0]
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
             log.info(uuid + " at target")
 
         if nextlatitude < nexttarget[0]:
@@ -1593,7 +1594,8 @@ class Pogom(Flask):
                 nextlongitude = nexttarget[1]
 
         if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            del self.deviceschedules[uuid][0]
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
             log.info(uuid + " target reached now")
 
         deviceworker['latitude'] = round(nextlatitude, 5)
