@@ -1557,6 +1557,7 @@ class Pogom(Flask):
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
+            log.info(uuid + " need to add to list")
 
         if len(self.deviceschedules[uuid]) == 0:
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, 5)
@@ -1567,6 +1568,7 @@ class Pogom(Flask):
             nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
+        log.info(uuid + " moving towards (" + str(nexttarget[0]) + "," + str(nexttarget[1]) + ") from (" + str(nextlatitude) + "," + str(nextlongitude) + ")")
 
         if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
             if len(self.deviceschedules[uuid]) > 0:
