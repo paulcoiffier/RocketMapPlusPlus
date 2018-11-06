@@ -43,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 45
+db_schema_version = 46
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -885,6 +885,7 @@ class DeviceWorker(LatLongModel):
     last_updated = DateTimeField(index=True, default=datetime.utcnow)
     scans = UBigIntegerField(default=0)
     direction = Utf8mb4CharField(max_length=1, default="U")
+    algo = Utf8mb4CharField(max_length=50, null=True)
 
     @staticmethod
     def get_by_id(id, latitude=0, longitude=0):
@@ -3651,6 +3652,11 @@ def database_migrate(db, old_ver):
 
     if old_ver < 45:
         create_tables(db)
+
+    if old_ver < 46 and old_ver > 40:
+        migrate(
+            migrator.add_column('deviceworker', 'algo', Utf8mb4CharField(max_length=50, null=True))
+        )
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')
