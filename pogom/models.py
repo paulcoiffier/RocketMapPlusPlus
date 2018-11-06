@@ -305,6 +305,12 @@ class Pokemon(LatLongModel):
                  .dicts()
                  )
 
+        if args.china:
+            for result in query:
+                result['latitude'], result['longitude'] = \
+                    transform_from_wgs_to_gcj(
+                        result['latitude'], result['longitude'])
+
         return list(query)
 
     @staticmethod
@@ -612,6 +618,9 @@ class Gym(LatLongModel):
         gyms = {}
         gym_ids = []
         for g in results:
+            if args.china:
+                g['latitude'], g['longitude'] = \
+                transform_from_wgs_to_gcj(g['latitude'], g['longitude'])
             g['name'] = None
             g['pokemon'] = []
             g['raid'] = None
@@ -981,6 +990,11 @@ class ScannedLocation(LatLongModel):
                      .order_by(ScannedLocation.last_modified.asc())
                      .dicts())
 
+        if args.china:
+            for result in query:
+                result['latitude'], result['longitude'] = \
+                    transform_from_wgs_to_gcj(
+                        result['latitude'], result['longitude'])
         return list(query)
 
     # DB format of a new location.
@@ -1479,6 +1493,12 @@ class SpawnPoint(LatLongModel):
             del sp['links']
             del sp['latest_seen']
             del sp['earliest_unseen']
+
+        if args.china:
+            for result in spawnpoints.values():
+                result['latitude'], result['longitude'] = \
+                    transform_from_wgs_to_gcj(
+                        result['latitude'], result['longitude'])
 
         return list(spawnpoints.values())
 
