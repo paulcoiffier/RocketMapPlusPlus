@@ -470,12 +470,14 @@ class Pokestop(LatLongModel):
             details = (PokestopDetails
                        .select(
                            PokestopDetails.pokestop_id,
-                           PokestopDetails.name)
+                           PokestopDetails.name,
+                           PokestopDetails.url)
                        .where(PokestopDetails.pokestop_id << pokestop_ids)
                        .dicts())
 
             for d in details:
                 pokestops[d['pokestop_id']]['name'] = d['name']
+                pokestops[d['pokestop_id']]['url'] = d['url']
 
         # Re-enable the GC.
         gc.enable()
@@ -505,6 +507,7 @@ class Pokestop(LatLongModel):
             result = (Pokestop
                       .select(Pokestop.pokestop_id,
                               PokestopDetails.name,
+                              PokestopDetails.url,
                               PokestopDetails.description,
                               Pokestop.enabled,
                               Pokestop.latitude,
@@ -654,12 +657,14 @@ class Gym(LatLongModel):
             details = (GymDetails
                        .select(
                            GymDetails.gym_id,
-                           GymDetails.name)
+                           GymDetails.name,
+                           GymDetails.url)
                        .where(GymDetails.gym_id << gym_ids)
                        .dicts())
 
             for d in details:
                 gyms[d['gym_id']]['name'] = d['name']
+                gyms[d['gym_id']]['url'] = d['url']
 
             raids = (Raid
                      .select()
@@ -703,6 +708,7 @@ class Gym(LatLongModel):
                               Gym.team_id,
                               GymDetails.name,
                               GymDetails.description,
+                              GymDetails.url,
                               Gym.guard_pokemon_id,
                               Gym.slots_available,
                               Gym.latitude,

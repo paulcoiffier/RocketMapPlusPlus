@@ -762,6 +762,7 @@ function gymLabel(gym, includeMembers = true) {
       <div class='gym name'>
         <span class='team ${gymTypes[gym.team_id].toLowerCase()}'>${titleText}</span>
       </div>`
+    const img = `<img class='gym img ${gymTypes[gym.team_id].toLowerCase()}' src='${gym.url}'>`
 
     if (gym.team_id !== 0) {
         subtitle = `
@@ -943,6 +944,7 @@ function gymLabel(gym, includeMembers = true) {
         <div>
             <center>
                 ${title}
+                ${img}
                 ${subtitle}
                 ${image}
                 ${imageLbl}
@@ -1010,25 +1012,30 @@ function pokestopLabel(pokestop, includeMembers = true) {
         hasNearby = true
     })
 
-    var icon = 'Pokestop'
-    if (expireTime) {
-        icon += 'Lured'
-    }
-    if (hasNearby) {
-        icon += '_Nearby'
+    var titleText = pokestop.name ? pokestop.name : 'Pokestop';
+    var imgSrc = 'static/images/pokestop/Pokestop.png';
+    if (pokestop.url) {
+        imgSrc = pokestop.url
+    } else {
+        if (expireTime) {
+            imgSrc = 'static/images/pokestop/PokestopLured.png'
+        }
+        if (hasNearby) {
+            imgSrc = 'static/images/pokestop/Pokestop_Nearby.png'
+        }
     }
 
     if (expireTime) {
         str = `
             <div>
-              <div class='pokestop lure'>
-                Lured Pokéstop
+              <div class='pokestop name lure'>
+                ${titleText}
               </div>
               <div class='pokestop-expire'>
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
+                <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${memberStr}
               <div>
@@ -1039,11 +1046,11 @@ function pokestopLabel(pokestop, includeMembers = true) {
     } else {
         str = `
             <div>
-              <div class='pokestop nolure'>
-                Pokéstop
+              <div class='pokestop name nolure'>
+                ${titleText}
               </div>
               <div>
-                <img class='pokestop sprite' src='static/images/pokestop/${icon}.png'>
+                <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${memberStr}
               <div>
