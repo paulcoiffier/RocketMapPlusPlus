@@ -7,9 +7,74 @@ a = 6378245.0
 ee = 0.00669342162296594323
 pi = 3.14159265358979324
 
+macau_border = [
+    {"latitude": 22.207514407609402, "longitude": 113.53480603903813},
+    {"latitude": 22.209351997243783, "longitude": 113.53425886839909},
+    {"latitude": 22.21060875777704, "longitude": 113.5337265676701},
+    {"latitude": 22.21135371302128, "longitude": 113.53339397375225},
+    {"latitude": 22.212098664310567, "longitude": 113.53331887189984},
+    {"latitude": 22.213141589471075, "longitude": 113.53472434942364},
+    {"latitude": 22.213449499226712, "longitude": 113.5361405557835},
+    {"latitude": 22.213383261719574, "longitude": 113.53829705183148},
+    {"latitude": 22.2129263629142, "longitude": 113.54026042883038},
+    {"latitude": 22.213055486640464, "longitude": 113.54189121191143},
+    {"latitude": 22.21560813898635, "longitude": 113.54308123906958},
+    {"latitude": 22.21640272945934, "longitude": 113.54358549436438},
+    {"latitude": 22.21681988765599, "longitude": 113.54432578405249},
+    {"latitude": 22.216849684622577, "longitude": 113.54518409093725},
+    {"latitude": 22.216680835061613, "longitude": 113.54548449834692},
+    {"latitude": 22.216656978296218, "longitude": 113.5471753163331},
+    {"latitude": 22.216537790228198, "longitude": 113.54754009675912},
+    {"latitude": 22.216656978296218, "longitude": 113.54820528459481},
+    {"latitude": 22.21657901729732, "longitude": 113.5489170513548},
+    {"latitude": 22.216611297399588, "longitude": 113.54927378515379},
+    {"latitude": 22.21674786698083, "longitude": 113.54974048952238},
+    {"latitude": 22.21690678414438, "longitude": 113.54998725275175},
+    {"latitude": 22.21694154724991, "longitude": 113.55024206260816},
+    {"latitude": 22.21702100574448, "longitude": 113.55078386882917},
+    {"latitude": 22.21564299036599, "longitude": 113.55077187459631},
+    {"latitude": 22.21549696007803, "longitude": 113.55141764965879},
+    {"latitude": 22.215084764170633, "longitude": 113.55237251606809},
+    {"latitude": 22.214235079151624, "longitude": 113.5543115615817},
+    {"latitude": 22.213445442682694, "longitude": 113.55604963302335},
+    {"latitude": 22.213151345943242, "longitude": 113.55689779752106},
+    {"latitude": 22.21314637965167, "longitude": 113.55715528958649},
+    {"latitude": 22.212483332334276, "longitude": 113.5588128947577},
+    {"latitude": 22.21132120978135, "longitude": 113.56099084847779},
+    {"latitude": 22.204368138769, "longitude": 113.56292203896851},
+    {"latitude": 22.187957525723302, "longitude": 113.56644109719605},
+    {"latitude": 22.168220091638695, "longitude": 113.5667127730078},
+    {"latitude": 22.1731481425775, "longitude": 113.5751241804785},
+    {"latitude": 22.169491863254862, "longitude": 113.58782712237303},
+    {"latitude": 22.134288954990772, "longitude": 113.60143626399645},
+    {"latitude": 22.10900401690852, "longitude": 113.5683056182445},
+    {"latitude": 22.109737582217022, "longitude": 113.55334650015789},
+    {"latitude": 22.111407473453415, "longitude": 113.550664291143},
+    {"latitude": 22.113037586301715, "longitude": 113.54935537314373},
+    {"latitude": 22.115831539461425, "longitude": 113.54933611322633},
+    {"latitude": 22.118614560256564, "longitude": 113.54972235132448},
+    {"latitude": 22.121411611091922, "longitude": 113.5495292322754},
+    {"latitude": 22.125162760379855, "longitude": 113.55068794656984},
+    {"latitude": 22.128601543265393, "longitude": 113.55058065820924},
+    {"latitude": 22.13799165675807, "longitude": 113.5512029307007},
+    {"latitude": 22.146204498846757, "longitude": 113.54965797830812},
+    {"latitude": 22.149752715540536, "longitude": 113.54734085520181},
+    {"latitude": 22.152932540417268, "longitude": 113.54356430490884},
+    {"latitude": 22.156509757522947, "longitude": 113.54030273874673},
+    {"latitude": 22.166175861752283, "longitude": 113.53710118732579},
+    {"latitude": 22.177065192092236, "longitude": 113.53177968464024},
+    {"latitude": 22.18477464586574, "longitude": 113.52765981159337},
+    {"latitude": 22.187086485934902, "longitude": 113.52939717673985},
+    {"latitude": 22.189907834906375, "longitude": 113.53111379050938},
+    {"latitude": 22.192694283789987, "longitude": 113.53362433814732},
+    {"latitude": 22.195773799491587, "longitude": 113.5351692905399},
+    {"latitude": 22.20097902086778, "longitude": 113.53598468208043},
+    {"latitude": 22.20725681738251, "longitude": 113.53493325614659}
+]
+
 
 def transform_from_wgs_to_gcj(latitude, longitude):
-    if is_location_out_of_china(latitude, longitude):
+    if is_location_out_of_china(latitude, longitude) or is_location_in_macau(latitude, longitude):
         adjust_lat, adjust_lon = latitude, longitude
     else:
         adjust_lat = transform_lat(longitude - 105, latitude - 35.0)
@@ -27,6 +92,30 @@ def transform_from_wgs_to_gcj(latitude, longitude):
         adjust_lon += longitude
     #  Print 'transfromed from ', wgs_loc, ' to ', adjust_loc.
     return adjust_lat, adjust_lon
+
+
+def is_location_in_macau(latitude, longitude):
+    inside = False
+    sides = len(macau_border)
+    j = sides - 1
+
+    for i, item in enumerate(macau_border):
+        if (
+            (
+                (
+                    (macau_border[i]['longitude'] <= longitude) and (longitude < macau_border[j]['longitude'])
+                ) or (
+                    (macau_border[j]['longitude'] <= longitude) and (longitude < macau_border[i]['longitude'])
+                )
+            ) and
+            (latitude < (macau_border[j]['latitude'] - macau_border[i]['latitude']) * (
+                longitude - macau_border[i]['longitude']) / (
+                 macau_border[j]['longitude'] - macau_border[i]['longitude']) + macau_border[i]['latitude'])
+        ):
+            inside = not inside
+
+        j = i
+    return inside
 
 
 def is_location_out_of_china(latitude, longitude):
