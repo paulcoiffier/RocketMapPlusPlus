@@ -69,3 +69,10 @@ a.pokestop:link {
   margin-left: auto;
   margin-right: auto;
 }
+
+.pokestop.img.sprite {
+  height: 64px;
+  width: 64px;
+  border-radius: 32px;
+  border: 2px solid rgb(29, 139, 240);
+}
