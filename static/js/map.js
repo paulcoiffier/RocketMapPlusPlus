@@ -1989,10 +1989,12 @@ function processPokemon(item) {
     const isRarityExcluded = excludedRarity.indexOf(pokemonRarity) !== -1
     const isPokeExcludedByRarity = excludedPokemonByRarity.indexOf(item['pokemon_id']) !== -1
 
+    const needToAdd = (!(item['encounter_id'] in mapData.pokemons)) || ((item['cp'] > 0) && mapData.pokemons[item['encounter_id']]['cp'] == 0)
+
     var oldMarker = null
     var newMarker = null
 
-    if (!(item['encounter_id'] in mapData.pokemons) &&
+    if (needToAdd &&
          !isPokeExcluded && !isRarityExcluded && isPokeAlive) {
         // Add marker to map and item to dict.
         if (!item.hidden) {

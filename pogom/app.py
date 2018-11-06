@@ -62,6 +62,7 @@ def convert_pokemon_list(pokemon):
         p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
         p['pokemon_types'] = get_pokemon_types(p['pokemon_id'])
         p['encounter_id'] = str(p['encounter_id'])
+        p['cp'] = float(p.get('cp', 0))
         if args.china:
             p['latitude'], p['longitude'] = \
                 transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
