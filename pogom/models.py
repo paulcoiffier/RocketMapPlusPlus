@@ -1513,11 +1513,13 @@ class SpawnPoint(LatLongModel):
             queryDict = query.dicts()
             for sp in queryDict:
                 key = sp['id']
-                distance = geopy.distance.vincenty((lat, lng), (sp['latitude'], sp['longitude'])).km
+                latitude = round(sp['latitude'], 5)
+                longitude = round(sp['longitude'], 5)
+                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                 if distance <= dist:
                     spawnpoints[key] = {
-                        'latitude': sp['latitude'],
-                        'longitude': sp['longitude'],
+                        'latitude': latitude,
+                        'longitude': longitude,
                         'distance': distance
                     }
             orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
