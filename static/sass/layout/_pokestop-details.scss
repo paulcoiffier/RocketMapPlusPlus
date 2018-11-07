@@ -182,9 +182,14 @@
         height: 96px;
         width: 96px;
 
+        &.pokestop-icon {
+            display: none;
+        }
+
         &.img {
             border-radius: 48px;
             border: 5px solid rgb(29, 139, 240);
+            margin-top: 10px;
         }
       }
 
