@@ -1012,21 +1012,20 @@ function pokestopLabel(pokestop, includeMembers = true) {
         hasNearby = true
     })
 
+    var icon = 'Pokestop'
+    if (expireTime) {
+        icon += 'Lured'
+    }
+    if (hasNearby) {
+        icon += '_Nearby'
+    }
+    var iconSrc = `static/images/pokestop/${icon}.png`;
     var titleText = pokestop.name ? pokestop.name : 'Pokestop';
-    var imgSrc = 'static/images/pokestop/Pokestop.png';
+    var imgSrc;
     if (pokestop.url) {
         imgSrc = pokestop.url
     } else {
-        if (expireTime) {
-            if (hasNearby) {
-                imgSrc = 'static/images/pokestop/PokestopLured_Nearby.png'
-            } else {
-                imgSrc = 'static/images/pokestop/PokestopLured.png'
-            }
-        }
-        if (hasNearby) {
-            imgSrc = 'static/images/pokestop/Pokestop_Nearby.png'
-        }
+        imgSrc = iconSrc;
     }
 
     if (expireTime) {
@@ -1039,6 +1038,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                   <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
               </div>
               <div>
+                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
                 <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${memberStr}
@@ -1054,6 +1054,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                 ${titleText}
               </div>
               <div>
+                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
                 <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${memberStr}
