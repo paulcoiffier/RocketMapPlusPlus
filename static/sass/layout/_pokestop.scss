@@ -71,8 +71,5 @@ a.pokestop:link {
 }
 
 .pokestop.img.sprite {
-  height: 64px;
-  width: 64px;
-  border-radius: 32px;
-  border: 2px solid rgb(29, 139, 240);
+  display: none;
 }
