@@ -29,6 +29,8 @@ from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
 
+import geopy
+
 from google.protobuf.json_format import MessageToJson
 from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
@@ -364,6 +366,9 @@ class Pogom(Flask):
 
             deviceworker['scans'] = deviceworker['scans'] + 1
             deviceworker['last_scanned'] = datetime.utcnow()
+
+            if deviceworker['algo'] == 'IDLE':
+                deviceworker['algo'] = 'SCANNING'
 
             deviceworkers = {}
             deviceworkers[uuid] = deviceworker
@@ -1560,6 +1565,11 @@ class Pogom(Flask):
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
 
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference > self.args.scheduletimeout * 60:
+            self.deviceschedules[uuid] = []
+
         if len(self.deviceschedules[uuid]) == 0:
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
@@ -1640,6 +1650,11 @@ class Pogom(Flask):
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
 
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference > self.args.scheduletimeout * 60:
+            self.deviceschedules[uuid] = []
+
         if len(self.deviceschedules[uuid]) == 0:
             self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
@@ -1718,6 +1733,11 @@ class Pogom(Flask):
         deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference > self.args.scheduletimeout * 60:
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -1870,7 +1890,7 @@ class Pogom(Flask):
                 direction = "U"
                 currentlatitude += self.args.stepsize
 
-        if self.args.maxradius > 0 and radius > self.args.maxradius:
+        if self.args.maxradius > 0 and geopy.distance.vincenty((currentlatitude, currentlongitude), (centerlatitude, centerlongitude)).km > self.args.maxradius:
             currentlatitude = centerlatitude
             currentlongitude = centerlongitude
             radius = 0
