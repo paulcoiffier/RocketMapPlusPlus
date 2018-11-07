@@ -111,6 +111,8 @@ class Pogom(Flask):
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
+        self.route("/walk_pokestop", methods=['POST'])(self.walk_pokestop)
+        self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
         self.route("/teleport_loc", methods=['POST'])(self.teleport_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
@@ -1559,9 +1561,11 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, 5)
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
@@ -1611,6 +1615,151 @@ class Pogom(Flask):
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
         ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
         self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
+    def walk_pokestop(self):
+        request_json = request.get_json()
+
+        uuid = request_json.get('uuid')
+        if uuid == "":
+            return ""
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+
+        if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        if len(self.deviceschedules[uuid]) == 0:
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, self.args.maxradius)
+            nextlatitude = latitude
+            nextlongitude = longitude
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
+        else:
+            nextlatitude = deviceworker['latitude']
+            nextlongitude = deviceworker['longitude']
+
+        nexttarget = self.deviceschedules[uuid][0]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        if nextlatitude < nexttarget[0]:
+            if nexttarget[0] - nextlatitude >= self.args.stepsize:
+                nextlatitude = nextlatitude + self.args.stepsize
+            else:
+                nextlatitude = nexttarget[0]
+        else:
+            if nextlatitude - nexttarget[0] >= self.args.stepsize:
+                nextlatitude = nextlatitude - self.args.stepsize
+            else:
+                nextlatitude = nexttarget[0]
+
+        if nextlongitude < nexttarget[1]:
+            if nexttarget[1] - nextlongitude >= self.args.stepsize:
+                nextlongitude = nextlongitude + self.args.stepsize
+            else:
+                nextlongitude = nexttarget[1]
+        else:
+            if nextlongitude - nexttarget[1] >= self.args.stepsize:
+                nextlongitude = nextlongitude - self.args.stepsize
+            else:
+                nextlongitude = nexttarget[1]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['last_updated'] = datetime.utcnow()
+        deviceworker['algo'] = "walk_pokestop"
+
+        deviceworkers = {}
+        deviceworkers[uuid] = deviceworker
+
+        self.db_update_queue.put((DeviceWorker, deviceworkers))
+
+        scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
+        ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
+        self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
+    def teleport_gym(self):
+        request_json = request.get_json()
+
+        uuid = request_json.get('uuid')
+        if uuid == "":
+            return ""
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+
+        if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        if len(self.deviceschedules[uuid]) == 0:
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
+            nextlatitude = latitude
+            nextlongitude = longitude
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
+        else:
+            nextlatitude = deviceworker['latitude']
+            nextlongitude = deviceworker['longitude']
+
+        nexttarget = self.deviceschedules[uuid][0]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference >= 60:
+            deviceworker['latitude'] = round(nextlatitude, 5)
+            deviceworker['longitude'] = round(nextlongitude, 5)
+            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['algo'] = "walk_pokestop"
+
+            deviceworkers = {}
+            deviceworkers[uuid] = deviceworker
+
+            self.db_update_queue.put((DeviceWorker, deviceworkers))
+
+            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
+            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
+            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
 
         d = {}
         d['latitude'] = deviceworker['latitude']
