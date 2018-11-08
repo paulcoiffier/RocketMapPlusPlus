@@ -23,6 +23,8 @@ from cachetools import TTLCache
 from cachetools import cached
 from timeit import default_timer
 from flask import json
+import geopy
+from collections import OrderedDict
 
 from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
@@ -41,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 45
+db_schema_version = 46
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -553,6 +555,55 @@ class Pokestop(LatLongModel):
 
         return result
 
+    @staticmethod
+    def get_nearby_pokestops(lat, lng, dist):
+        pokestops = {}
+        with Pokestop.database().execution_context():
+            query = (Pokestop.select(
+                Pokestop.latitude, Pokestop.longitude, Pokestop.pokestop_id).dicts())
+
+            lat1 = lat - 0.1
+            lat2 = lat + 0.1
+            lng1 = lng - 0.1
+            lng2 = lng + 0.1
+            minlat = min(lat1, lat2)
+            maxlat = max(lat1, lat2)
+            minlng = min(lng1, lng2)
+            maxlng = max(lng1, lng2)
+
+            if dist > 0:
+                query = (query
+                         .where((((Pokestop.latitude >= minlat) &
+                                  (Pokestop.longitude >= minlng) &
+                                  (Pokestop.latitude <= maxlat) &
+                                  (Pokestop.longitude <= maxlng))))
+                         .dicts())
+
+            queryDict = query.dicts()
+            for p in queryDict:
+                key = p['pokestop_id']
+                latitude = round(p['latitude'], 5)
+                longitude = round(p['longitude'], 5)
+                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                if dist == 0 or distance <= dist:
+                    pokestops[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance
+                    }
+            orderedpokestops = OrderedDict(sorted(pokestops.items(), key=lambda x: x[1]['distance']))
+
+            result = []
+            while len(orderedpokestops) > 0:
+                value = orderedpokestops.items()[0][1]
+                result.append((value['latitude'], value['longitude']))
+                newlat = value['latitude']
+                newlong = value['longitude']
+                orderedpokestops.popitem(last=False)
+                orderedpokestops = OrderedDict(sorted(orderedpokestops.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+
+        return result
+
 
 class Gym(LatLongModel):
     gym_id = Utf8mb4CharField(primary_key=True, max_length=50)
@@ -794,6 +845,55 @@ class Gym(LatLongModel):
                 return gym_by_id[0]['park']
         return False
 
+    @staticmethod
+    def get_nearby_gyms(lat, lng, dist):
+        gyms = {}
+        with Gym.database().execution_context():
+            query = (Gym.select(
+                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
+
+            lat1 = lat - 0.1
+            lat2 = lat + 0.1
+            lng1 = lng - 0.1
+            lng2 = lng + 0.1
+            minlat = min(lat1, lat2)
+            maxlat = max(lat1, lat2)
+            minlng = min(lng1, lng2)
+            maxlng = max(lng1, lng2)
+
+            if dist > 0:
+                query = (query
+                         .where((((Gym.latitude >= minlat) &
+                                  (Gym.longitude >= minlng) &
+                                  (Gym.latitude <= maxlat) &
+                                  (Gym.longitude <= maxlng))))
+                         .dicts())
+
+            queryDict = query.dicts()
+            for g in queryDict:
+                key = g['gym_id']
+                latitude = round(g['latitude'], 5)
+                longitude = round(g['longitude'], 5)
+                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                if dist == 0 or distance <= dist:
+                    gyms[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance
+                    }
+            orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
+
+            result = []
+            while len(orderedgyms) > 0:
+                value = orderedgyms.items()[0][1]
+                result.append((value['latitude'], value['longitude']))
+                newlat = value['latitude']
+                newlong = value['longitude']
+                orderedgyms.popitem(last=False)
+                orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+
+        return result
+
 
 class Raid(BaseModel):
     gym_id = Utf8mb4CharField(primary_key=True, max_length=50)
@@ -889,6 +989,8 @@ class DeviceWorker(LatLongModel):
     last_updated = DateTimeField(index=True, default=datetime.utcnow)
     scans = UBigIntegerField(default=0)
     direction = Utf8mb4CharField(max_length=1, default="U")
+    fetch = Utf8mb4CharField(max_length=50, default='IDLE')
+    scanning = SmallIntegerField(default=0)
 
     @staticmethod
     def get_by_id(id, latitude=0, longitude=0):
@@ -909,9 +1011,20 @@ class DeviceWorker(LatLongModel):
                 'radius': 0,
                 'step': 0,
                 'scans': 0,
-                'direction' : 'U'
+                'direction': 'U',
+                'fetch': 'IDLE',
+                'scanning': 0
             }
         return result
+
+    @staticmethod
+    def get_all():
+        with DeviceWorker.database().execution_context():
+            query = (DeviceWorker
+                     .select()
+                     .dicts())
+
+        return list(query)
 
 
 class ScannedLocation(LatLongModel):
@@ -1507,6 +1620,56 @@ class SpawnPoint(LatLongModel):
                         result['latitude'], result['longitude'])
 
         return list(spawnpoints.values())
+
+    @staticmethod
+    def get_nearby_spawnpoints(lat, lng, dist):
+        spawnpoints = {}
+        with SpawnPoint.database().execution_context():
+            query = (SpawnPoint.select(
+                SpawnPoint.latitude, SpawnPoint.longitude, SpawnPoint.id)
+                .dicts())
+
+            lat1 = lat - 0.1
+            lat2 = lat + 0.1
+            lng1 = lng - 0.1
+            lng2 = lng + 0.1
+            minlat = min(lat1, lat2)
+            maxlat = max(lat1, lat2)
+            minlng = min(lng1, lng2)
+            maxlng = max(lng1, lng2)
+
+            if dist > 0:
+                query = (query
+                         .where((((SpawnPoint.latitude >= minlat) &
+                                  (SpawnPoint.longitude >= minlng) &
+                                  (SpawnPoint.latitude <= maxlat) &
+                                  (SpawnPoint.longitude <= maxlng))))
+                         .dicts())
+
+            queryDict = query.dicts()
+            for sp in queryDict:
+                key = sp['id']
+                latitude = round(sp['latitude'], 5)
+                longitude = round(sp['longitude'], 5)
+                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                if dist == 0 or distance <= dist:
+                    spawnpoints[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance
+                    }
+            orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
+
+            result = []
+            while len(orderedspawnpoints) > 0:
+                value = orderedspawnpoints.items()[0][1]
+                result.append((value['latitude'], value['longitude']))
+                newlat = value['latitude']
+                newlong = value['longitude']
+                orderedspawnpoints.popitem(last=False)
+                orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+
+        return result
 
     # Confirm if TTH has been found.
     @staticmethod
@@ -3605,6 +3768,12 @@ def database_migrate(db, old_ver):
 
     if old_ver < 45:
         create_tables(db)
+
+    if old_ver < 46 and old_ver > 40:
+        migrate(
+            migrator.add_column('deviceworker', 'fetch', Utf8mb4CharField(max_length=50, default='IDLE')),
+            migrator.add_column('deviceworker', 'scanning', SmallIntegerField(default=0))
+        )
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

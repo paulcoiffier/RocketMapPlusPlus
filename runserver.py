@@ -18,7 +18,7 @@ from flask_cache_bust import init_cache_busting
 
 from pogom.app import Pogom
 from pogom.utils import (get_args, now, log_resource_usage_loop, get_debug_dump_link,
-                         dynamic_rarity_refresher)
+                         dynamic_rarity_refresher, device_worker_refresher)
 from pogom.altitude import get_gmaps_altitude
 
 from pogom.models import (init_database, create_tables, drop_tables,
@@ -316,6 +316,12 @@ def main():
         log.info('Dynamic rarity is enabled.')
     else:
         log.info('Dynamic rarity is disabled.')
+
+    t = Thread(target=device_worker_refresher,
+               name='device-worker',
+               args=(db_updates_queue, wh_updates_queue, args))
+    t.daemon = True
+    t.start()
 
     # WH updates queue & WH unique key LFU caches.
     # The LFU caches will stop the server from resending the same data an
