@@ -376,14 +376,14 @@ class Quest(BaseModel):
                             (Pokestop.longitude <= neLng))
                      .dicts())
 
-        quests = {}
-        for quest in query:
-            if args.china:
-                quest['latitude'], quest['longitude'] = \
-                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
-            quests[quest['pokestop_id']] = quest
+#        quests = {}
+#        for quest in query:
+#            if args.china:
+#                quest['latitude'], quest['longitude'] = \
+#                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
+#            quests[quest['pokestop_id']] = quest
 
-        return quests
+        return list(query)
 
 
 class Pokestop(LatLongModel):

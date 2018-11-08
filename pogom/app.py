@@ -184,11 +184,12 @@ class Pogom(Flask):
 
         result = ""
         for quest in d:
+#            log.info(quest)
             if result != "":
                 result += "\n"
             result += str(round(quest['latitude'], 5)) + "," + str(round(quest['longitude'], 5)) + ","
             if quest["reward_type"] == "POKEMON_ENCOUNTER":
-                result += _POKEMONID.values_by_name[quest["reward_item"]].number
+                result += str(_POKEMONID.values_by_name[quest["reward_item"]].number)
             else:
                 result += ""
             result += "," + str(quest['quest_type']) + "," + str(quest["reward_type"])
