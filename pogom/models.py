@@ -349,6 +349,42 @@ class Quest(BaseModel):
     reward_amount = IntegerField(null=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
 
+    @staticmethod
+    def get_quests(swLat, swLng, neLat, neLng, timestamp=0, oSwLat=None,
+                   oSwLng=None, oNeLat=None, oNeLng=None, lured=False):
+
+        query = (Quest
+                 .select(Quest.pokestop_id,
+                         Pokestop.latitude,
+                         Pokestop.longitude,
+                         Quest.quest_type,
+                         Quest.reward_type,
+                         Quest.reward_item,
+                         Quest.reward_amount,
+                         Quest.last_scanned)
+                 .join(Pokestop, JOIN.LEFT_OUTER,
+                       on=(Quest.pokestop_id == Pokestop.pokestop_id)))
+
+        if not (swLat and swLng and neLat and neLng):
+            query = (query
+                     .dicts())
+        else:
+            query = (query
+                     .where((Pokestop.latitude >= swLat) &
+                            (Pokestop.longitude >= swLng) &
+                            (Pokestop.latitude <= neLat) &
+                            (Pokestop.longitude <= neLng))
+                     .dicts())
+
+        quests = {}
+        for quest in query:
+            if args.china:
+                quest['latitude'], quest['longitude'] = \
+                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
+            quests[quest['pokestop_id']] = quest
+
+        return quests
+
 
 class Pokestop(LatLongModel):
     pokestop_id = Utf8mb4CharField(primary_key=True, max_length=50)

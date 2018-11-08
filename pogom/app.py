@@ -131,6 +131,7 @@ class Pogom(Flask):
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
+        self.route("/feedquest", methods=['GET'])(self.feedquest)
         self.route("/gym_img", methods=['GET'])(self.gym_img)
 
         self.deviceschedules = {}
@@ -167,6 +168,39 @@ class Pogom(Flask):
             rarity = data.get(str(pokemonid), "New Spawn")
 
         return rarity
+
+    def feedquest(self):
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        swLat = request.args.get('swLat')
+        swLng = request.args.get('swLng')
+        neLat = request.args.get('neLat')
+        neLng = request.args.get('neLng')
+
+        d = Quest.get_quests(swLat, swLng, neLat, neLng)
+
+        result = ""
+        for quest in d:
+            if result != "":
+                result += "\n"
+            result += str(round(quest['latitude'], 5)) + "," + str(round(quest['longitude'], 5)) + ","
+            if quest["reward_type"] == "POKEMON_ENCOUNTER":
+                result += _POKEMONID.values_by_name[quest["reward_item"]].number
+            else:
+                result += ""
+            result += "," + str(quest['quest_type']) + "," + str(quest["reward_type"])
+            if quest["reward_type"] != "STARDUST":
+                result += ": " + str(quest["reward_item"])
+            if quest["reward_type"] != "POKEMON_ENCOUNTER":
+                result += " (" + str(quest["reward_amount"]) + ")"
+            now_date = datetime.utcnow()
+            ttl = int(round((now_date - quest['last_scanned']).total_seconds() / 60))
+            result += ", Scanned " + str(ttl) + "m ago"
+
+        return result.strip()
 
     def feedpokemon(self):
         self.heartbeat[0] = now()
