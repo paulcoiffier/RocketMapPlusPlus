@@ -1071,6 +1071,9 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                 if worker['fetch'] != workers[worker['deviceid']]['fetch']:
                     needtosend = True
                     log.info("Device changed fetching endpoint: " + worker['deviceid'])
+                if worker['scanning'] != workers[worker['deviceid']]['scanning']:
+                    needtosend = True
+                    log.info("Device changed scanning status: " + worker['deviceid'])
             workers[worker['deviceid']] = worker.copy()
 
             if needtosend and 'devices' in args.wh_types:
