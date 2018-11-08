@@ -983,7 +983,8 @@ class DeviceWorker(LatLongModel):
     last_updated = DateTimeField(index=True, default=datetime.utcnow)
     scans = UBigIntegerField(default=0)
     direction = Utf8mb4CharField(max_length=1, default="U")
-    algo = Utf8mb4CharField(max_length=50, default='IDLE')
+    fetch = Utf8mb4CharField(max_length=50, default='IDLE')
+    scanning = SmallIntegerField(default=0)
 
     @staticmethod
     def get_by_id(id, latitude=0, longitude=0):
@@ -1005,7 +1006,8 @@ class DeviceWorker(LatLongModel):
                 'step': 0,
                 'scans': 0,
                 'direction': 'U',
-                'algo': 'IDLE'
+                'fetch': 'IDLE',
+                'scanning': 0
             }
         return result
 
@@ -3763,7 +3765,8 @@ def database_migrate(db, old_ver):
 
     if old_ver < 46 and old_ver > 40:
         migrate(
-            migrator.add_column('deviceworker', 'algo', Utf8mb4CharField(max_length=50, default='IDLE'))
+            migrator.add_column('deviceworker', 'fetch', Utf8mb4CharField(max_length=50, default='IDLE')),
+            migrator.add_column('deviceworker', 'scanning', SmallIntegerField(default=0))
         )
 
     # Always log that we're done.

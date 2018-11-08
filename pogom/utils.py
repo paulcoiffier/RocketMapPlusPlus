@@ -1043,9 +1043,6 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
         deviceworkers = DeviceWorker.get_all()
         updateworkers = {}
 
-        log.info(str(len(deviceworkers)) + " devices found")
-#        log.info(deviceworkers)
-
         for worker in deviceworkers:
             needtosend = False
             if worker['deviceid'] not in workers:
@@ -1054,39 +1051,37 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
             else:
                 last_updated = worker['last_updated']
                 difference = (datetime.utcnow() - last_updated).total_seconds()
-                if difference > 300 and worker['algo'] != 'IDLE' and worker['algo'] != 'SCANNING':
-                    worker['algo'] = 'IDLE'
+                if difference > 300 and worker['fetch'] != 'IDLE':
+                    worker['fetch'] = 'IDLE'
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
                     log.info("Device stopped fetching: " + worker['deviceid'])
                 last_scanned = worker['last_scanned']
                 difference = (datetime.utcnow() - last_scanned).total_seconds()
-                if difference < 60 and worker['algo'] == 'IDLE':
-                    worker['algo'] = 'SCANNING'
+                if difference < 60 and worker['scanning'] == 0:
+                    worker['scanning'] = 1
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
                     log.info("Device is scanning " + worker['deviceid'])
-                elif difference > 60 and worker['algo'] != 'IDLE':
-                    worker['algo'] = 'IDLE'
+                elif difference > 60 and worker['scanning'] == 1:
+                    worker['scanning'] = 0
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
                     log.info("Device went idle " + worker['deviceid'])
-                elif worker['algo'] != workers[worker['deviceid']]['algo']:
+                if worker['fetch'] != workers[worker['deviceid']]['fetch']:
                     needtosend = True
-                    log.info("Device changed algo: " + worker['deviceid'])
+                    log.info("Device changed fetching endpoint: " + worker['deviceid'])
             workers[worker['deviceid']] = worker.copy()
 
             if needtosend and 'devices' in args.wh_types:
-                log.info("Sending device to webhook: " + worker['deviceid'])
                 wh_worker = {
                     'uuid': worker['deviceid'],
-                    'algo': worker['algo']
+                    'fetch': worker['fetch'],
+                    'scanning': worker['scanning']
                 }
-#                wh_worker = workers[worker['deviceid']].copy()
                 wh_update_queue.put(('devices', wh_worker))
 
         if updateworkers:
-            log.info("Updating the status of " + str(len(updateworkers)) + " workers")
             db_update_queue.put((DeviceWorker, updateworkers))
 
         time.sleep(refresh_time_sec)

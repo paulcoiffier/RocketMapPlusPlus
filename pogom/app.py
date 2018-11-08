@@ -367,8 +367,8 @@ class Pogom(Flask):
             deviceworker['scans'] = deviceworker['scans'] + 1
             deviceworker['last_scanned'] = datetime.utcnow()
 
-            if deviceworker['algo'] == 'IDLE':
-                deviceworker['algo'] = 'SCANNING'
+            if deviceworker['scanning'] == 0:
+                deviceworker['scanning'] = 1
 
             deviceworkers = {}
             deviceworkers[uuid] = deviceworker
@@ -1567,7 +1567,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['algo'] != "walk_spawnpoint":
+        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_spawnpoint":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -1615,7 +1615,7 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
-        deviceworker['algo'] = "walk_spawnpoint"
+        deviceworker['fetch'] = "walk_spawnpoint"
 
         deviceworkers = {}
         deviceworkers[uuid] = deviceworker
@@ -1652,7 +1652,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['algo'] != "walk_pokestop":
+        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_pokestop":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -1700,7 +1700,7 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
-        deviceworker['algo'] = "walk_pokestop"
+        deviceworker['fetch'] = "walk_pokestop"
 
         deviceworkers = {}
         deviceworkers[uuid] = deviceworker
@@ -1737,7 +1737,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['algo'] != "teleport_gym":
+        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gym":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -1770,7 +1770,7 @@ class Pogom(Flask):
             deviceworker['latitude'] = round(nextlatitude, 5)
             deviceworker['longitude'] = round(nextlongitude, 5)
             deviceworker['last_updated'] = datetime.utcnow()
-            deviceworker['algo'] = "teleport_gym"
+            deviceworker['fetch'] = "teleport_gym"
 
             deviceworkers = {}
             deviceworkers[uuid] = deviceworker
@@ -1905,7 +1905,7 @@ class Pogom(Flask):
         deviceworker['step'] = step
         deviceworker['direction'] = direction
         deviceworker['last_updated'] = datetime.utcnow()
-        deviceworker['algo'] = "teleport_loc" if needtojump else "scan_loc"
+        deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
 
         deviceworkers = {}
         deviceworkers[uuid] = deviceworker
