@@ -14,7 +14,7 @@ import psutil
 import subprocess
 import requests
 import configargparse
-import datetime
+from datetime import datetime
 
 from s2sphere import CellId, LatLng
 from geopy.geocoders import GoogleV3
@@ -1033,6 +1033,9 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
     refresh_time_sec = 60
 
     workers = {}
+    deviceworkers = DeviceWorker.get_all()
+    for worker in deviceworkers:
+        workers[worker['deviceid']] = worker.copy()
 
     while True:
         log.info('Updating deviceworkers...')
@@ -1040,34 +1043,50 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
         deviceworkers = DeviceWorker.get_all()
         updateworkers = {}
 
+        log.info(str(len(deviceworkers)) + " devices found")
+#        log.info(deviceworkers)
+
         for worker in deviceworkers:
             needtosend = False
-            if worker['uuid'] not in workers:
+            if worker['deviceid'] not in workers:
                 needtosend = True
+                log.info("New device found: " + worker['deviceid'])
             else:
                 last_updated = worker['last_updated']
                 difference = (datetime.utcnow() - last_updated).total_seconds()
                 if difference > 300 and worker['algo'] != 'IDLE' and worker['algo'] != 'SCANNING':
                     worker['algo'] = 'IDLE'
-                    updateworkers[worker['uuid']] = worker
+                    updateworkers[worker['deviceid']] = worker
                     needtosend = True
+                    log.info("Device stopped fetching: " + worker['deviceid'])
                 last_scanned = worker['last_scanned']
                 difference = (datetime.utcnow() - last_scanned).total_seconds()
                 if difference < 60 and worker['algo'] == 'IDLE':
                     worker['algo'] = 'SCANNING'
-                    updateworkers[worker['uuid']] = worker
+                    updateworkers[worker['deviceid']] = worker
                     needtosend = True
+                    log.info("Device is scanning " + worker['deviceid'])
                 elif difference > 60 and worker['algo'] != 'IDLE':
                     worker['algo'] = 'IDLE'
-                    updateworkers[worker['uuid']] = worker
+                    updateworkers[worker['deviceid']] = worker
                     needtosend = True
-            workers[worker['uuid']] = worker.copy()
+                    log.info("Device went idle " + worker['deviceid'])
+                elif worker['algo'] != workers[worker['deviceid']]['algo']:
+                    needtosend = True
+                    log.info("Device changed algo: " + worker['deviceid'])
+            workers[worker['deviceid']] = worker.copy()
 
             if needtosend and 'devices' in args.wh_types:
-                wh_worker = workers[worker['uuid']].copy()
+                log.info("Sending device to webhook: " + worker['deviceid'])
+                wh_worker = {
+                    'uuid': worker['deviceid'],
+                    'algo': worker['algo']
+                }
+#                wh_worker = workers[worker['deviceid']].copy()
                 wh_update_queue.put(('devices', wh_worker))
 
         if updateworkers:
+            log.info("Updating the status of " + str(len(updateworkers)) + " workers")
             db_update_queue.put((DeviceWorker, updateworkers))
 
         time.sleep(refresh_time_sec)
