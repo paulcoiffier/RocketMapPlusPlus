@@ -407,7 +407,8 @@ class Pokestop(LatLongModel):
         query = Pokestop.select(Pokestop.active_fort_modifier,
                                 Pokestop.enabled, Pokestop.latitude,
                                 Pokestop.longitude, Pokestop.last_modified,
-                                Pokestop.lure_expiration, Pokestop.pokestop_id)
+                                Pokestop.lure_expiration, Pokestop.pokestop_id,
+                                Pokestop.last_updated)
 
         if not (swLat and swLng and neLat and neLng):
             query = (query
