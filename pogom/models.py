@@ -37,6 +37,8 @@ from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
 from .proxy import get_new_proxy
 from .apiRequests import encounter
 
+from .app import get_quest_icon
+
 log = logging.getLogger(__name__)
 
 args = get_args()
@@ -479,6 +481,7 @@ class Pokestop(LatLongModel):
                 p['latitude'], p['longitude'] = \
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
             p['pokemon'] = []
+            p['quest'] = []
             pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
 
@@ -516,6 +519,20 @@ class Pokestop(LatLongModel):
             for d in details:
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
+
+            quests = (Quest
+                      .select(
+                          Quest.pokestop_id,
+                          Quest.quest_type,
+                          Quest.reward_type,
+                          Quest.reward_item)
+                      .where(Quest.pokestop_id << pokestop_ids)
+                      .dicts())
+            for q in quests:
+                pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
+                pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
+                pokestops[q['pokestop_id']]['quest']['item'] = q['reward_item']
+                pokestops[q['pokestop_id']]['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
 
         # Re-enable the GC.
         gc.enable()
@@ -588,6 +605,20 @@ class Pokestop(LatLongModel):
             p['pokemon_name'] = get_pokemon_name(p['pokemon_id'])
 
             result['pokemon'].append(p)
+
+        result['quest'] = []
+        quest = (Quest
+                 .select(
+                     Quest.quest_type,
+                     Quest.reward_type,
+                     Quest.reward_item)
+                 .where(Quest.pokestop_id == id)
+                 .dicts())
+        for q in quest:
+            result['quest']['text'] = q['quest_type']
+            result['quest']['type'] = q['reward_type']
+            result['quest']['item'] = q['reward_item']
+            result['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
 
         return result
 
