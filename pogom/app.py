@@ -21,13 +21,14 @@ from base64 import b64decode
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
-                     Quest, PokestopDetails)
+                     Quest, PokestopDetails, Geofence)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between)
 from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
+from .geofence import Geofences
 
 import geopy
 
@@ -137,6 +138,8 @@ class Pogom(Flask):
 
         self.deviceschedules = {}
 
+        self.geofences = Geofences()
+
     def gym_img(self):
         team = request.args.get('team')
         level = request.args.get('level')
@@ -146,7 +149,6 @@ class Pogom(Flask):
         is_ex_raid_eligible = 'ex_raid' in request.args
         is_unknown = 'is_unknown' in request.args
         return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown), mimetype='image/png')
-
 
     def get_pokemon_rarity_code(self, pokemonid):
         rarity = self.get_pokemon_rarity(pokemonid)
@@ -392,6 +394,13 @@ class Pogom(Flask):
         if protos:
             lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
             lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+            # Geofence results.
+            if self.geofences.is_enabled():
+                results = self.geofences.get_geofenced_coordinates((lat, lng, 0))
+                if not results:
+                    log.info('The post from %s is coming from outside your geofences. Aborting post.' % uuid)
+                    return ""
 
             if not self.args.dont_move_map:
                 self.location_queue.put((lat, lng, 0))
@@ -1305,6 +1314,8 @@ class Pogom(Flask):
         scan_display = False
 
         visibility_flags = {
+            'geofences': bool(args.geofence_file or
+                              args.geofence_excluded_file),
             'gyms': not args.no_gyms,
             'pokemons': not args.no_pokemon,
             'pokestops': not args.no_pokestops,
@@ -1551,6 +1562,27 @@ class Pogom(Flask):
                 else:
                     d['main_workers'] = MainWorker.get_all()
                     d['workers'] = WorkerStatus.get_all()
+
+        if request.args.get('geofences', 'true') == 'true':
+            db_geofences = Geofence.get_geofences()
+
+            geofences = {}
+            for g in db_geofences:
+                # Check if already there
+                geofence = geofences.get(g['name'], None)
+                if not geofence:  # Create a new sub-dict if new
+                    geofences[g['name']] = {
+                        'excluded': g['excluded'],
+                        'name': g['name'],
+                        'coordinates': []
+                    }
+                coordinate = {
+                    'lat': g['latitude'],
+                    'lng': g['longitude']
+                }
+                geofences[g['name']]['coordinates'].append(coordinate)
+
+            d['geofences'] = geofences
 
         d['deviceworkers'] = DeviceWorker.get_active()
 
