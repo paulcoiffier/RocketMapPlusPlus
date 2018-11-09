@@ -35,6 +35,8 @@ from google.protobuf.json_format import MessageToJson
 from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
 from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
+from protos.pogoprotos.networking.requests.messages.disk_encounter_message_pb2 import DiskEncounterMessage
+from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import GymGetInfoResponse
 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
@@ -440,6 +442,29 @@ class Pogom(Flask):
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
 
         ScannedLocation.update_band(scan_location, now_date)
+
+        for proto in protos_dict:
+            if "GetMapObjects" not in proto and "FortSearchResponse" not in proto and "EncounterResponse" not in proto:
+                if "GymGetInfoResponse" in proto:
+                    ggir_response = b64decode(proto["GymGetInfoResponse"])
+                    ggir = GymGetInfoResponse()
+                    ggir.ParseFromString(ggir_response)
+                    ggir_json = json.loads(MessageToJson(ggir))
+                    f = open("/home/bart/gymdetails.log", "a+")
+                    f.write(json.dumps(ggir_json) + "\n----\n\n")
+                    f.close()
+                elif "DiskEncounterMessage" in proto:
+                    dem_response = b64decode(proto["DiskEncounterMessage"])
+                    dem = DiskEncounterMessage()
+                    dem.ParseFromString(dem_response)
+                    dem_json = json.loads(MessageToJson(dem))
+                    f = open("/home/bart/diskencounter.log", "a+")
+                    f.write(json.dumps(dem_json) + "\n-----\n\n")
+                    f.close()
+                else:
+                    f = open("/home/bart/unparsed.log", "a+")
+                    f.write(json.dumps(proto) + "\n----\n\n")
+                    f.close()
 
         for proto in protos_dict:
             if "GetMapObjects" in proto:
