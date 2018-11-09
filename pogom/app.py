@@ -137,8 +137,7 @@ class Pogom(Flask):
 
         self.deviceschedules = {}
 
-        from .geofence import Geofences
-        self.geofences = Geofences()
+        self.geofences = None
 
     def gym_img(self):
         team = request.args.get('team')
@@ -396,6 +395,9 @@ class Pogom(Flask):
             lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
             # Geofence results.
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
             if self.geofences.is_enabled():
                 results = self.geofences.get_geofenced_coordinates((lat, lng, 0))
                 if not results:
