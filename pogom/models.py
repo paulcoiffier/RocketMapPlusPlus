@@ -32,7 +32,6 @@ from .utils import (get_pokemon_name, get_pokemon_types,
                     get_quest_icon)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
-from .geofence import Geofences
 
 from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
 from .proxy import get_new_proxy
@@ -718,6 +717,8 @@ class Pokestop(LatLongModel):
                          .dicts())
 
             queryDict = query.dicts()
+
+            from .geofence import Geofences
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
@@ -1028,6 +1029,8 @@ class Gym(LatLongModel):
                          .dicts())
 
             queryDict = query.dicts()
+
+            from .geofence import Geofences
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
@@ -1861,6 +1864,7 @@ class SpawnPoint(LatLongModel):
 
             queryDict = query.dicts()
 
+            from .geofence import Geofences
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
