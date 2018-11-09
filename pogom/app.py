@@ -125,6 +125,7 @@ class Pogom(Flask):
         self.route("/stats", methods=['GET'])(self.get_stats)
         self.route("/gym_data", methods=['GET'])(self.get_gymdata)
         self.route("/pokestop_data", methods=['GET'])(self.get_pokestopdata)
+        self.route("/get_deviceworkerdata", methods=['GET'])(self.get_deviceworkerdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
         self.route("/webhook", methods=['POST'])(self.webhook)
@@ -1551,6 +1552,8 @@ class Pogom(Flask):
                     d['main_workers'] = MainWorker.get_all()
                     d['workers'] = WorkerStatus.get_all()
 
+        d['deviceworkers'] = DeviceWorker.get_active()
+
         return jsonify(d)
 
     def loc(self):
@@ -2062,6 +2065,12 @@ class Pogom(Flask):
         pokestop = Pokestop.get_stop(pokestop_id)
 
         return jsonify(pokestop)
+
+    def get_deviceworkerdata(self):
+        deviceworker_id = request.args.get('id')
+        deviceworker = DeviceWorker.get_active_by_id(deviceworker_id)
+
+        return jsonify(deviceworker)
 
 
 class CustomJSONEncoder(JSONEncoder):

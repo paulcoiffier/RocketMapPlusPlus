@@ -1092,6 +1092,41 @@ class DeviceWorker(LatLongModel):
 
         return list(query)
 
+    @staticmethod
+    def get_active():
+        with DeviceWorker.database().execution_context():
+            query = (DeviceWorker
+                     .select(DeviceWorker.deviceid,
+                             DeviceWorker.latitude,
+                             DeviceWorker.longitude,
+                             DeviceWorker.last_scanned,
+                             DeviceWorker.last_updated,
+                             DeviceWorker.scans,
+                             DeviceWorker.fetch,
+                             DeviceWorker.scanning)
+                     .where((DeviceWorker.scanning == 1) |
+                            (DeviceWorker.fetch != 'IDLE'))
+                     .dicts())
+
+        return list(query)
+
+    @staticmethod
+    def get_active_by_id(id):
+        with DeviceWorker.database().execution_context():
+            query = (DeviceWorker
+                     .select(DeviceWorker.deviceid,
+                             DeviceWorker.latitude,
+                             DeviceWorker.longitude,
+                             DeviceWorker.last_scanned,
+                             DeviceWorker.last_updated,
+                             DeviceWorker.scans,
+                             DeviceWorker.fetch,
+                             DeviceWorker.scanning)
+                     .where(DeviceWorker.id == id)
+                     .dicts())
+
+        return list(query)
+
 
 class ScannedLocation(LatLongModel):
     cellid = UBigIntegerField(primary_key=True)
