@@ -480,7 +480,7 @@ class Pokestop(LatLongModel):
                 p['latitude'], p['longitude'] = \
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
             p['pokemon'] = []
-            p['quest'] = []
+            p['quest'] = {}
             pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
 
@@ -605,7 +605,7 @@ class Pokestop(LatLongModel):
 
             result['pokemon'].append(p)
 
-        result['quest'] = []
+        result['quest'] = {}
         quest = (Quest
                  .select(
                      Quest.quest_type,
