@@ -959,6 +959,7 @@ function gymLabel(gym, includeMembers = true) {
 function pokestopLabel(pokestop, includeMembers = true) {
     var str
     var memberStr = ''
+    var questStr = ''
 
     var expireTime = pokestop['lure_expiration']
     var latitude = pokestop['latitude']
@@ -1008,6 +1009,13 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr += '</div>'
     }
 
+    if(pokestop.quest && pokestop.quest.type) {
+        questStr = `<div class='pokestop quest'>
+                        <img class='quest-icon' src='static/icons/${pokestop.quest.icon}.png'>
+                        <span class='quest-text'>${pokestop.quest.text}</span>
+                    </div>`
+    }
+
     pokestop.pokemon.forEach((member) => {
         hasNearby = true
     })
@@ -1039,8 +1047,9 @@ function pokestopLabel(pokestop, includeMembers = true) {
               </div>
               <div>
                 <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img sprite' src='${imgSrc}'>
+                <img class='pokestop img' src='${imgSrc}'>
               </div>
+              ${questStr}
               ${memberStr}
               <div>
                 <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop lure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
@@ -1055,8 +1064,9 @@ function pokestopLabel(pokestop, includeMembers = true) {
               </div>
               <div>
                 <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img sprite' src='${imgSrc}'>
+                <img class='pokestop img' src='${imgSrc}'>
               </div>
+              ${questStr}
               ${memberStr}
               <div>
                 <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
