@@ -28,7 +28,6 @@ from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
-from .geofence import Geofences
 
 import geopy
 
@@ -138,6 +137,7 @@ class Pogom(Flask):
 
         self.deviceschedules = {}
 
+        from .geofence import Geofences
         self.geofences = Geofences()
 
     def gym_img(self):
