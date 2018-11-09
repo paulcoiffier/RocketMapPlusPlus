@@ -399,6 +399,15 @@ def get_args():
                               'gyms that are candidates for EX raids. ' +
                               'Only required once per area.'),
                         action='store_true', default=False)
+    parser.add_argument('-gf', '--geofence-file',
+                        help=('Geofence file to define outer borders of the ' +
+                              'scan area.'),
+                        default='')
+    parser.add_argument('-gef', '--geofence-excluded-file',
+                        help=('File to define excluded areas inside scan ' +
+                              'area. Regarded this as inverted geofence. ' +
+                              'Can be combined with geofence-file.'),
+                        default='')
     verbose = parser.add_mutually_exclusive_group()
     verbose.add_argument('-v',
                          help=('Show debug messages from RocketMap ' +

@@ -43,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 46
+db_schema_version = 47
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -338,6 +338,77 @@ class Pokemon(LatLongModel):
                  )
 
         return list(itertools.chain(*query))
+
+
+# Geofence DB Model
+class Geofence(BaseModel):
+    name = Utf8mb4CharField(max_length=50)
+    excluded = BooleanField()
+    coordinates_id = SmallIntegerField()
+    latitude = DoubleField()
+    longitude = DoubleField()
+
+    class Meta:
+        primary_key = False
+
+    @staticmethod
+    def clear_all():
+        # Remove all geofences without interfering with other threads.
+        with flaskDb.database.transaction():
+            DeleteQuery(Geofence).execute()
+
+    @staticmethod
+    def remove_duplicates(geofences):
+        # Remove old geofences without interfering with other DB threads.
+        with flaskDb.database.transaction():
+            for g in geofences:
+                (DeleteQuery(Geofence)
+                 .where(Geofence.name == g['name'])
+                 .execute())
+
+    @staticmethod
+    def push_geofences(geofences):
+        Geofence.remove_duplicates(geofences)
+
+        db_geofences = []
+        for g in geofences:
+            coordinates_id = 0
+            for c in g['polygon']:
+                db_geofences.append({
+                    'excluded': g['excluded'],
+                    'name': g['name'],
+                    'coordinates_id': coordinates_id,
+                    'latitude': c['lat'],
+                    'longitude': c['lon']
+                })
+                coordinates_id = coordinates_id + 1
+
+        # Make a DB save.
+        with flaskDb.database.transaction():
+            Geofence.insert_many(db_geofences).execute()
+
+        return db_geofences
+
+    @staticmethod
+    def get_geofences():
+        query = Geofence.select().dicts()
+
+        # Performance:  disable the garbage collector prior to creating a
+        # (potentially) large dict with append().
+        gc.disable()
+
+        geofences = []
+        for g in query:
+            if args.china:
+                g['polygon']['latitude'], g['polygon']['longitude'] = \
+                    transform_from_wgs_to_gcj(g['polygon']['latitude'],
+                                              g['polygon']['longitude'])
+            geofences.append(g)
+
+        # Re-enable the GC.
+        gc.enable()
+
+        return geofences
 
 
 class Quest(BaseModel):
@@ -646,17 +717,39 @@ class Pokestop(LatLongModel):
                          .dicts())
 
             queryDict = query.dicts()
-            for p in queryDict:
-                key = p['pokestop_id']
-                latitude = round(p['latitude'], 5)
-                longitude = round(p['longitude'], 5)
-                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                if dist == 0 or distance <= dist:
-                    pokestops[key] = {
-                        'latitude': latitude,
-                        'longitude': longitude,
-                        'distance': distance
-                    }
+
+            from .geofence import Geofences
+            geofences = Geofences()
+            if geofences.is_enabled():
+                results = []
+                for p in queryDict:
+                    results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
+                results = geofences.get_geofenced_coordinates(results)
+                if not results:
+                    return []
+                for index, coords in enumerate(results):
+                    key = index
+                    latitude = coords[0]
+                    longitude = coords[1]
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        pokestops[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
+            else:
+                for p in queryDict:
+                    key = p['pokestop_id']
+                    latitude = round(p['latitude'], 5)
+                    longitude = round(p['longitude'], 5)
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        pokestops[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
             orderedpokestops = OrderedDict(sorted(pokestops.items(), key=lambda x: x[1]['distance']))
 
             result = []
@@ -936,17 +1029,39 @@ class Gym(LatLongModel):
                          .dicts())
 
             queryDict = query.dicts()
-            for g in queryDict:
-                key = g['gym_id']
-                latitude = round(g['latitude'], 5)
-                longitude = round(g['longitude'], 5)
-                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                if dist == 0 or distance <= dist:
-                    gyms[key] = {
-                        'latitude': latitude,
-                        'longitude': longitude,
-                        'distance': distance
-                    }
+
+            from .geofence import Geofences
+            geofences = Geofences()
+            if geofences.is_enabled():
+                results = []
+                for g in queryDict:
+                    results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
+                results = geofences.get_geofenced_coordinates(results)
+                if not results:
+                    return []
+                for index, coords in enumerate(results):
+                    key = index
+                    latitude = coords[0]
+                    longitude = coords[1]
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        gyms[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
+            else:
+                for g in queryDict:
+                    key = g['gym_id']
+                    latitude = round(g['latitude'], 5)
+                    longitude = round(g['longitude'], 5)
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        gyms[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
             orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
 
             result = []
@@ -1748,17 +1863,39 @@ class SpawnPoint(LatLongModel):
                          .dicts())
 
             queryDict = query.dicts()
-            for sp in queryDict:
-                key = sp['id']
-                latitude = round(sp['latitude'], 5)
-                longitude = round(sp['longitude'], 5)
-                distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                if dist == 0 or distance <= dist:
-                    spawnpoints[key] = {
-                        'latitude': latitude,
-                        'longitude': longitude,
-                        'distance': distance
-                    }
+
+            from .geofence import Geofences
+            geofences = Geofences()
+            if geofences.is_enabled():
+                results = []
+                for sp in queryDict:
+                    results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
+                results = geofences.get_geofenced_coordinates(results)
+                if not results:
+                    return []
+                for index, coords in enumerate(results):
+                    key = index
+                    latitude = coords[0]
+                    longitude = coords[1]
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        spawnpoints[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
+            else:
+                for sp in queryDict:
+                    key = sp['id']
+                    latitude = round(sp['latitude'], 5)
+                    longitude = round(sp['longitude'], 5)
+                    distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
+                    if dist == 0 or distance <= dist:
+                        spawnpoints[key] = {
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'distance': distance
+                        }
             orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
 
             result = []
@@ -3568,7 +3705,7 @@ def create_tables(db):
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
               Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember,
-              Quest, PokestopDetails]
+              Quest, PokestopDetails, Geofence]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3585,7 +3722,7 @@ def drop_tables(db):
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
               Token, HashKeys, DeviceWorker, PokestopMember,
-              Quest, PokestopDetails]
+              Quest, PokestopDetails, Geofence]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -3875,6 +4012,9 @@ def database_migrate(db, old_ver):
             migrator.add_column('deviceworker', 'fetch', Utf8mb4CharField(max_length=50, default='IDLE')),
             migrator.add_column('deviceworker', 'scanning', SmallIntegerField(default=0))
         )
+
+    if old_ver < 47:
+        create_tables(db)
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

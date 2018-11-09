@@ -1085,6 +1085,10 @@ var StoreOptions = {
     'isSearchMarkerMovable': {
         default: false,
         type: StoreTypes.Boolean
+    },
+    'showGeofences': {
+        default: false,
+        type: StoreTypes.Boolean
     }
 }
 

@@ -6,6 +6,7 @@ import timeit
 import logging
 
 from .utils import get_args
+from .models import Geofence
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class Geofences:
                 args.geofence_file, excluded=False)
             self.excluded_areas = self.parse_geofences_file(
                 args.geofence_excluded_file, excluded=True)
+            Geofence.push_geofences(self.geofenced_areas + self.excluded_areas)
             log.info('Loaded %d geofenced and %d excluded areas.',
                      len(self.geofenced_areas),
                      len(self.excluded_areas))
@@ -72,10 +74,7 @@ class Geofences:
         return False
 
     def _in_area(self, coordinate, area):
-        if args.spawnpoint_scanning:
-            point = {'lat': coordinate['lat'], 'lon': coordinate['lng']}
-        else:
-            point = {'lat': coordinate[0], 'lon': coordinate[1]}
+        point = {'lat': coordinate[0], 'lon': coordinate[1]}
         polygon = area['polygon']
         if self.use_matplotlib:
             return self.is_point_in_polygon_matplotlib(point, polygon)
@@ -140,7 +139,7 @@ class Geofences:
         inside = False
         lat1, lon1 = polygon[0]['lat'], polygon[0]['lon']
         N = len(polygon)
-        for n in range(1, N+1):
+        for n in range(1, N + 1):
             lat2, lon2 = polygon[n % N]['lat'], polygon[n % N]['lon']
             if (min(lon1, lon2) < point['lon'] <= max(lon1, lon2) and
                     point['lat'] <= max(lat1, lat2)):
