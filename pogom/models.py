@@ -22,22 +22,20 @@ from datetime import datetime, timedelta
 from cachetools import TTLCache
 from cachetools import cached
 from timeit import default_timer
-from flask import json
 import geopy
 from collections import OrderedDict
 
 from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
                     get_move_name, get_move_damage, get_move_energy,
-                    get_move_type, calc_pokemon_level, peewee_attr_to_col)
+                    get_move_type, calc_pokemon_level, peewee_attr_to_col,
+                    get_quest_icon)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
 from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
 from .proxy import get_new_proxy
 from .apiRequests import encounter
-
-from .app import get_quest_icon
 
 log = logging.getLogger(__name__)
 

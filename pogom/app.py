@@ -76,17 +76,6 @@ def convert_pokemon_list(pokemon):
     return pokemon
 
 
-def get_quest_icon(reward_type, reward_item):
-    result = ""
-    if reward_type == "POKEMON_ENCOUNTER":
-        result = str(_POKEMONID.values_by_name[reward_item].number)
-    elif reward_type == "STARDUST":
-        result = "STARDUST"
-    else:
-        result = reward_item
-    return result
-
-
 class Pogom(Flask):
 
     def __init__(self, import_name, **kwargs):

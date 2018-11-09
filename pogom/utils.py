@@ -26,6 +26,8 @@ from pprint import pformat
 from time import strftime
 from timeit import default_timer
 
+from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
+
 log = logging.getLogger(__name__)
 
 
@@ -578,6 +580,17 @@ def get_pokemon_data(pokemon_id):
 
 def get_pokemon_name(pokemon_id):
     return i8ln(get_pokemon_data(pokemon_id)['name'])
+
+
+def get_quest_icon(reward_type, reward_item):
+    result = ""
+    if reward_type == "POKEMON_ENCOUNTER":
+        result = str(_POKEMONID.values_by_name[reward_item].number)
+    elif reward_type == "STARDUST":
+        result = "STARDUST"
+    else:
+        result = reward_item
+    return result
 
 
 def get_pokemon_types(pokemon_id):
