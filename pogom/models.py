@@ -723,7 +723,7 @@ class Pokestop(LatLongModel):
             if geofences.is_enabled():
                 results = []
                 for p in queryDict:
-                    results.append([round(p['latitude'], 5), round(p['longitude'], 5), 0])
+                    results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
@@ -1035,7 +1035,7 @@ class Gym(LatLongModel):
             if geofences.is_enabled():
                 results = []
                 for g in queryDict:
-                    results.append([round(g['latitude'], 5), round(g['longitude'], 5), 0])
+                    results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
@@ -1869,7 +1869,7 @@ class SpawnPoint(LatLongModel):
             if geofences.is_enabled():
                 results = []
                 for sp in queryDict:
-                    results.append([round(sp['latitude'], 5), round(sp['longitude'], 5), 0])
+                    results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
