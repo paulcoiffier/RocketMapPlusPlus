@@ -399,7 +399,7 @@ class Pogom(Flask):
                 from .geofence import Geofences
                 self.geofences = Geofences()
             if self.geofences.is_enabled():
-                results = self.geofences.get_geofenced_coordinates((lat, lng, 0))
+                results = self.geofences.get_geofenced_coordinates([lat, lng, 0])
                 if not results:
                     log.info('The post from %s is coming from outside your geofences. Aborting post.' % uuid)
                     return ""
