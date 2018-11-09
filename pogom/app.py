@@ -938,7 +938,7 @@ class Pogom(Flask):
 
                                     if 'gym' in self.args.wh_types:
                                         raid_active_until = 0
-                                        if 'raidInfo' in fort:
+                                        if 'raidInfo' in fort and not fort["raidInfo"].get('complete', False):
                                             raid_battle_ms = float(fort['raidInfo']['raidBattleMs'])
                                             raid_end_ms = float(fort['raidInfo']['raidEndMs'])
 
