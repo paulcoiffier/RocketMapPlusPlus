@@ -1222,7 +1222,11 @@ class DeviceWorker(LatLongModel):
                      .where((DeviceWorker.scanning == 1) |
                             (DeviceWorker.fetch != 'IDLE'))
                      .dicts())
-
+        if args.china:
+            for result in query:
+                result['latitude'], result['longitude'] = \
+                    transform_from_wgs_to_gcj(
+                        result['latitude'], result['longitude'])
         return list(query)
 
     @staticmethod
