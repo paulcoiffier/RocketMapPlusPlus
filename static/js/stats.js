@@ -3,6 +3,7 @@ function countMarkers(map) { // eslint-disable-line no-unused-vars
     document.getElementById('stats-pkmn-label').innerHTML = 'Pokémon'
     document.getElementById('stats-gym-label').innerHTML = 'Gyms'
     document.getElementById('stats-pkstop-label').innerHTML = 'PokéStops'
+    document.getElementById('stats-dw-label').innerHTML = 'DeviceWorkers'
 
     var i = 0
     var arenaCount = []
@@ -143,5 +144,18 @@ function countMarkers(map) { // eslint-disable-line no-unused-vars
         document.getElementById('pokestopList').innerHTML = pokestopListString
     } else {
         document.getElementById('pokestopList').innerHTML = 'PokéStops markers are disabled'
+    }
+
+    if (mapData.deviceworkers && mapData.deviceworkers.length) {
+        let deviceworkerListString = '<table><th>Icon</th><th>Fetch</th><th>Last Scanned</th><th>Scans</th>'
+        for (i = 0; i < mapData.deviceworkers.length; i++) {
+            let deviceworker = mapData.deviceworkers[i]
+            const lastScannedStr = getDateStr(deviceworker.last_scanned)
+            deviceworkerListString += '<tr><td><img class="deviceworkerListString" src="static/images/markers/mobile.png" /></td><td>' + deviceworker.fetch + '</td><td>' + lastScannedStr + '</td><td>' + deviceworker.scans + '</td></tr>'
+        }
+        deviceworkerListString += '</table>'
+        document.getElementById('deviceworkerList').innerHTML = deviceworkerListString
+    } else {
+        document.getElementById('deviceworkerList').innerHTML = 'No deviceworker connected'
     }
 }

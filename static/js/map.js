@@ -960,6 +960,46 @@ function gymLabel(gym, includeMembers = true) {
         </div>`
 }
 
+function deviceworkerLabel(deviceworker) {
+    var str
+
+    const latitude = deviceworker['latitude']
+    const longitude = deviceworker['longitude']
+
+    const lastScannedStr = getDateStr(deviceworker.last_scanned)
+    const lastUpdatedStr = getDateStr(deviceworker.last_updated)
+
+    str = `
+            <div>
+              <div class='deviceworker container'>
+                <div class='deviceworker info'>
+                    Device id: <span>${deviceworker.deviceid}</span>
+                </div>
+                <div class='deviceworker info'>
+                    fetch: <span>${deviceworker.fetch}</span>
+                </div>
+                <div class='deviceworker info'>
+                    scanning: <span>${deviceworker.scanning}</span>
+                </div>
+                <div class='deviceworker info'>
+                    scans: <span>${deviceworker.scans}</span>
+                </div>
+                <div class='deviceworker info last-scanned'>
+                    Last Scanned: ${lastScannedStr}
+                </div>
+                <div class='deviceworker info last-modified'>
+                    Last Updated: ${lastUpdatedStr}
+                </div>
+                <div>
+                  <span class='deviceworker navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                </div> 
+              </div>
+            </div>
+          </div>`
+
+    return str
+}
+
 function pokestopLabel(pokestop, includeMembers = true) {
     var str
     var memberStr = ''
@@ -968,6 +1008,9 @@ function pokestopLabel(pokestop, includeMembers = true) {
     var expireTime = pokestop['lure_expiration']
     var latitude = pokestop['latitude']
     var longitude = pokestop['longitude']
+
+    const lastScannedStr = getDateStr(pokestop.last_updated)
+    const lastModifiedStr = getDateStr(pokestop.last_modified)
 
     var hasNearby = false
 
@@ -1031,56 +1074,53 @@ function pokestopLabel(pokestop, includeMembers = true) {
     if (hasNearby) {
         icon += '_Nearby'
     }
-    var iconSrc = `static/images/pokestop/${icon}.png`;
-    var titleText = pokestop.name ? pokestop.name : 'Pokestop';
-    var imgSrc;
+    let iconSrc = `static/images/pokestop/${icon}.png`
+    let titleText = pokestop.name ? pokestop.name : 'Pokestop'
+    let imgSrc
     if (pokestop.url) {
         imgSrc = pokestop.url
     } else {
-        imgSrc = iconSrc;
+        imgSrc = iconSrc
     }
 
+    let expireTimeStr = ''
+    let lureClass = 'nolure'
     if (expireTime) {
-        str = `
-            <div>
-              <div class='pokestop name lure'>
-                ${titleText} (Lured)
-              </div>
-              <div class='pokestop-expire'>
-                  <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
-              </div>
-              <div>
-                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img' src='${imgSrc}'>
-              </div>
-              ${questStr}
-              ${memberStr}
-              <div>
-                <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop lure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-              </div>
-            </div>
-          </div>`
-    } else {
-        str = `
-            <div>
-              <div class='pokestop name nolure'>
-                ${titleText}
-              </div>
-              <div>
-                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img' src='${imgSrc}'>
-              </div>
-              ${questStr}
-              ${memberStr}
-              <div>
-                <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-              </div>
-            </div>
-          </div>`
+        titleText += ' (Lured)'
+        lureClass = 'lure'
+        expireTimeStr = `
+        <div class='pokestop-expire'>
+          <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
+        </div>`
     }
+
+    str = `
+            <div>
+              <div class='pokestop name ${lureClass}'>
+                  ${titleText}
+              </div>
+              ${expireTimeStr}
+              <div>
+                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
+                <img class='pokestop img' src='${imgSrc}'>
+              </div>
+              ${questStr}
+              ${memberStr}
+              <div class='pokestop container'>
+               <div>
+                  <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                </div> 
+                <div class='pokestop info last-scanned'>
+                    Last Scanned: ${lastScannedStr}
+                </div>
+                <div class='pokestop info last-modified'>
+                    Last Modified: ${lastModifiedStr}
+                </div>
+              </div>
+            </div>
+          </div>`
 
     return str
-
 }
 
 function formatSpawnTime(seconds) {
@@ -1620,6 +1660,31 @@ function getColorByDate(value) {
     return ['hsl(', hue, ',100%,50%)'].join('')
 }
 
+function setupDeviceworkerMarker(item) {
+    var deviceworkerMarker = new google.maps.Marker({
+        map: map,
+        position: {
+            lat: item['latitude'],
+            lng: item['longitude']
+        },
+        icon: {
+            url: 'static/images/markers/mobile.png',
+            scaledSize: new google.maps.Size(24, 24)
+        },
+        optimized: false,
+        zIndex: google.maps.Marker.MAX_ZINDEX + 2
+    })
+
+    deviceworkerMarker.infoWindow = new google.maps.InfoWindow({
+        content: deviceworkerLabel(item),
+        disableAutoPan: true
+    })
+
+    addListeners(deviceworkerMarker)
+
+    return deviceworkerMarker
+}
+
 function setupScannedMarker(item) {
     var circleCenter = new google.maps.LatLng(item['latitude'], item['longitude'])
 
@@ -2128,6 +2193,20 @@ function processPokemon(item) {
     return [newMarker, oldMarker]
 }
 
+function processDeviceworkers(deviceworkers) {
+    // clear all existing marker;
+    if (mapData.deviceworkers) {
+        mapData.deviceworkers.forEach(item => {
+            item.marker && item.marker.setMap(null)
+        })
+    }
+
+    mapData.deviceworkers = deviceworkers || []
+    mapData.deviceworkers.forEach(item => {
+        item.marker = setupDeviceworkerMarker(item)
+    })
+}
+
 function processPokestop(i, item) {
     if (!Store.get('showPokestops')) {
         return false
@@ -2379,6 +2458,7 @@ function updateGeofences(geofences) {
 function updateMap() {
     loadRawData().done(function (result) {
         processPokemons(result.pokemons)
+        processDeviceworkers(result.deviceworkers)
         $.each(result.pokestops, processPokestop)
         $.each(result.gyms, processGym)
         $.each(result.scanned, processScanned)
