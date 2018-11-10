@@ -969,6 +969,9 @@ function pokestopLabel(pokestop, includeMembers = true) {
     var latitude = pokestop['latitude']
     var longitude = pokestop['longitude']
 
+    const lastScannedStr = getDateStr(pokestop.last_updated)
+    const lastModifiedStr = getDateStr(pokestop.last_modified)
+
     var hasNearby = false
 
     if (includeMembers) {
@@ -1031,56 +1034,53 @@ function pokestopLabel(pokestop, includeMembers = true) {
     if (hasNearby) {
         icon += '_Nearby'
     }
-    var iconSrc = `static/images/pokestop/${icon}.png`;
-    var titleText = pokestop.name ? pokestop.name : 'Pokestop';
-    var imgSrc;
+    let iconSrc = `static/images/pokestop/${icon}.png`
+    let titleText = pokestop.name ? pokestop.name : 'Pokestop'
+    let imgSrc
     if (pokestop.url) {
         imgSrc = pokestop.url
     } else {
-        imgSrc = iconSrc;
+        imgSrc = iconSrc
     }
 
+    let expireTimeStr = ''
+    let lureClass = 'nolure'
     if (expireTime) {
-        str = `
-            <div>
-              <div class='pokestop name lure'>
-                ${titleText} (Lured)
-              </div>
-              <div class='pokestop-expire'>
-                  <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
-              </div>
-              <div>
-                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img' src='${imgSrc}'>
-              </div>
-              ${questStr}
-              ${memberStr}
-              <div>
-                <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop lure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-              </div>
-            </div>
-          </div>`
-    } else {
-        str = `
-            <div>
-              <div class='pokestop name nolure'>
-                ${titleText}
-              </div>
-              <div>
-                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img' src='${imgSrc}'>
-              </div>
-              ${questStr}
-              ${memberStr}
-              <div>
-                <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-              </div>
-            </div>
-          </div>`
+        titleText += ' (Lured)'
+        lureClass = 'lure'
+        expireTimeStr = `
+        <div class='pokestop-expire'>
+          <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
+        </div>`
     }
+
+    str = `
+            <div>
+              <div class='pokestop name ${lureClass}'>
+                  ${titleText}
+              </div>
+              ${expireTimeStr}
+              <div>
+                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
+                <img class='pokestop img' src='${imgSrc}'>
+              </div>
+              ${questStr}
+              ${memberStr}
+              <div class='pokestop container'>
+               <div>
+                  <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                </div> 
+                <div class='pokestop info last-scanned'>
+                    Last Scanned: ${lastScannedStr}
+                </div>
+                <div class='pokestop info last-modified'>
+                    Last Modified: ${lastModifiedStr}
+                </div>
+              </div>
+            </div>
+          </div>`
 
     return str
-
 }
 
 function formatSpawnTime(seconds) {
