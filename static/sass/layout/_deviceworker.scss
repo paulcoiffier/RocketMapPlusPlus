@@ -1,0 +1,43 @@
+.deviceworker {
+  color: rgb(93,109,126);
+  font-size: 11px;
+  font-weight: 500;
+
+  &.container {
+    display: grid;
+    justify-content: center;
+  }
+
+  &.info {
+    span {
+      color: #5d6d7e;
+      font-weight: 300;
+    }
+    &.last-modified:before {
+      content: '\f040';
+      display: inline-block;
+      font-family: FontAwesome;
+      height: 16px;
+      width: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    &.last-scanned:before {
+      content: '\f002';
+      display: inline-block;
+      font-family: FontAwesome;
+      height: 16px;
+      width: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    &.navigate:before {
+      content: '\f018';
+      display: inline-block;
+      font-family: FontAwesome;
+      height: 16px;
+      width: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+}
