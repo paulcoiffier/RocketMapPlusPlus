@@ -593,11 +593,11 @@ def get_pokemon_name(pokemon_id):
 
 def get_quest_icon(reward_type, reward_item):
     result = ""
-    if reward_type == "POKEMON_ENCOUNTER":
+    if reward_type == "POKEMON_ENCOUNTER" and reward_item is not None:
         result = str(_POKEMONID.values_by_name[reward_item].number)
     elif reward_type == "STARDUST":
         result = "STARDUST"
-    else:
+    elif reward_item is not None:
         result = reward_item
     return result
 
