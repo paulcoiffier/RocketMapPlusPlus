@@ -43,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 47
+db_schema_version = 48
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1160,6 +1160,7 @@ class PlayerLocale(BaseModel):
 
 class DeviceWorker(LatLongModel):
     deviceid = Utf8mb4CharField(primary_key=True, max_length=100, index=True)
+    name = Utf8mb4CharField(max_length=100, default="")
     latitude = DoubleField()
     longitude = DoubleField()
     centerlatitude = DoubleField()
@@ -1183,6 +1184,7 @@ class DeviceWorker(LatLongModel):
 
             result = query[0] if query else {
                 'deviceid': id,
+                'name': '',
                 'latitude': latitude,
                 'longitude': longitude,
                 'centerlatitude': latitude,
@@ -1212,6 +1214,7 @@ class DeviceWorker(LatLongModel):
         with DeviceWorker.database().execution_context():
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
+                             DeviceWorker.name,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -1234,6 +1237,7 @@ class DeviceWorker(LatLongModel):
         with DeviceWorker.database().execution_context():
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
+                             DeviceWorker.name,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -4019,6 +4023,12 @@ def database_migrate(db, old_ver):
 
     if old_ver < 47:
         create_tables(db)
+
+    if old_ver < 48:
+        migrate(
+            migrator.add_column('deviceworker', 'name',
+                                Utf8mb4CharField(max_length=100, default=""))
+        )
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

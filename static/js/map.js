@@ -969,11 +969,16 @@ function deviceworkerLabel(deviceworker) {
     const lastScannedStr = getDateStr(deviceworker.last_scanned)
     const lastUpdatedStr = getDateStr(deviceworker.last_updated)
 
+    let title = deviceworker.deviceid
+    if (deviceworker.name != '') {
+        title = deviceworker.name
+    }
+
     str = `
             <div>
               <div class='deviceworker container'>
                 <div class='deviceworker info'>
-                    Device id: <span>${deviceworker.deviceid}</span>
+                    Device: <span>${title}</span>
                 </div>
                 <div class='deviceworker info'>
                     fetch: <span>${deviceworker.fetch}</span>
@@ -992,7 +997,7 @@ function deviceworkerLabel(deviceworker) {
                 </div>
                 <div>
                   <span class='deviceworker navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-                </div> 
+                </div>
               </div>
             </div>
           </div>`
@@ -1109,7 +1114,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
               <div class='pokestop container'>
                <div>
                   <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-                </div> 
+                </div>
                 <div class='pokestop info last-scanned'>
                     Last Scanned: ${lastScannedStr}
                 </div>

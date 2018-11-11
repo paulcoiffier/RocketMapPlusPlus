@@ -23,7 +23,8 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
                      Quest, PokestopDetails, Geofence)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, clock_between)
+                    now, dottedQuadToNum, date_secs, clock_between,
+                    calc_pokemon_level)
 from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
@@ -1101,6 +1102,9 @@ class Pogom(Flask):
                 if "wildPokemon" in encounter_response_json:
                     wildpokemon = encounter_response_json["wildPokemon"]
 
+                    if "pokemonData" not in wildpokemon:
+                        continue
+
                     spawn_id = wildpokemon['spawnPointId']
 
                     sp = SpawnPoint.get_by_id(spawn_id, wildpokemon['latitude'], wildpokemon['longitude'])
@@ -1153,15 +1157,15 @@ class Pogom(Flask):
                         'latitude': wildpokemon['latitude'],
                         'longitude': wildpokemon['longitude'],
                         'disappear_time': disappear_time,
-                        'individual_attack': wildpokemon['pokemonData']['individualAttack'],
-                        'individual_defense': wildpokemon['pokemonData']['individualDefense'],
-                        'individual_stamina': wildpokemon['pokemonData']['individualStamina'],
-                        'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move1']].number,
-                        'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move2']].number,
-                        'cp': wildpokemon['pokemonData']['cp'],
-                        'cp_multiplier': wildpokemon['pokemonData']['cpMultiplier'],
-                        'height': wildpokemon['pokemonData']['heightM'],
-                        'weight': wildpokemon['pokemonData']['weightKg'],
+                        'individual_attack': wildpokemon['pokemonData'].get('individualAttack', None),
+                        'individual_defense': wildpokemon['pokemonData'].get('individualDefense', None),
+                        'individual_stamina': wildpokemon['pokemonData'].get('individualStamina', None),
+                        'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move1', 'MOVE_UNSET')].number,
+                        'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move2', 'MOVE_UNSET')].number,
+                        'cp': wildpokemon['pokemonData'].get('cp', None),
+                        'cp_multiplier': wildpokemon['pokemonData'].get('cpMultiplier', None),
+                        'height': wildpokemon['pokemonData'].get('heightM', None),
+                        'weight': wildpokemon['pokemonData'].get('weightKg', None),
                         'gender': gender,
                         'costume': costume,
                         'form': form,
@@ -1183,15 +1187,16 @@ class Pogom(Flask):
                                 'spawn_start': start_end[0],
                                 'spawn_end': start_end[1],
                                 'player_level': int(trainerlvl),
-                                'individual_attack': wildpokemon['pokemonData']['individualAttack'],
-                                'individual_defense': wildpokemon['pokemonData']['individualDefense'],
-                                'individual_stamina': wildpokemon['pokemonData']['individualStamina'],
-                                'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move1']].number,
-                                'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData']['move2']].number,
-                                'cp': wildpokemon['pokemonData']['cp'],
-                                'cp_multiplier': wildpokemon['pokemonData']['cpMultiplier'],
-                                'height': wildpokemon['pokemonData']['heightM'],
-                                'weight': wildpokemon['pokemonData']['weightKg'],
+                                'individual_attack': wildpokemon['pokemonData'].get('individualAttack', 0),
+                                'individual_defense': wildpokemon['pokemonData'].get('individualDefense', 0),
+                                'individual_stamina': wildpokemon['pokemonData'].get('individualStamina', 0),
+                                'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move1', 'MOVE_UNSET')].number,
+                                'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move2', 'MOVE_UNSET')].number,
+                                'cp': wildpokemon['pokemonData'].get('cp', 0),
+                                'cp_multiplier': wildpokemon['pokemonData'].get('cpMultiplier', 0),
+                                'height': wildpokemon['pokemonData'].get('heightM', 0),
+                                'weight': wildpokemon['pokemonData'].get('weightKg', 0),
+                                'pokemon_level': calc_pokemon_level(wildpokemon['pokemonData'].get('cpMultiplier', 0)),
                                 'weather_id': weather
                             })
 
