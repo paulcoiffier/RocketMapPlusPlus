@@ -247,6 +247,9 @@ def get_args():
     parser.add_argument('-tf', '--teleport-factor',
                         help=('Teleport factor for the stepsize'),
                         type=float, default=10)
+    parser.add_argument('-ti', '--teleport-interval',
+                        help=('Time between teleports in seconds'),
+                        type=int, default=60)
     parser.add_argument('-mn', '--mapname',
                         help=('Name for the map in the HTML'),
                         type=str, default='RocketMapPlusPlus')

@@ -1201,6 +1201,20 @@ class DeviceWorker(LatLongModel):
         return result
 
     @staticmethod
+    def get_existing_by_id(id):
+        try:
+            with DeviceWorker.database().execution_context():
+                query = (DeviceWorker
+                         .select()
+                         .where(DeviceWorker.deviceid == id)
+                         .dicts())
+
+                result = query[0]
+        except DeviceWorker.DoesNotExist:
+            result = None
+        return result
+
+    @staticmethod
     def get_all():
         with DeviceWorker.database().execution_context():
             query = (DeviceWorker

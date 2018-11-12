@@ -1605,6 +1605,31 @@ class Pogom(Flask):
 
         return jsonify(d)
 
+    def changeDeviceLoc(self, lat, lon, uuid):
+        deviceworker = DeviceWorker.get_existing_by_id(uuid)
+
+        if not deviceworker or (not deviceworker['last_scanned'] and deviceworker['fetch'] == 'IDLE'):
+            return "Not moved, device isn't found or has never scanned and isn't fetching"
+
+        if uuid in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        deviceworker['latitude'] = round(lat, 5)
+        deviceworker['longitude'] = round(lon, 5)
+        deviceworker['last_updated'] = datetime.utcnow()
+        deviceworker['fetch'] = "walk_spawnpoint"
+
+        deviceworkers = {}
+        deviceworkers[uuid] = deviceworker
+
+        self.db_update_queue.put((DeviceWorker, deviceworkers))
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
     def teleport_loc(self):
         request_json = request.get_json()
 
@@ -1848,7 +1873,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference >= 60:
+        if difference >= self.args.teleport_interval:
             deviceworker['latitude'] = round(nextlatitude, 5)
             deviceworker['longitude'] = round(nextlongitude, 5)
             deviceworker['last_updated'] = datetime.utcnow()
@@ -2007,24 +2032,31 @@ class Pogom(Flask):
         return jsonify(d)
 
     def next_loc(self):
-        args = get_args()
-        if args.fixed_location:
-            return 'Location changes are turned off', 403
         lat = None
         lon = None
         # Part of query string.
         if request.args:
             lat = request.args.get('lat', type=float)
             lon = request.args.get('lon', type=float)
+            coords = request.args.get('coords', type=str)
+            uuid = request.args.get('uuid', type=str)
         # From post requests.
         if request.form:
             lat = request.form.get('lat', type=float)
             lon = request.form.get('lon', type=float)
+            coords = request.form.get('coords', type=str)
+            uuid = request.form.get('uuid', type=str)
 
-        if not (lat and lon):
+        if not (lat and lon and coords):
             log.warning('Invalid next location: %s,%s', lat, lon)
             return 'bad parameters', 400
         else:
+            if not (lat and lon):
+                coordslist = coords.split(',')
+                lat = float(coordslist[0])
+                lon = float(coordslist[1])
+            if uuid:
+                return self.changeDeviceLoc(lat, lon, uuid)
             self.location_queue.put((lat, lon, 0))
             self.set_current_location((lat, lon, 0))
             log.info('Changing next location: %s,%s', lat, lon)
