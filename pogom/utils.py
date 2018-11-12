@@ -250,6 +250,9 @@ def get_args():
     parser.add_argument('-ti', '--teleport-interval',
                         help=('Time between teleports in seconds'),
                         type=int, default=60)
+    parser.add_argument('-tig', '--teleport-ignore',
+                        help=('Ignore coordinates inside this radius for teleport scheduling'),
+                        type=int, default=300)
     parser.add_argument('-mn', '--mapname',
                         help=('Name for the map in the HTML'),
                         type=str, default='RocketMapPlusPlus')
