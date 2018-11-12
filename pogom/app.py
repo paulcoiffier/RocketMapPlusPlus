@@ -452,6 +452,7 @@ class Pogom(Flask):
         sp_id_list = []
         gym_members = {}
         gym_pokemon = {}
+        gym_encountered = {}
 
         now_date = datetime.utcnow()
 
@@ -1109,6 +1110,8 @@ class Pogom(Flask):
                         fort.get('isExRaidEligible', False)
                 }
 
+                gym_encountered[gym_id] = gyms[gym_id].copy()
+
                 gymdetails = Gym.get_gym_details(gym_id)
                 gym_name = gym_get_info_response_json["name"]
                 gym_description = gym_get_info_response_json["description"]
@@ -1398,10 +1401,10 @@ class Pogom(Flask):
         if gym_pokemon:
             self.db_update_queue.put((GymPokemon, gym_pokemon))
 
-        if gym_details:
+        if gym_encountered:
             with GymMember.database().execution_context():
                 DeleteQuery(GymMember).where(
-                    GymMember.gym_id << gym_details.keys()).execute()
+                    GymMember.gym_id << gym_encountered.keys()).execute()
 
         if gym_members:
             self.db_update_queue.put((GymMember, gym_members))
