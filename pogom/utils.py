@@ -1068,8 +1068,6 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
         workers[worker['deviceid']] = worker.copy()
 
     while True:
-        log.info('Updating deviceworkers...')
-
         deviceworkers = DeviceWorker.get_all()
         updateworkers = {}
 
