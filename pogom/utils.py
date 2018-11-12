@@ -437,6 +437,8 @@ def get_args():
                         help='Link for users not in required guild.')
     parser.add_argument('-uasdrr', '--uas-discord-required-roles', default=None,
                         help='Required Discord Guild Role(s) for user external authentication.')
+    parser.add_argument('-uasdai', '--uas-discord-admin-ids', default=None,
+                        help='Discord IDs of the admins running the map.')
     parser.add_argument('-uasdbt', '--uas-discord-bot-token', default=None,
                         help='Discord Bot Token for user external authentication.')
     rarity = parser.add_argument_group('Dynamic Rarity')
