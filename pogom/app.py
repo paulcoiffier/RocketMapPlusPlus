@@ -18,6 +18,8 @@ from flask_compress import Compress
 from pogom.dyn_img import get_gym_icon
 from base64 import b64decode
 
+from peewee import DeleteQuery
+
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
@@ -1091,7 +1093,7 @@ class Pogom(Flask):
                     'slots_available':
                         6 - len(gymdefenders),
                     'total_cp':
-                        fort["gymDisplay"].get('totalGymCp', 0),
+                        float(fort["gymDisplay"].get('totalGymCp', 0)),
                     'enabled':
                         fort['enabled'],
                     'latitude':
@@ -1160,27 +1162,27 @@ class Pogom(Flask):
                         'pokemon_uid':
                             pokemon.get("id"),
                         'cp_decayed':
-                            motivatedpokemon.get('cpNow', 0),
+                            int(motivatedpokemon.get('cpNow', 0)),
                         'deployment_time':
                             datetime.utcnow() -
-                            timedelta(milliseconds=member.get("deploymentTotals", {}).get("deploymentDurationMs", 0))
+                            timedelta(milliseconds=float(member.get("deploymentTotals", {}).get("deploymentDurationMs", 0)))
                     }
                     gym_pokemon[i] = {
                         'pokemon_uid': pokemon.get("id"),
                         'pokemon_id': pokemon.get("id"),
-                        'cp': motivatedpokemon.get("cpWhenDeployed", 0),
-                        'num_upgrades': pokemon.get("numUpgrades", 0),
+                        'cp': int(motivatedpokemon.get("cpWhenDeployed", 0)),
+                        'num_upgrades': int(pokemon.get("numUpgrades", 0)),
                         'move_1': _POKEMONMOVE.values_by_name[pokemon.get("move1")].number,
                         'move_2': _POKEMONMOVE.values_by_name[pokemon.get("move2")].number,
-                        'height': pokemon.get("heightM"),
-                        'weight': pokemon.get("weightKg"),
-                        'stamina': pokemon.get("stamina"),
-                        'stamina_max': pokemon.get("staminaMax"),
-                        'cp_multiplier': pokemon.get("cpMultiplier"),
-                        'additional_cp_multiplier': pokemon.get("additionalCpMultiplier", 0),
-                        'iv_defense': pokemon.get("individualDefense"),
-                        'iv_stamina': pokemon.get("individualStamina"),
-                        'iv_attack': pokemon.get("individualAttack"),
+                        'height': float(pokemon.get("heightM")),
+                        'weight': float(pokemon.get("weightKg")),
+                        'stamina': int(pokemon.get("stamina")),
+                        'stamina_max': int(pokemon.get("staminaMax")),
+                        'cp_multiplier': float(pokemon.get("cpMultiplier")),
+                        'additional_cp_multiplier': float(pokemon.get("additionalCpMultiplier", 0)),
+                        'iv_defense': int(pokemon.get("individualDefense")),
+                        'iv_stamina': int(pokemon.get("individualStamina")),
+                        'iv_attack': int(pokemon.get("individualAttack")),
                         'costume': _COSTUME.values_by_name[pokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
                         'form': _FORM.values_by_name[pokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
                         'shiny': pokemon.get("pokemonDisplay", {}).get("shiny"),
@@ -1192,7 +1194,7 @@ class Pogom(Flask):
                         del wh_pokemon['last_seen']
                         wh_pokemon.update({
                             'cp_decayed':
-                                motivatedpokemon.get('cpNow', 0),
+                                int(motivatedpokemon.get('cpNow', 0)),
                             'deployment_time': calendar.timegm(
                                 gym_members[i]['deployment_time'].timetuple())
                         })
