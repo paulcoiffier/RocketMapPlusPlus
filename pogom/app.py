@@ -1124,7 +1124,7 @@ class Pogom(Flask):
 
                     wh_gym.update({
                         'gym_id':
-                            b64_gym_id,
+                            gym_id,
                         'gym_name':
                             gym_name,
                         'lowest_pokemon_motivation':
