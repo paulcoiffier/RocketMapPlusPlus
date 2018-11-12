@@ -1160,7 +1160,7 @@ class Pogom(Flask):
                         'gym_id':
                             gym_id,
                         'pokemon_uid':
-                            _POKEMONID.values_by_name[pokemon.get("id", 'MISSINGNO')].number,
+                            pokemon.get("id"),
                         'cp_decayed':
                             int(motivatedpokemon.get('cpNow', 0)),
                         'deployment_time':
@@ -1169,7 +1169,7 @@ class Pogom(Flask):
                     }
                     gym_pokemon[i] = {
                         'pokemon_uid': pokemon.get("id"),
-                        'pokemon_id': pokemon.get("id"),
+                        'pokemon_id': _POKEMONID.values_by_name[pokemon.get("pokemonId", 'MISSINGNO')].number,
                         'cp': int(motivatedpokemon.get("cpWhenDeployed", 0)),
                         'num_upgrades': int(pokemon.get("numUpgrades", 0)),
                         'move_1': _POKEMONMOVE.values_by_name[pokemon.get("move1")].number,
