@@ -546,7 +546,7 @@ class Pogom(Flask):
 
                                 sp['last_scanned'] = datetime.utcnow()
 
-                                if ((p['encounterId'], spawn_id) in encountered_pokemon):
+                                if ((float(p['encounterId']), spawn_id) in encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
                                     continue
@@ -693,7 +693,7 @@ class Pogom(Flask):
 
                                 sp['last_scanned'] = datetime.utcnow()
 
-                                if ((p['encounterId'], spawn_id) in encountered_pokemon):
+                                if ((float(p['encounterId']), spawn_id) in encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
                                     continue
@@ -792,7 +792,7 @@ class Pogom(Flask):
                                 encounter_id = p.get('encounterId')
                                 if not encounter_id:
                                     continue
-                                if ((encounter_id, pokestop_id) in nearby_encountered_pokemon):
+                                if ((float(encounter_id), pokestop_id) in nearby_encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
                                     continue
@@ -1160,7 +1160,7 @@ class Pogom(Flask):
                         'gym_id':
                             gym_id,
                         'pokemon_uid':
-                            pokemon.get("id"),
+                            _POKEMONID.values_by_name[pokemon.get("id", 'MISSINGNO')].number,
                         'cp_decayed':
                             int(motivatedpokemon.get('cpNow', 0)),
                         'deployment_time':
