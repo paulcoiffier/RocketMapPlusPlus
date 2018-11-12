@@ -1158,12 +1158,12 @@ class Pogom(Flask):
                     motivatedpokemon = member.get("motivatedPokemon")
                     if not motivatedpokemon:
                         continue
-                    pokemon = motivatedpokemon.get("pokemon")
+                    gympokemon = motivatedpokemon.get("pokemon")
                     gym_members[i] = {
                         'gym_id':
                             gym_id,
                         'pokemon_uid':
-                            pokemon.get("id"),
+                            gympokemon.get("id"),
                         'cp_decayed':
                             int(motivatedpokemon.get('cpNow', 0)),
                         'deployment_time':
@@ -1171,24 +1171,24 @@ class Pogom(Flask):
                             timedelta(milliseconds=float(member.get("deploymentTotals", {}).get("deploymentDurationMs", 0)))
                     }
                     gym_pokemon[i] = {
-                        'pokemon_uid': pokemon.get("id"),
-                        'pokemon_id': _POKEMONID.values_by_name[pokemon.get("pokemonId", 'MISSINGNO')].number,
+                        'pokemon_uid': gympokemon.get("id"),
+                        'pokemon_id': _POKEMONID.values_by_name[gympokemon.get("pokemonId", 'MISSINGNO')].number,
                         'cp': int(motivatedpokemon.get("cpWhenDeployed", 0)),
-                        'num_upgrades': int(pokemon.get("numUpgrades", 0)),
-                        'move_1': _POKEMONMOVE.values_by_name[pokemon.get("move1")].number,
-                        'move_2': _POKEMONMOVE.values_by_name[pokemon.get("move2")].number,
-                        'height': float(pokemon.get("heightM")),
-                        'weight': float(pokemon.get("weightKg")),
-                        'stamina': int(pokemon.get("stamina")),
-                        'stamina_max': int(pokemon.get("staminaMax")),
-                        'cp_multiplier': float(pokemon.get("cpMultiplier")),
-                        'additional_cp_multiplier': float(pokemon.get("additionalCpMultiplier", 0)),
-                        'iv_defense': int(pokemon.get("individualDefense")),
-                        'iv_stamina': int(pokemon.get("individualStamina")),
-                        'iv_attack': int(pokemon.get("individualAttack")),
-                        'costume': _COSTUME.values_by_name[pokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
-                        'form': _FORM.values_by_name[pokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
-                        'shiny': pokemon.get("pokemonDisplay", {}).get("shiny"),
+                        'num_upgrades': int(gympokemon.get("numUpgrades", 0)),
+                        'move_1': _POKEMONMOVE.values_by_name[gympokemon.get("move1")].number,
+                        'move_2': _POKEMONMOVE.values_by_name[gympokemon.get("move2")].number,
+                        'height': float(gympokemon.get("heightM")),
+                        'weight': float(gympokemon.get("weightKg")),
+                        'stamina': int(gympokemon.get("stamina")),
+                        'stamina_max': int(gympokemon.get("staminaMax")),
+                        'cp_multiplier': float(gympokemon.get("cpMultiplier")),
+                        'additional_cp_multiplier': float(gympokemon.get("additionalCpMultiplier", 0)),
+                        'iv_defense': int(gympokemon.get("individualDefense")),
+                        'iv_stamina': int(gympokemon.get("individualStamina")),
+                        'iv_attack': int(gympokemon.get("individualAttack")),
+                        'costume': _COSTUME.values_by_name[gympokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
+                        'form': _FORM.values_by_name[gympokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
+                        'shiny': gympokemon.get("pokemonDisplay", {}).get("shiny"),
                         'last_seen': datetime.utcnow(),
                     }
 
