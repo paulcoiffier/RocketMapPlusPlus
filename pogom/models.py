@@ -43,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 48
+db_schema_version = 49
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1165,6 +1165,7 @@ class PlayerLocale(BaseModel):
 class DeviceWorker(LatLongModel):
     deviceid = Utf8mb4CharField(primary_key=True, max_length=100, index=True)
     name = Utf8mb4CharField(max_length=100, default="")
+    discord_id = Utf8mb4CharField(max_length=100, default="")
     latitude = DoubleField()
     longitude = DoubleField()
     centerlatitude = DoubleField()
@@ -1189,6 +1190,7 @@ class DeviceWorker(LatLongModel):
             result = query[0] if query else {
                 'deviceid': id,
                 'name': '',
+                'discord_id': '',
                 'latitude': latitude,
                 'longitude': longitude,
                 'centerlatitude': latitude,
@@ -1233,6 +1235,7 @@ class DeviceWorker(LatLongModel):
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
                              DeviceWorker.name,
+                             DeviceWorker.discord_id,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -1256,6 +1259,7 @@ class DeviceWorker(LatLongModel):
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
                              DeviceWorker.name,
+                             DeviceWorker.discord_id,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -4045,6 +4049,12 @@ def database_migrate(db, old_ver):
     if old_ver < 48:
         migrate(
             migrator.add_column('deviceworker', 'name',
+                                Utf8mb4CharField(max_length=100, default=""))
+        )
+
+    if old_ver < 49:
+        migrate(
+            migrator.add_column('deviceworker', 'discord_id',
                                 Utf8mb4CharField(max_length=100, default=""))
         )
 
