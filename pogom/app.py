@@ -21,7 +21,7 @@ from base64 import b64decode
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
-                     Quest, PokestopDetails, Geofence)
+                     Quest, PokestopDetails, Geofence, GymMember, GymPokemon)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between,
                     calc_pokemon_level)
@@ -36,6 +36,7 @@ from google.protobuf.json_format import MessageToJson
 from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
 from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
+from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import GymGetInfoResponse
 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
@@ -447,6 +448,8 @@ class Pogom(Flask):
         sightings = {}
         new_spawn_points = []
         sp_id_list = []
+        gym_members = {}
+        gym_pokemon = {}
 
         now_date = datetime.utcnow()
 
@@ -1051,6 +1054,155 @@ class Pogom(Flask):
                                             self.wh_update_queue.put(('raid', wh_raid))
 
         for proto in protos_dict:
+            if "GymGetInfoResponse" in proto:
+                gym_get_info_response_string = b64decode(proto["GymGetInfoResponse"])
+
+                ggir = GymGetInfoResponse()
+
+                try:
+                    ggir.ParseFromString(gym_get_info_response_string)
+                    gym_get_info_response_json = json.loads(MessageToJson(ggir))
+                except:
+                    continue
+
+                gymstatusdefenders = gym_get_info_response_json.get("gymStatusAndDefenders")
+                if not gymstatusdefenders:
+                    continue
+
+                fort = gymstatusdefenders.get("pokemonFortProto")
+                if not fort:
+                    continue
+
+                gym_id = fort["id"]
+
+                gymdefenders = gymstatusdefenders.get('gymDefender', [])
+
+                park = Gym.get_gyms_park(gym_id)
+
+                gyms[fort['id']] = {
+                    'gym_id':
+                        fort['id'],
+                    'team_id':
+                        _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
+                    'park':
+                        park,
+                    'guard_pokemon_id':
+                        _POKEMONID.values_by_name[fort.get('guardPokemonId', 'MISSINGNO')].number,
+                    'slots_available':
+                        6 - len(gymdefenders),
+                    'total_cp':
+                        fort["gymDisplay"].get('totalGymCp', 0),
+                    'enabled':
+                        fort['enabled'],
+                    'latitude':
+                        fort['latitude'],
+                    'longitude':
+                        fort['longitude'],
+                    'last_modified':
+                        datetime.utcfromtimestamp(
+                            float(fort['lastModifiedTimestampMs']) / 1000.0),
+                    'is_in_battle':
+                        fort.get('isInBattle', False),
+                    'is_ex_raid_eligible':
+                        fort.get('isExRaidEligible', False)
+                }
+
+                gymdetails = Gym.get_gym_details(gym_id)
+                gym_name = gym_get_info_response_json["name"]
+                gym_description = gym_get_info_response_json["description"]
+                gym_url = gym_get_info_response_json["url"]
+
+                gym_details[gym_id] = {
+                    'gym_id': gym_id,
+                    'name': gym_name,
+                    'description': gym_description,
+                    'url': gym_url
+                }
+
+                if 'gym' in self.args.wh_types:
+                    wh_gym = gyms[fort['id']].copy()
+
+                    wh_gym.update({
+                        'gym_id':
+                            b64_gym_id,
+                        'gym_name':
+                            gym_name,
+                        'lowest_pokemon_motivation':
+                            float(fort["gymDisplay"].get('lowestPokemonMotivation', 0)),
+                        'occupied_since':
+                            float(fort["gymDisplay"].get('occupiedMillis', 0)),
+                        'last_modified':
+                            float(fort['lastModifiedTimestampMs']),
+                    })
+
+                    self.wh_update_queue.put(('gym', wh_gym))
+
+                webhook_data = {
+                    'id': str(gym_id),
+                    'latitude': fort['latitude'],
+                    'longitude': fort['longitude'],
+                    'team': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
+                    'name': gym_name,
+                    'description': gym_description,
+                    'url': gym_url,
+                    'pokemon': [],
+                }
+
+                i = 0
+                for member in gymdefenders:
+                    motivatedpokemon = member.get("motivatedPokemon")
+                    if not motivatedpokemon:
+                        continue
+                    pokemon = motivatedpokemon.get("pokemon")
+                    gym_members[i] = {
+                        'gym_id':
+                            gym_id,
+                        'pokemon_uid':
+                            pokemon.get("id"),
+                        'cp_decayed':
+                            motivatedpokemon.get('cpNow', 0),
+                        'deployment_time':
+                            datetime.utcnow() -
+                            timedelta(milliseconds=member.get("deploymentTotals", {}).get("deploymentDurationMs", 0))
+                    }
+                    gym_pokemon[i] = {
+                        'pokemon_uid': pokemon.get("id"),
+                        'pokemon_id': pokemon.get("id"),
+                        'cp': motivatedpokemon.get("cpWhenDeployed", 0),
+                        'num_upgrades': pokemon.get("numUpgrades", 0),
+                        'move_1': _POKEMONMOVE.values_by_name[pokemon.get("move1")].number,
+                        'move_2': _POKEMONMOVE.values_by_name[pokemon.get("move2")].number,
+                        'height': pokemon.get("heightM"),
+                        'weight': pokemon.get("weightKg"),
+                        'stamina': pokemon.get("stamina"),
+                        'stamina_max': pokemon.get("staminaMax"),
+                        'cp_multiplier': pokemon.get("cpMultiplier"),
+                        'additional_cp_multiplier': pokemon.get("additionalCpMultiplier", 0),
+                        'iv_defense': pokemon.get("individualDefense"),
+                        'iv_stamina': pokemon.get("individualStamina"),
+                        'iv_attack': pokemon.get("individualAttack"),
+                        'costume': _COSTUME.values_by_name[pokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
+                        'form': _FORM.values_by_name[pokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
+                        'shiny': pokemon.get("pokemonDisplay", {}).get("shiny"),
+                        'last_seen': datetime.utcnow(),
+                    }
+
+                    if 'gym-info' in self.args.wh_types:
+                        wh_pokemon = gym_pokemon[i].copy()
+                        del wh_pokemon['last_seen']
+                        wh_pokemon.update({
+                            'cp_decayed':
+                                motivatedpokemon.get('cpNow', 0),
+                            'deployment_time': calendar.timegm(
+                                gym_members[i]['deployment_time'].timetuple())
+                        })
+                        webhook_data['pokemon'].append(wh_pokemon)
+
+                    i += 1
+
+                if 'gym-info' in self.args.wh_types:
+                    self.wh_update_queue.put(('gym_details', webhook_data))
+
             if "FortSearchResponse" in proto:
                 fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
@@ -1240,6 +1392,17 @@ class Pogom(Flask):
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
         if quest_result:
             self.db_update_queue.put((Quest, quest_result))
+
+        if gym_pokemon:
+            self.db_update_queue.put((GymPokemon, gym_pokemon))
+
+        if gym_details:
+            with GymMember.database().execution_context():
+                DeleteQuery(GymMember).where(
+                    GymMember.gym_id << gym_details.keys()).execute()
+
+        if gym_members:
+            self.db_update_queue.put((GymMember, gym_members))
 
         return 'ok'
 
