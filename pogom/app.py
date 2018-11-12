@@ -1114,8 +1114,8 @@ class Pogom(Flask):
 
                 gymdetails = Gym.get_gym_details(gym_id)
                 gym_name = gym_get_info_response_json["name"]
-                gym_description = gym_get_info_response_json["description"]
-                gym_url = gym_get_info_response_json["url"]
+                gym_description = gym_get_info_response_json.get("description", "")
+                gym_url = gym_get_info_response_json.get("url", "")
 
                 gym_details[gym_id] = {
                     'gym_id': gym_id,
