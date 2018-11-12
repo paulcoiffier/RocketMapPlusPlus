@@ -140,6 +140,7 @@ class Pogom(Flask):
         self.route("/gym_img", methods=['GET'])(self.gym_img)
 
         self.deviceschedules = {}
+        self.devicesscheduling = []
 
         self.geofences = None
 
@@ -1782,6 +1783,9 @@ class Pogom(Flask):
         if uuid in self.deviceschedules:
             self.deviceschedules[uuid] = []
 
+        if uuid in self.devicesscheduling:
+            self.devicesscheduling.remove(uuid)
+
         deviceworker['latitude'] = round(lat, 5)
         deviceworker['longitude'] = round(lon, 5)
         deviceworker['last_updated'] = datetime.utcnow()
@@ -1859,12 +1863,23 @@ class Pogom(Flask):
 
             return jsonify(d)
 
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_spawnpoint":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
+            self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
@@ -1963,12 +1978,23 @@ class Pogom(Flask):
 
             return jsonify(d)
 
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_pokestop":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
+            self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
@@ -2067,12 +2093,23 @@ class Pogom(Flask):
 
             return jsonify(d)
 
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gym":
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
+            self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
