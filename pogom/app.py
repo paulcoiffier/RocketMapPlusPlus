@@ -1831,6 +1831,8 @@ class Pogom(Flask):
             for point in route.points:
                 result.append((point.latitude, point.longitude))
 
+        log.info("GPX route " + routename + " has " + len(result) + " points")
+
         return result
 
     def changeDeviceLoc(self, lat, lon, uuid):
@@ -2031,9 +2033,9 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) == 0:
             routename = ""
             if request.args:
-                routename = request.args.get('uuid', type=str)
+                routename = request.args.get('route', type=str)
             if request.form:
-                routename = request.form.get('uuid', type=str)
+                routename = request.form.get('route', type=str)
             if routename != "":
                 routename = os.path.join(
                     self.args.root_path,
@@ -2044,11 +2046,8 @@ class Pogom(Flask):
 
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
-            nextlatitude = latitude
-            nextlongitude = longitude
-        else:
-            nextlatitude = deviceworker['latitude']
-            nextlongitude = deviceworker['longitude']
+        nextlatitude = deviceworker['latitude']
+        nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
 
