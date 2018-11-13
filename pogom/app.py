@@ -18,6 +18,8 @@ from flask_compress import Compress
 from pogom.dyn_img import get_gym_icon
 from base64 import b64decode
 
+import gpxpy
+
 from peewee import DeleteQuery
 
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
@@ -117,6 +119,7 @@ class Pogom(Flask):
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
+        self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
         self.route("/walk_pokestop", methods=['POST'])(self.walk_pokestop)
         self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
@@ -1809,6 +1812,27 @@ class Pogom(Flask):
 
         return jsonify(d)
 
+    def get_gpx_route(self, routename):
+        result = []
+
+        gpx_file = open(routename, 'r')
+
+        gpx = gpxpy.parse(gpx_file)
+
+        for track in gpx.tracks:
+            for segment in track.segments:
+                for point in segment.points:
+                    result.append((point.latitude, point.longitude))
+
+        for waypoint in gpx.waypoints:
+            result.append((waypoint.latitude, waypoint.longitude))
+
+        for route in gpx.routes:
+            for point in route.points:
+                result.append((point.latitude, point.longitude))
+
+        return result
+
     def changeDeviceLoc(self, lat, lon, uuid):
         deviceworker = DeviceWorker.get_existing_by_id(uuid)
 
@@ -1910,6 +1934,118 @@ class Pogom(Flask):
             nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
+        else:
+            nextlatitude = deviceworker['latitude']
+            nextlongitude = deviceworker['longitude']
+
+        nexttarget = self.deviceschedules[uuid][0]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        if nextlatitude < nexttarget[0]:
+            if nexttarget[0] - nextlatitude >= self.args.stepsize:
+                nextlatitude = nextlatitude + self.args.stepsize
+            else:
+                nextlatitude = nexttarget[0]
+        else:
+            if nextlatitude - nexttarget[0] >= self.args.stepsize:
+                nextlatitude = nextlatitude - self.args.stepsize
+            else:
+                nextlatitude = nexttarget[0]
+
+        if nextlongitude < nexttarget[1]:
+            if nexttarget[1] - nextlongitude >= self.args.stepsize:
+                nextlongitude = nextlongitude + self.args.stepsize
+            else:
+                nextlongitude = nexttarget[1]
+        else:
+            if nextlongitude - nexttarget[1] >= self.args.stepsize:
+                nextlongitude = nextlongitude - self.args.stepsize
+            else:
+                nextlongitude = nexttarget[1]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['last_updated'] = datetime.utcnow()
+        deviceworker['fetch'] = "walk_spawnpoint"
+
+        self.save_device(deviceworker)
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
+    def walk_gpx(self):
+        request_json = request.get_json()
+
+        uuid = request_json.get('uuid')
+        if uuid == "":
+            return ""
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        deviceworker = self.get_device(uuid, latitude, longitude)
+
+        if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        if deviceworker['fetch'] == "jump_now":
+            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['fetch'] = "walk_gpx"
+
+            self.save_device(deviceworker)
+
+            d = {}
+            d['latitude'] = deviceworker['latitude']
+            d['longitude'] = deviceworker['longitude']
+
+            return jsonify(d)
+
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
+
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_gpx":
+            self.deviceschedules[uuid] = []
+
+        if len(self.deviceschedules[uuid]) == 0:
+            routename = ""
+            if request.args:
+                routename = request.args.get('uuid', type=str)
+            if request.form:
+                routename = request.form.get('uuid', type=str)
+            if routename != "":
+                routename = os.path.join(
+                    self.args.root_path,
+                    'gpx',
+                    routename + ".gpx")
+            if routename == "" or not os.path.isfile(routename):
+                return self.scan_loc()
+
+            self.devicesscheduling.append(uuid)
+            self.deviceschedules[uuid] = self.get_gpx_route(routename)
+            nextlatitude = latitude
+            nextlongitude = longitude
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
