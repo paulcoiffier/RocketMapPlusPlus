@@ -141,8 +141,46 @@ class Pogom(Flask):
 
         self.deviceschedules = {}
         self.devicesscheduling = []
+        self.devices = {}
 
         self.geofences = None
+
+    def get_device(self, uuid, lat, lng):
+        if uuid not in self.devices:
+            self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+        device = self.devices[uuid]
+
+        last_updated = device['last_updated']
+        last_scanned = device['last_scanned']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        difference2 = (datetime.utcnow() - last_scanned).total_seconds()
+        if difference > 30 or difference2 > 30:
+            self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+            device = self.devices[uuid]
+
+        return device
+
+    def save_device(self, device):
+        uuid = device['deviceid']
+        if uuid not in self.devices:
+            self.devices[uuid] = DeviceWorker.get_by_id(uuid, device['latitude'], device['longitude'])
+
+        self.devices[uuid] = device.copy()
+
+        last_updated = device['last_updated']
+        last_scanned = device['last_scanned']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        difference2 = (datetime.utcnow() - last_scanned).total_seconds()
+        if difference > 30 or difference2 > 30:
+            deviceworkers = {}
+            deviceworkers[uuid] = self.devices[uuid]
+
+            self.db_update_queue.put((DeviceWorker, deviceworkers))
+
+            if device['fetch'] != 'IDLE':
+                scan_location = ScannedLocation.get_by_loc([device['latitude'], device['longitude']])
+                ScannedLocation.update_band(scan_location, device['last_updated'])
+                self.db_update_queue.put((ScannedLocation, {0: scan_location}))
 
     def gym_img(self):
         team = request.args.get('team')
@@ -414,7 +452,7 @@ class Pogom(Flask):
                 self.set_current_location((lat, lng, 0))
                 log.info('Changing next location: %s,%s', lat, lng)
 
-            deviceworker = DeviceWorker.get_by_id(uuid, lat, lng)
+            deviceworker = self.get_device(uuid, lat, lng)
 
             deviceworker['scans'] = deviceworker['scans'] + 1
             deviceworker['last_scanned'] = datetime.utcnow()
@@ -425,10 +463,7 @@ class Pogom(Flask):
                 deviceworker['latitude'] = lat
                 deviceworker['longitude'] = lng
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
+            self.save_device(deviceworker)
 
             return self.parse_map_protos(protos, trainerlvl, deviceworker)
         else:
@@ -1791,10 +1826,7 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "jump_now"
 
-        deviceworkers = {}
-        deviceworkers[uuid] = deviceworker
-
-        self.db_update_queue.put((DeviceWorker, deviceworkers))
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -1812,7 +1844,7 @@ class Pogom(Flask):
         latitude = round(request_json.get('latitude', 0), 5)
         longitude = round(request_json.get('longitude', 0), 5)
 
-        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+        deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
             return "Device need to have posted data first"
 
@@ -1839,7 +1871,7 @@ class Pogom(Flask):
         latitude = round(lat, 5)
         longitude = round(lng, 5)
 
-        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+        deviceworker = self.get_device(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -1848,14 +1880,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_spawnpoint"
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            self.save_device(deviceworker)
 
             d = {}
             d['latitude'] = deviceworker['latitude']
@@ -1926,14 +1951,7 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_spawnpoint"
 
-        deviceworkers = {}
-        deviceworkers[uuid] = deviceworker
-
-        self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-        scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-        ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-        self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -1954,7 +1972,7 @@ class Pogom(Flask):
         latitude = round(lat, 5)
         longitude = round(lng, 5)
 
-        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+        deviceworker = self.get_device(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -1963,14 +1981,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_pokestop"
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            self.save_device(deviceworker)
 
             d = {}
             d['latitude'] = deviceworker['latitude']
@@ -2041,14 +2052,7 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_pokestop"
 
-        deviceworkers = {}
-        deviceworkers[uuid] = deviceworker
-
-        self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-        scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-        ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-        self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -2069,7 +2073,7 @@ class Pogom(Flask):
         latitude = round(lat, 5)
         longitude = round(lng, 5)
 
-        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+        deviceworker = self.get_device(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -2078,14 +2082,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gym"
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            self.save_device(deviceworker)
 
             d = {}
             d['latitude'] = deviceworker['latitude']
@@ -2141,14 +2138,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gym"
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -2173,7 +2163,7 @@ class Pogom(Flask):
         #    latitude = round(self.current_location[0], 5)
         #    longitude = round(self.current_location[1], 5)
 
-        deviceworker = DeviceWorker.get_by_id(uuid, latitude, longitude)
+        deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
             return "Device need to have posted data first"
 
@@ -2181,14 +2171,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
 
-            deviceworkers = {}
-            deviceworkers[uuid] = deviceworker
-
-            self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-            scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-            ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-            self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            self.save_device(deviceworker)
 
             d = {}
             d['latitude'] = deviceworker['latitude']
@@ -2295,14 +2278,7 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
 
-        deviceworkers = {}
-        deviceworkers[uuid] = deviceworker
-
-        self.db_update_queue.put((DeviceWorker, deviceworkers))
-
-        scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
-        ScannedLocation.update_band(scan_location, deviceworker['last_updated'])
-        self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+        self.save_device(deviceworker)
 
         # log.info(request)
 
