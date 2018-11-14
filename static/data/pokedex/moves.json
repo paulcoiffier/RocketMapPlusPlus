@@ -1830,5 +1830,221 @@
         "duration": 1300,
         "energy": 20,
         "dps": 3.8
+    },
+    "292": {
+        "name": "Weather Ball Fire",
+        "type": "Fire",
+        "damage": 60,
+        "duration": 1600,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "293": {
+        "name": "Weather Ball Ice",
+        "type": "Ice",
+        "damage": 60,
+        "duration": 1600,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "294": {
+        "name": "WEATHER_BALL_ROCK",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "295": {
+        "name": "WEATHER_BALL_WATER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "296": {
+        "name": "FRENZY_PLANT",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "297": {
+        "name": "SMACK_DOWN_FAST",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "298": {
+        "name": "BLAST_BURN",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "299": {
+        "name": "HYDRO_CANNON",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "300": {
+        "name": "LAST_RESORT",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "301": {
+        "name": "METEOR_MASH",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "302": {
+        "name": "SKULL_BASH",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "303": {
+        "name": "ACID_SPRAY",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "304": {
+        "name": "EARTH_POWER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "305": {
+        "name": "CRABHAMMER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "306": {
+        "name": "LUNGE",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "307": {
+        "name": "CRUSH_CLAW",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "308": {
+        "name": "OCTAZOOKA",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "309": {
+        "name": "MIRROR_SHOT",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "310": {
+        "name": "SUPER_POWER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "311": {
+        "name": "FELL_STINGER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "312": {
+        "name": "LEAF_TORNADO",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "313": {
+        "name": "LEECH_LIFE",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "314": {
+        "name": "DRAIN_PUNCH",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "315": {
+        "name": "SHADOW_BONE",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "316": {
+        "name": "MUDDY_WATER",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "317": {
+        "name": "BLAZE_KICK",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
+    },
+    "318": {
+        "name": "RAZOR_SHELL",
+        "type": "Normal",
+        "damage": 5,
+        "duration": 1300,
+        "energy": 20,
+        "dps": 3.8
     }
 }

@@ -9,6 +9,8 @@ config/*
 !config/config.ini.example
 geofences/*
 !geofences/*.example
+gpx/*
+!gpx/*.example
 static/dist/
 node_modules/
 venv/
