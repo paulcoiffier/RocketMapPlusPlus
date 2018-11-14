@@ -918,7 +918,7 @@ class Pogom(Flask):
 
                                     pokestops[fort['id']] = {
                                         'pokestop_id': fort['id'],
-                                        'enabled': fort['enabled'],
+                                        'enabled': fort.get('enabled', False),
                                         'latitude': fort['latitude'],
                                         'longitude': fort['longitude'],
                                         'last_modified': datetime.utcfromtimestamp(
@@ -974,7 +974,7 @@ class Pogom(Flask):
                                         'total_cp':
                                             fort["gymDisplay"].get('totalGymCp', 0),
                                         'enabled':
-                                            fort['enabled'],
+                                            fort.get('enabled', False),
                                         'latitude':
                                             fort['latitude'],
                                         'longitude':
@@ -1144,7 +1144,7 @@ class Pogom(Flask):
                     'total_cp':
                         float(fort["gymDisplay"].get('totalGymCp', 0)),
                     'enabled':
-                        fort['enabled'],
+                        fort.get('enabled', False),
                     'latitude':
                         fort['latitude'],
                     'longitude':
