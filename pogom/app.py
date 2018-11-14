@@ -155,8 +155,12 @@ class Pogom(Flask):
 
         last_updated = device['last_updated']
         last_scanned = device['last_scanned']
+
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        difference2 = (datetime.utcnow() - last_scanned).total_seconds()
+        if last_scanned is None:
+            difference2 = 60
+        else:
+            difference2 = (datetime.utcnow() - last_scanned).total_seconds()
         if difference > 30 and difference2 > 30:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             device = self.devices[uuid].copy()
