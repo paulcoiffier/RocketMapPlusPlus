@@ -2043,6 +2043,8 @@ class Pogom(Flask):
                 routename = request.args.get('route', type=str)
             if request.form:
                 routename = request.form.get('route', type=str)
+            if routename == "":
+                routename = uuid
             if routename != "":
                 routename = os.path.join(
                     self.args.root_path,
