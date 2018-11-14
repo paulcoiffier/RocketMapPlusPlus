@@ -683,7 +683,7 @@ class Pogom(Flask):
                                 sp['missed_count'] = 0
 
                                 sighting = {
-                                    'encounter_id': float(p['encounterId']),
+                                    'encounter_id': long(p['encounterId']),
                                     'spawnpoint_id': spawn_id,
                                     'scan_time': now_date,
                                     'tth_secs': None
@@ -1381,7 +1381,7 @@ class Pogom(Flask):
                         if (pokemon_id in self.args.webhook_whitelist or
                             (not self.args.webhook_whitelist and pokemon_id
                              not in self.args.webhook_blacklist)):
-                            wh_poke = pokemon[wildpokemon['encounterId']].copy()
+                            wh_poke = pokemon[long(wildpokemon['encounterId'])].copy()
                             wh_poke.update({
                                 'disappear_time': calendar.timegm(
                                     disappear_time.timetuple()),
