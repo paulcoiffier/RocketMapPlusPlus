@@ -151,15 +151,15 @@ class Pogom(Flask):
     def get_device(self, uuid, lat, lng):
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
-        device = self.devices[uuid]
+        device = self.devices[uuid].copy()
 
         last_updated = device['last_updated']
         last_scanned = device['last_scanned']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         difference2 = (datetime.utcnow() - last_scanned).total_seconds()
-        if difference > 30 or difference2 > 30:
+        if difference > 30 and difference2 > 30:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
-            device = self.devices[uuid]
+            device = self.devices[uuid].copy()
 
         return device
 
@@ -170,11 +170,7 @@ class Pogom(Flask):
 
         self.devices[uuid] = device.copy()
 
-        last_updated = device['last_updated']
-        last_scanned = device['last_scanned']
-        difference = (datetime.utcnow() - last_updated).total_seconds()
-        difference2 = (datetime.utcnow() - last_scanned).total_seconds()
-        if difference > 30 or difference2 > 30:
+        if round(now()) % 30 == 0:
             deviceworkers = {}
             deviceworkers[uuid] = self.devices[uuid]
 
@@ -514,7 +510,7 @@ class Pogom(Flask):
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
                         if "wildPokemons" in mapcell:
-                            encounter_ids = [p['encounterId'] for p in mapcell["wildPokemons"]]
+                            encounter_ids = [float(p['encounterId']) for p in mapcell["wildPokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
                             with Pokemon.database().execution_context():
@@ -528,7 +524,7 @@ class Pogom(Flask):
                                 # query.
                                 # All of that is needed to make sure it's unique.
                                 encountered_pokemon = [
-                                    (p['encounter_id'], p['spawnpoint_id']) for p in query]
+                                    (float(p['encounter_id']), p['spawnpoint_id']) for p in query]
 
                             for p in mapcell["wildPokemons"]:
                                 spawn_id = p['spawnPointId']
@@ -539,7 +535,7 @@ class Pogom(Flask):
                                 sp['missed_count'] = 0
 
                                 sighting = {
-                                    'encounter_id': p['encounterId'],
+                                    'encounter_id': float(p['encounterId']),
                                     'spawnpoint_id': spawn_id,
                                     'scan_time': now_date,
                                     'tth_secs': None
@@ -582,7 +578,7 @@ class Pogom(Flask):
                                 if (not SpawnPoint.tth_found(sp) or sighting['tth_secs']):
                                     SpawnpointDetectionData.classify(sp, scan_location, now_secs,
                                                                      sighting)
-                                    sightings[p.encounter_id] = sighting
+                                    sightings[float(p['encounterId'])] = sighting
 
                                 sp['last_scanned'] = datetime.utcnow()
 
@@ -605,8 +601,8 @@ class Pogom(Flask):
                                 printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
 
-                                pokemon[p['encounterId']] = {
-                                    'encounter_id': p['encounterId'],
+                                pokemon[float(p['encounterId'])] = {
+                                    'encounter_id': float(p['encounterId']),
                                     'spawnpoint_id': spawn_id,
                                     'pokemon_id': pokemon_id,
                                     'latitude': p['latitude'],
@@ -631,7 +627,7 @@ class Pogom(Flask):
                                     if (pokemon_id in self.args.webhook_whitelist or
                                         (not self.args.webhook_whitelist and pokemon_id
                                          not in self.args.webhook_blacklist)):
-                                        wh_poke = pokemon[p['encounterId']].copy()
+                                        wh_poke = pokemon[float(p['encounterId'])].copy()
                                         wh_poke.update({
                                             'disappear_time': calendar.timegm(
                                                 disappear_time.timetuple()),
@@ -662,7 +658,7 @@ class Pogom(Flask):
                                         self.wh_update_queue.put(('pokemon', wh_poke))
 
                         if "catchablePokemons" in mapcell:
-                            encounter_ids = [p['encounterId'] for p in mapcell["catchablePokemons"]]
+                            encounter_ids = [float(p['encounterId']) for p in mapcell["catchablePokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
                             with Pokemon.database().execution_context():
@@ -676,7 +672,7 @@ class Pogom(Flask):
                                 # query.
                                 # All of that is needed to make sure it's unique.
                                 encountered_pokemon = [
-                                    (p['encounter_id'], p['spawnpoint_id']) for p in query]
+                                    (float(p['encounter_id']), p['spawnpoint_id']) for p in query]
 
                             for p in mapcell["catchablePokemons"]:
                                 spawn_id = p['spawnPointId']
@@ -687,7 +683,7 @@ class Pogom(Flask):
                                 sp['missed_count'] = 0
 
                                 sighting = {
-                                    'encounter_id': p['encounterId'],
+                                    'encounter_id': float(p['encounterId']),
                                     'spawnpoint_id': spawn_id,
                                     'scan_time': now_date,
                                     'tth_secs': None
@@ -729,7 +725,7 @@ class Pogom(Flask):
                                 if (not SpawnPoint.tth_found(sp) or sighting['tth_secs']):
                                     SpawnpointDetectionData.classify(sp, scan_location, now_secs,
                                                                      sighting)
-                                    sightings[p.encounter_id] = sighting
+                                    sightings[float(p['encounterId'])] = sighting
 
                                 sp['last_scanned'] = datetime.utcnow()
 
@@ -752,8 +748,8 @@ class Pogom(Flask):
                                 printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
 
-                                pokemon[p['encounterId']] = {
-                                    'encounter_id': p['encounterId'],
+                                pokemon[float(p['encounterId'])] = {
+                                    'encounter_id': float(p['encounterId']),
                                     'spawnpoint_id': spawn_id,
                                     'pokemon_id': pokemon_id,
                                     'latitude': p['latitude'],
@@ -778,7 +774,7 @@ class Pogom(Flask):
                                     if (pokemon_id in self.args.webhook_whitelist or
                                         (not self.args.webhook_whitelist and pokemon_id
                                          not in self.args.webhook_blacklist)):
-                                        wh_poke = pokemon[p['encounterId']].copy()
+                                        wh_poke = pokemon[float(p['encounterId'])].copy()
                                         wh_poke.update({
                                             'disappear_time': calendar.timegm(
                                                 disappear_time.timetuple()),
@@ -809,7 +805,7 @@ class Pogom(Flask):
                                         self.wh_update_queue.put(('pokemon', wh_poke))
 
                         if "nearbyPokemons" in mapcell:
-                            nearby_encounter_ids = [p['encounterId'] for p in mapcell["nearbyPokemons"]]
+                            nearby_encounter_ids = [float(p['encounterId']) for p in mapcell["nearbyPokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
                             with PokestopMember.database().execution_context():
@@ -823,7 +819,20 @@ class Pogom(Flask):
                                 # query.
                                 # All of that is needed to make sure it's unique.
                                 nearby_encountered_pokemon = [
-                                    (p['encounter_id'], p['pokestop_id']) for p in query]
+                                    (float(p['encounter_id']), p['pokestop_id']) for p in query]
+                                    
+                            with Pokemon.database().execution_context():
+                                query = (Pokemon
+                                         .select(Pokemon.encounter_id)
+                                         .where((Pokemon.disappear_time >= now_date) &
+                                                (Pokemon.encounter_id << nearby_encounter_ids))
+                                         .dicts())
+
+                                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
+                                # query.
+                                # All of that is needed to make sure it's unique.
+                                encountered_pokemon = [
+                                    float(p['encounter_id']) for p in query]
 
                             for p in mapcell["nearbyPokemons"]:
                                 pokestop_id = p.get('fortId')
@@ -832,7 +841,7 @@ class Pogom(Flask):
                                 encounter_id = p.get('encounterId')
                                 if not encounter_id:
                                     continue
-                                if ((float(encounter_id), pokestop_id) in nearby_encountered_pokemon):
+                                if ((float(encounter_id), pokestop_id) in nearby_encountered_pokemon) or (float(encounter_id) in encountered_pokemon):
                                     # If Pokemon has been encountered before don't process it.
                                     skipped += 1
                                     continue
@@ -848,8 +857,8 @@ class Pogom(Flask):
                                 form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
                                 weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
-                                nearby_pokemons[encounter_id] = {
-                                    'encounter_id': encounter_id,
+                                nearby_pokemons[float(encounter_id)] = {
+                                    'encounter_id': float(encounter_id),
                                     'pokestop_id': p['fortId'],
                                     'pokemon_id': pokemon_id,
                                     'disappear_time': disappear_time,
@@ -859,10 +868,10 @@ class Pogom(Flask):
                                     'weather_boosted_condition': weather,
                                     'distance': distance
                                 }
-                                if nearby_pokemons[encounter_id]['costume'] < -1:
-                                    nearby_pokemons[encounter_id]['costume'] = -1
-                                if nearby_pokemons[encounter_id]['form'] < -1:
-                                    nearby_pokemons[encounter_id]['form'] = -1
+                                if nearby_pokemons[float(encounter_id)]['costume'] < -1:
+                                    nearby_pokemons[float(encounter_id)]['costume'] = -1
+                                if nearby_pokemons[float(encounter_id)]['form'] < -1:
+                                    nearby_pokemons[float(encounter_id)]['form'] = -1
 
                                 pokestopdetails = Pokestop.get_pokestop_details(p['fortId'])
                                 pokestop_url = p.get('fortImageUrl', "")
@@ -1831,8 +1840,6 @@ class Pogom(Flask):
             for point in route.points:
                 result.append((point.latitude, point.longitude))
 
-        log.info("GPX route " + routename + " has " + len(result) + " points")
-
         return result
 
     def changeDeviceLoc(self, lat, lon, uuid):
@@ -2045,6 +2052,8 @@ class Pogom(Flask):
                 return self.scan_loc()
 
             self.devicesscheduling.append(uuid)
+            deviceworker['last_updated'] = datetime.utcnow()
+            self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
         nextlongitude = deviceworker['longitude']
@@ -2084,7 +2093,7 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
-        deviceworker['fetch'] = "walk_spawnpoint"
+        deviceworker['fetch'] = "walk_gpx"
 
         self.save_device(deviceworker)
 
