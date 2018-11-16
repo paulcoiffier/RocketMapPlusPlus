@@ -5,6 +5,7 @@ import calendar
 import logging
 import gc
 import os
+import math
 
 import time
 from datetime import datetime, timedelta
@@ -1957,31 +1958,37 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
 
-        if nextlatitude < nexttarget[0]:
-            if nexttarget[0] - nextlatitude >= self.args.stepsize:
-                nextlatitude = nextlatitude + self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
-        else:
-            if nextlatitude - nexttarget[0] >= self.args.stepsize:
-                nextlatitude = nextlatitude - self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
+        dlat = abs(nexttarget[0] - nextlatitude)
+        dlong = abs(nexttarget[1] - nextlongitude)
+        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if nextlongitude < nexttarget[1]:
-            if nexttarget[1] - nextlongitude >= self.args.stepsize:
-                nextlongitude = nextlongitude + self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
-        else:
-            if nextlongitude - nexttarget[1] >= self.args.stepsize:
-                nextlongitude = nextlongitude - self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
+        if dll > self.args.stepsize:
+            adjusted_dlat = 0.0
+            adjusted_dlong = 0.0
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+            if dlat == 0.0:
+                adjusted_dlat = 0.0
+                adjusted_dlong = self.args.stepsize
+            elif dlong == 0.0:
+                adjusted_dlat = self.args.stepsize
+                adjusted_dlong = 0.0
+            else:
+                angle_radians = math.atan(dlat / dlong)
+                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
+                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += adjusted_dlat
+            else:
+                nextlatitude -= adjusted_dlat
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += adjusted_dlong
+            else:
+                nextlongitude -= adjusted_dlong
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
@@ -2070,31 +2077,37 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
 
-        if nextlatitude < nexttarget[0]:
-            if nexttarget[0] - nextlatitude >= self.args.stepsize:
-                nextlatitude = nextlatitude + self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
-        else:
-            if nextlatitude - nexttarget[0] >= self.args.stepsize:
-                nextlatitude = nextlatitude - self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
+        dlat = abs(nexttarget[0] - nextlatitude)
+        dlong = abs(nexttarget[1] - nextlongitude)
+        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if nextlongitude < nexttarget[1]:
-            if nexttarget[1] - nextlongitude >= self.args.stepsize:
-                nextlongitude = nextlongitude + self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
-        else:
-            if nextlongitude - nexttarget[1] >= self.args.stepsize:
-                nextlongitude = nextlongitude - self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
+        if dll > self.args.stepsize:
+            adjusted_dlat = 0.0
+            adjusted_dlong = 0.0
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+            if dlat == 0.0:
+                adjusted_dlat = 0.0
+                adjusted_dlong = self.args.stepsize
+            elif dlong == 0.0:
+                adjusted_dlat = self.args.stepsize
+                adjusted_dlong = 0.0
+            else:
+                angle_radians = math.atan(dlat / dlong)
+                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
+                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += adjusted_dlat
+            else:
+                nextlatitude -= adjusted_dlat
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += adjusted_dlong
+            else:
+                nextlongitude -= adjusted_dlong
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
@@ -2171,31 +2184,37 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
 
-        if nextlatitude < nexttarget[0]:
-            if nexttarget[0] - nextlatitude >= self.args.stepsize:
-                nextlatitude = nextlatitude + self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
-        else:
-            if nextlatitude - nexttarget[0] >= self.args.stepsize:
-                nextlatitude = nextlatitude - self.args.stepsize
-            else:
-                nextlatitude = nexttarget[0]
+        dlat = abs(nexttarget[0] - nextlatitude)
+        dlong = abs(nexttarget[1] - nextlongitude)
+        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if nextlongitude < nexttarget[1]:
-            if nexttarget[1] - nextlongitude >= self.args.stepsize:
-                nextlongitude = nextlongitude + self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
-        else:
-            if nextlongitude - nexttarget[1] >= self.args.stepsize:
-                nextlongitude = nextlongitude - self.args.stepsize
-            else:
-                nextlongitude = nexttarget[1]
+        if dll > self.args.stepsize:
+            adjusted_dlat = 0.0
+            adjusted_dlong = 0.0
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+            if dlat == 0.0:
+                adjusted_dlat = 0.0
+                adjusted_dlong = self.args.stepsize
+            elif dlong == 0.0:
+                adjusted_dlat = self.args.stepsize
+                adjusted_dlong = 0.0
+            else:
+                angle_radians = math.atan(dlat / dlong)
+                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
+                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += adjusted_dlat
+            else:
+                nextlatitude -= adjusted_dlat
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += adjusted_dlong
+            else:
+                nextlongitude -= adjusted_dlong
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
