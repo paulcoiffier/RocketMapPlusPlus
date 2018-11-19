@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.telemetry',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n)pogoprotos/data/telemetry/boot_time.proto\x12\x19pogoprotos.data.telemetry\x1a\x43pogoprotos/networking/platform/telemetry/platform_metric_data.proto\"\xa1\x04\n\x08\x42ootTime\x12N\n\x08\x64uration\x18\x01 \x01(\x0b\x32<.pogoprotos.networking.platform.telemetry.PlatformMetricData\x12\x41\n\nboot_phase\x18\x02 \x01(\x0e\x32-.pogoprotos.data.telemetry.BootTime.BootPhase\"\x81\x03\n\tBootPhase\x12\r\n\tUNDEFINED\x10\x00\x12\x0f\n\x0bTIME_TO_MAP\x10\x01\x12\x14\n\x10LOGO_SCREEN_TIME\x10\x02\x12\x18\n\x14MAIN_SCENE_LOAD_TIME\x10\x03\x12\x11\n\rWAIT_FOR_AUTH\x10\x04\x12\x1f\n\x1bINIT_REMOTE_CONFIG_VERSIONS\x10\x05\x12\x16\n\x12INIT_BUNDLE_DIGEST\x10\x06\x12\x0c\n\x08INIT_GMT\x10\x07\x12\x11\n\rDOWNLOAD_I18N\x10\x08\x12\x1a\n\x16\x44OWNLOAD_GLOBAL_ASSETS\x10\t\x12\x1e\n\x1aREGISTER_PUSH_NOTIFICATION\x10\n\x12\x16\n\x12INITIALIZE_UPSIGHT\x10\x0b\x12\x1a\n\x16INITIALIZE_CRITTERCISM\x10\x0c\x12\x17\n\x13LOGIN_VERSION_CHECK\x10\r\x12\x14\n\x10LOGIN_GET_PLAYER\x10\x0e\x12\x18\n\x14LOGIN_AUTHENTICATION\x10\x0f\x62\x06proto3')
+  serialized_pb=_b('\n)pogoprotos/data/telemetry/boot_time.proto\x12\x19pogoprotos.data.telemetry\x1a\x43pogoprotos/networking/platform/telemetry/platform_metric_data.proto\"\xb1\x04\n\x08\x42ootTime\x12N\n\x08\x64uration\x18\x01 \x01(\x0b\x32<.pogoprotos.networking.platform.telemetry.PlatformMetricData\x12\x41\n\nboot_phase\x18\x02 \x01(\x0e\x32-.pogoprotos.data.telemetry.BootTime.BootPhase\"\x91\x03\n\tBootPhase\x12\r\n\tUNDEFINED\x10\x00\x12\x0f\n\x0bTIME_TO_MAP\x10\x01\x12\x14\n\x10LOGO_SCREEN_TIME\x10\x02\x12\x18\n\x14MAIN_SCENE_LOAD_TIME\x10\x03\x12\x11\n\rWAIT_FOR_AUTH\x10\x04\x12\x1f\n\x1bINIT_REMOTE_CONFIG_VERSIONS\x10\x05\x12\x16\n\x12INIT_BUNDLE_DIGEST\x10\x06\x12\x0c\n\x08INIT_GMT\x10\x07\x12\x11\n\rDOWNLOAD_I18N\x10\x08\x12\x1a\n\x16\x44OWNLOAD_GLOBAL_ASSETS\x10\t\x12\x1e\n\x1aREGISTER_PUSH_NOTIFICATION\x10\n\x12\x16\n\x12INITIALIZE_UPSIGHT\x10\x0b\x12\x1a\n\x16INITIALIZE_CRITTERCISM\x10\x0c\x12\x17\n\x13LOGIN_VERSION_CHECK\x10\r\x12\x14\n\x10LOGIN_GET_PLAYER\x10\x0e\x12\x18\n\x14LOGIN_AUTHENTICATION\x10\x0f\x12\x0e\n\nMODAL_TIME\x10\x10\x62\x06proto3')
   ,
   dependencies=[pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_platform__metric__data__pb2.DESCRIPTOR,])
 
@@ -96,11 +96,15 @@ _BOOTTIME_BOOTPHASE = _descriptor.EnumDescriptor(
       name='LOGIN_AUTHENTICATION', index=15, number=15,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MODAL_TIME', index=16, number=16,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=302,
-  serialized_end=687,
+  serialized_end=703,
 )
 _sym_db.RegisterEnumDescriptor(_BOOTTIME_BOOTPHASE)
 
@@ -140,7 +144,7 @@ _BOOTTIME = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=142,
-  serialized_end=687,
+  serialized_end=703,
 )
 
 _BOOTTIME.fields_by_name['duration'].message_type = pogoprotos_dot_networking_dot_platform_dot_telemetry_dot_platform__metric__data__pb2._PLATFORMMETRICDATA

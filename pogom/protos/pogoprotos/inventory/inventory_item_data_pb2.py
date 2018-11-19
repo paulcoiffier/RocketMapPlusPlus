@@ -27,6 +27,7 @@ from pogoprotos.data.player import player_camera_pb2 as pogoprotos_dot_data_dot_
 from pogoprotos.data.quests import quest_pb2 as pogoprotos_dot_data_dot_quests_dot_quest__pb2
 from pogoprotos.data.quests import quests_pb2 as pogoprotos_dot_data_dot_quests_dot_quests__pb2
 from pogoprotos.data.gift import gift_boxes_pb2 as pogoprotos_dot_data_dot_gift_dot_gift__boxes__pb2
+from pogoprotos.data.beluga import beluga_incense_box_pb2 as pogoprotos_dot_data_dot_beluga_dot_beluga__incense__box__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -34,9 +35,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.inventory',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n.pogoprotos/inventory/inventory_item_data.proto\x12\x14pogoprotos.inventory\x1a)pogoprotos/inventory/item/item_data.proto\x1a(pogoprotos/inventory/applied_items.proto\x1a)pogoprotos/inventory/egg_incubators.proto\x1a pogoprotos/inventory/candy.proto\x1a-pogoprotos/inventory/inventory_upgrades.proto\x1a\'pogoprotos/inventory/raid_tickets.proto\x1a(pogoprotos/data/avatar/avatar_item.proto\x1a\"pogoprotos/data/pokemon_data.proto\x1a#pogoprotos/data/pokedex_entry.proto\x1a)pogoprotos/data/player/player_stats.proto\x1a,pogoprotos/data/player/player_currency.proto\x1a*pogoprotos/data/player/player_camera.proto\x1a\"pogoprotos/data/quests/quest.proto\x1a#pogoprotos/data/quests/quests.proto\x1a%pogoprotos/data/gift/gift_boxes.proto\"\xfd\x06\n\x11InventoryItemData\x12\x34\n\x0cpokemon_data\x18\x01 \x01(\x0b\x32\x1c.pogoprotos.data.PokemonDataH\x00\x12\x33\n\x04item\x18\x02 \x01(\x0b\x32#.pogoprotos.inventory.item.ItemDataH\x00\x12\x36\n\rpokedex_entry\x18\x03 \x01(\x0b\x32\x1d.pogoprotos.data.PokedexEntryH\x00\x12;\n\x0cplayer_stats\x18\x04 \x01(\x0b\x32#.pogoprotos.data.player.PlayerStatsH\x00\x12\x41\n\x0fplayer_currency\x18\x05 \x01(\x0b\x32&.pogoprotos.data.player.PlayerCurrencyH\x00\x12=\n\rplayer_camera\x18\x06 \x01(\x0b\x32$.pogoprotos.data.player.PlayerCameraH\x00\x12\x45\n\x12inventory_upgrades\x18\x07 \x01(\x0b\x32\'.pogoprotos.inventory.InventoryUpgradesH\x00\x12;\n\rapplied_items\x18\x08 \x01(\x0b\x32\".pogoprotos.inventory.AppliedItemsH\x00\x12=\n\x0e\x65gg_incubators\x18\t \x01(\x0b\x32#.pogoprotos.inventory.EggIncubatorsH\x00\x12,\n\x05\x63\x61ndy\x18\n \x01(\x0b\x32\x1b.pogoprotos.inventory.CandyH\x00\x12.\n\x05quest\x18\x0b \x01(\x0b\x32\x1d.pogoprotos.data.quests.QuestH\x00\x12\x39\n\x0b\x61vatar_item\x18\x0c \x01(\x0b\x32\".pogoprotos.data.avatar.AvatarItemH\x00\x12\x39\n\x0craid_tickets\x18\r \x01(\x0b\x32!.pogoprotos.inventory.RaidTicketsH\x00\x12\x30\n\x06quests\x18\x0e \x01(\x0b\x32\x1e.pogoprotos.data.quests.QuestsH\x00\x12\x35\n\ngift_boxes\x18\x0f \x01(\x0b\x32\x1f.pogoprotos.data.gift.GiftBoxesH\x00\x42\x06\n\x04Typeb\x06proto3')
+  serialized_pb=_b('\n.pogoprotos/inventory/inventory_item_data.proto\x12\x14pogoprotos.inventory\x1a)pogoprotos/inventory/item/item_data.proto\x1a(pogoprotos/inventory/applied_items.proto\x1a)pogoprotos/inventory/egg_incubators.proto\x1a pogoprotos/inventory/candy.proto\x1a-pogoprotos/inventory/inventory_upgrades.proto\x1a\'pogoprotos/inventory/raid_tickets.proto\x1a(pogoprotos/data/avatar/avatar_item.proto\x1a\"pogoprotos/data/pokemon_data.proto\x1a#pogoprotos/data/pokedex_entry.proto\x1a)pogoprotos/data/player/player_stats.proto\x1a,pogoprotos/data/player/player_currency.proto\x1a*pogoprotos/data/player/player_camera.proto\x1a\"pogoprotos/data/quests/quest.proto\x1a#pogoprotos/data/quests/quests.proto\x1a%pogoprotos/data/gift/gift_boxes.proto\x1a/pogoprotos/data/beluga/beluga_incense_box.proto\"\xc1\x07\n\x11InventoryItemData\x12\x34\n\x0cpokemon_data\x18\x01 \x01(\x0b\x32\x1c.pogoprotos.data.PokemonDataH\x00\x12\x33\n\x04item\x18\x02 \x01(\x0b\x32#.pogoprotos.inventory.item.ItemDataH\x00\x12\x36\n\rpokedex_entry\x18\x03 \x01(\x0b\x32\x1d.pogoprotos.data.PokedexEntryH\x00\x12;\n\x0cplayer_stats\x18\x04 \x01(\x0b\x32#.pogoprotos.data.player.PlayerStatsH\x00\x12\x41\n\x0fplayer_currency\x18\x05 \x01(\x0b\x32&.pogoprotos.data.player.PlayerCurrencyH\x00\x12=\n\rplayer_camera\x18\x06 \x01(\x0b\x32$.pogoprotos.data.player.PlayerCameraH\x00\x12\x45\n\x12inventory_upgrades\x18\x07 \x01(\x0b\x32\'.pogoprotos.inventory.InventoryUpgradesH\x00\x12;\n\rapplied_items\x18\x08 \x01(\x0b\x32\".pogoprotos.inventory.AppliedItemsH\x00\x12=\n\x0e\x65gg_incubators\x18\t \x01(\x0b\x32#.pogoprotos.inventory.EggIncubatorsH\x00\x12,\n\x05\x63\x61ndy\x18\n \x01(\x0b\x32\x1b.pogoprotos.inventory.CandyH\x00\x12.\n\x05quest\x18\x0b \x01(\x0b\x32\x1d.pogoprotos.data.quests.QuestH\x00\x12\x39\n\x0b\x61vatar_item\x18\x0c \x01(\x0b\x32\".pogoprotos.data.avatar.AvatarItemH\x00\x12\x39\n\x0craid_tickets\x18\r \x01(\x0b\x32!.pogoprotos.inventory.RaidTicketsH\x00\x12\x30\n\x06quests\x18\x0e \x01(\x0b\x32\x1e.pogoprotos.data.quests.QuestsH\x00\x12\x35\n\ngift_boxes\x18\x0f \x01(\x0b\x32\x1f.pogoprotos.data.gift.GiftBoxesH\x00\x12\x42\n\x0e\x62\x65luga_incense\x18\x10 \x01(\x0b\x32(.pogoprotos.data.beluga.BelugaIncenseBoxH\x00\x42\x06\n\x04Typeb\x06proto3')
   ,
-  dependencies=[pogoprotos_dot_inventory_dot_item_dot_item__data__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_applied__items__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_egg__incubators__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_candy__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_inventory__upgrades__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_raid__tickets__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_avatar_dot_avatar__item__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_pokemon__data__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_pokedex__entry__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__stats__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__currency__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__camera__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quest__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quests__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_gift_dot_gift__boxes__pb2.DESCRIPTOR,])
+  dependencies=[pogoprotos_dot_inventory_dot_item_dot_item__data__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_applied__items__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_egg__incubators__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_candy__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_inventory__upgrades__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_raid__tickets__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_avatar_dot_avatar__item__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_pokemon__data__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_pokedex__entry__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__stats__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__currency__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_player_dot_player__camera__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quest__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_quests_dot_quests__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_gift_dot_gift__boxes__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_beluga_dot_beluga__incense__box__pb2.DESCRIPTOR,])
 
 
 
@@ -153,6 +154,13 @@ _INVENTORYITEMDATA = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='beluga_incense', full_name='pogoprotos.inventory.InventoryItemData.beluga_incense', index=15,
+      number=16, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -168,8 +176,8 @@ _INVENTORYITEMDATA = _descriptor.Descriptor(
       name='Type', full_name='pogoprotos.inventory.InventoryItemData.Type',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=683,
-  serialized_end=1576,
+  serialized_start=732,
+  serialized_end=1693,
 )
 
 _INVENTORYITEMDATA.fields_by_name['pokemon_data'].message_type = pogoprotos_dot_data_dot_pokemon__data__pb2._POKEMONDATA
@@ -187,6 +195,7 @@ _INVENTORYITEMDATA.fields_by_name['avatar_item'].message_type = pogoprotos_dot_d
 _INVENTORYITEMDATA.fields_by_name['raid_tickets'].message_type = pogoprotos_dot_inventory_dot_raid__tickets__pb2._RAIDTICKETS
 _INVENTORYITEMDATA.fields_by_name['quests'].message_type = pogoprotos_dot_data_dot_quests_dot_quests__pb2._QUESTS
 _INVENTORYITEMDATA.fields_by_name['gift_boxes'].message_type = pogoprotos_dot_data_dot_gift_dot_gift__boxes__pb2._GIFTBOXES
+_INVENTORYITEMDATA.fields_by_name['beluga_incense'].message_type = pogoprotos_dot_data_dot_beluga_dot_beluga__incense__box__pb2._BELUGAINCENSEBOX
 _INVENTORYITEMDATA.oneofs_by_name['Type'].fields.append(
   _INVENTORYITEMDATA.fields_by_name['pokemon_data'])
 _INVENTORYITEMDATA.fields_by_name['pokemon_data'].containing_oneof = _INVENTORYITEMDATA.oneofs_by_name['Type']
@@ -232,6 +241,9 @@ _INVENTORYITEMDATA.fields_by_name['quests'].containing_oneof = _INVENTORYITEMDAT
 _INVENTORYITEMDATA.oneofs_by_name['Type'].fields.append(
   _INVENTORYITEMDATA.fields_by_name['gift_boxes'])
 _INVENTORYITEMDATA.fields_by_name['gift_boxes'].containing_oneof = _INVENTORYITEMDATA.oneofs_by_name['Type']
+_INVENTORYITEMDATA.oneofs_by_name['Type'].fields.append(
+  _INVENTORYITEMDATA.fields_by_name['beluga_incense'])
+_INVENTORYITEMDATA.fields_by_name['beluga_incense'].containing_oneof = _INVENTORYITEMDATA.oneofs_by_name['Type']
 DESCRIPTOR.message_types_by_name['InventoryItemData'] = _INVENTORYITEMDATA
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

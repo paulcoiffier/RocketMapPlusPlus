@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.trading',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n-pogoprotos/data/trading/trading_pokemon.proto\x12\x17pogoprotos.data.trading\x1a%pogoprotos/data/pokemon_display.proto\x1a\"pogoprotos/data/pokemon_data.proto\x1a)pogoprotos/inventory/item/item_data.proto\"\xd2\x04\n\x0eTradingPokemon\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\x12\x1c\n\x14pokedex_entry_number\x18\x02 \x01(\x05\x12\x13\n\x0boriginal_cp\x18\x03 \x01(\x05\x12\x17\n\x0f\x61\x64justed_cp_min\x18\x04 \x01(\x05\x12\x17\n\x0f\x61\x64justed_cp_max\x18\x05 \x01(\x05\x12\x18\n\x10original_stamina\x18\x06 \x01(\x05\x12\x1c\n\x14\x61\x64justed_stamina_min\x18\x07 \x01(\x05\x12\x1c\n\x14\x61\x64justed_stamina_max\x18\x08 \x01(\x05\x12\x18\n\x10\x66riend_level_cap\x18\t \x01(\x08\x12\r\n\x05move1\x18\n \x01(\x05\x12\r\n\x05move2\x18\x0b \x01(\x05\x12\x38\n\x0fpokemon_display\x18\x0c \x01(\x0b\x32\x1f.pogoprotos.data.PokemonDisplay\x12\x1b\n\x13\x63\x61ptured_s2_cell_id\x18\r \x01(\x03\x12\x34\n\x0etraded_pokemon\x18\x0e \x01(\x0b\x32\x1c.pogoprotos.data.PokemonData\x12\x35\n\x08pokeball\x18\x0f \x01(\x0b\x32#.pogoprotos.inventory.item.ItemData\x12\x19\n\x11individual_attack\x18\x10 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x11 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x12 \x01(\x05\x12\x10\n\x08nickname\x18\x13 \x01(\t\x12\x10\n\x08\x66\x61vorite\x18\x14 \x01(\x08\x62\x06proto3')
+  serialized_pb=_b('\n-pogoprotos/data/trading/trading_pokemon.proto\x12\x17pogoprotos.data.trading\x1a%pogoprotos/data/pokemon_display.proto\x1a\"pogoprotos/data/pokemon_data.proto\x1a)pogoprotos/inventory/item/item_data.proto\"\xec\x04\n\x0eTradingPokemon\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\x12\x1c\n\x14pokedex_entry_number\x18\x02 \x01(\x05\x12\x13\n\x0boriginal_cp\x18\x03 \x01(\x05\x12\x17\n\x0f\x61\x64justed_cp_min\x18\x04 \x01(\x05\x12\x17\n\x0f\x61\x64justed_cp_max\x18\x05 \x01(\x05\x12\x18\n\x10original_stamina\x18\x06 \x01(\x05\x12\x1c\n\x14\x61\x64justed_stamina_min\x18\x07 \x01(\x05\x12\x1c\n\x14\x61\x64justed_stamina_max\x18\x08 \x01(\x05\x12\x18\n\x10\x66riend_level_cap\x18\t \x01(\x08\x12\r\n\x05move1\x18\n \x01(\x05\x12\r\n\x05move2\x18\x0b \x01(\x05\x12\x38\n\x0fpokemon_display\x18\x0c \x01(\x0b\x32\x1f.pogoprotos.data.PokemonDisplay\x12\x1b\n\x13\x63\x61ptured_s2_cell_id\x18\r \x01(\x03\x12\x34\n\x0etraded_pokemon\x18\x0e \x01(\x0b\x32\x1c.pogoprotos.data.PokemonData\x12\x35\n\x08pokeball\x18\x0f \x01(\x0b\x32#.pogoprotos.inventory.item.ItemData\x12\x19\n\x11individual_attack\x18\x10 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x11 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x12 \x01(\x05\x12\x10\n\x08nickname\x18\x13 \x01(\t\x12\x10\n\x08\x66\x61vorite\x18\x14 \x01(\x08\x12\x18\n\x10\x63reation_time_ms\x18\x16 \x01(\x03\x62\x06proto3')
   ,
   dependencies=[pogoprotos_dot_data_dot_pokemon__display__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_pokemon__data__pb2.DESCRIPTOR,pogoprotos_dot_inventory_dot_item_dot_item__data__pb2.DESCRIPTOR,])
 
@@ -176,6 +176,13 @@ _TRADINGPOKEMON = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='creation_time_ms', full_name='pogoprotos.data.trading.TradingPokemon.creation_time_ms', index=20,
+      number=22, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -189,7 +196,7 @@ _TRADINGPOKEMON = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=193,
-  serialized_end=787,
+  serialized_end=813,
 )
 
 _TRADINGPOKEMON.fields_by_name['pokemon_display'].message_type = pogoprotos_dot_data_dot_pokemon__display__pb2._POKEMONDISPLAY
