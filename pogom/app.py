@@ -2278,40 +2278,30 @@ class Pogom(Flask):
         if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gym":
             self.deviceschedules[uuid] = []
 
+        if difference >= self.args.teleport_interval:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+            deviceworker['last_updated'] = datetime.utcnow()
+            self.save_device(deviceworker)
+
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
-            nextlatitude = latitude
-            nextlongitude = longitude
+            deviceworker['last_updated'] = datetime.utcnow()
+            self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-        else:
-            nextlatitude = deviceworker['latitude']
-            nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+        nextlatitude = nexttarget[0]
+        nextlongitude = nexttarget[1]
 
-        else:
-            nextlatitude = nexttarget[0]
-            nextlongitude = nexttarget[1]
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['fetch'] = "teleport_gym"
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
-
-        last_updated = deviceworker['last_updated']
-        difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference >= self.args.teleport_interval:
-            deviceworker['latitude'] = round(nextlatitude, 5)
-            deviceworker['longitude'] = round(nextlongitude, 5)
-            deviceworker['last_updated'] = datetime.utcnow()
-            deviceworker['fetch'] = "teleport_gym"
-
-            self.save_device(deviceworker)
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -2364,6 +2354,12 @@ class Pogom(Flask):
         if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gpx":
             self.deviceschedules[uuid] = []
 
+        if difference >= self.args.teleport_interval:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+            deviceworker['last_updated'] = datetime.utcnow()
+            self.save_device(deviceworker)
+
         if len(self.deviceschedules[uuid]) == 0:
             routename = ""
             if request.args:
@@ -2381,40 +2377,22 @@ class Pogom(Flask):
                 return self.scan_loc()
 
             self.devicesscheduling.append(uuid)
+            self.deviceschedules[uuid] = self.get_gpx_route(routename)
             deviceworker['last_updated'] = datetime.utcnow()
             self.save_device(deviceworker)
-            self.deviceschedules[uuid] = self.get_gpx_route(routename)
-            nextlatitude = latitude
-            nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-        else:
-            nextlatitude = deviceworker['latitude']
-            nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+        nextlatitude = nexttarget[0]
+        nextlongitude = nexttarget[1]
 
-        else:
-            nextlatitude = nexttarget[0]
-            nextlongitude = nexttarget[1]
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['fetch'] = "teleport_gpx"
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
-
-        last_updated = deviceworker['last_updated']
-        difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference >= self.args.teleport_interval:
-            deviceworker['latitude'] = round(nextlatitude, 5)
-            deviceworker['longitude'] = round(nextlongitude, 5)
-            deviceworker['last_updated'] = datetime.utcnow()
-            deviceworker['fetch'] = "teleport_gpx"
-
-            self.save_device(deviceworker)
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
