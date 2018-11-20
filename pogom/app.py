@@ -123,6 +123,7 @@ class Pogom(Flask):
         self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
         self.route("/walk_pokestop", methods=['POST'])(self.walk_pokestop)
         self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
+        self.route("/teleport_gpx", methods=['POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
         self.route("/teleport_loc", methods=['POST'])(self.teleport_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
@@ -176,6 +177,9 @@ class Pogom(Flask):
         self.devices[uuid] = device.copy()
 
         if round(now()) % 30 == 0:
+            if self.devices[uuid].get('last_scanned') is None:
+                self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
+
             deviceworkers = {}
             deviceworkers[uuid] = self.devices[uuid]
 
@@ -411,9 +415,9 @@ class Pogom(Flask):
         for pokemon in d['pokemons']:
             if result != "":
                 result += "\n"
-            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name'])
+            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + pokemon['pokemon_name'].encode('utf-8')
             if pokemon['weather_boosted_condition'] > 0 and weathertypes[pokemon['weather_boosted_condition']]:
-                result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"] + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
+                result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"].encode('utf-8') + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
             rarity = self.get_pokemon_rarity(pokemon['pokemon_id'])
             result += ", " + rarity
             now_date = datetime.utcnow()
@@ -1230,15 +1234,15 @@ class Pogom(Flask):
                         'num_upgrades': int(gympokemon.get("numUpgrades", 0)),
                         'move_1': _POKEMONMOVE.values_by_name[gympokemon.get("move1")].number,
                         'move_2': _POKEMONMOVE.values_by_name[gympokemon.get("move2")].number,
-                        'height': float(gympokemon.get("heightM")),
-                        'weight': float(gympokemon.get("weightKg")),
-                        'stamina': int(gympokemon.get("stamina")),
-                        'stamina_max': int(gympokemon.get("staminaMax")),
-                        'cp_multiplier': float(gympokemon.get("cpMultiplier")),
+                        'height': float(gympokemon.get("heightM"), 0),
+                        'weight': float(gympokemon.get("weightKg"), 0),
+                        'stamina': int(gympokemon.get("stamina"), 0),
+                        'stamina_max': int(gympokemon.get("staminaMax"), 0),
+                        'cp_multiplier': float(gympokemon.get("cpMultiplier"), 0),
                         'additional_cp_multiplier': float(gympokemon.get("additionalCpMultiplier", 0)),
-                        'iv_defense': int(gympokemon.get("individualDefense")),
-                        'iv_stamina': int(gympokemon.get("individualStamina")),
-                        'iv_attack': int(gympokemon.get("individualAttack")),
+                        'iv_defense': int(gympokemon.get("individualDefense"), 0),
+                        'iv_stamina': int(gympokemon.get("individualStamina"), 0),
+                        'iv_attack': int(gympokemon.get("individualAttack"), 0),
                         'costume': _COSTUME.values_by_name[gympokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
                         'form': _FORM.values_by_name[gympokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
                         'shiny': gympokemon.get("pokemonDisplay", {}).get("shiny"),
@@ -2306,6 +2310,105 @@ class Pogom(Flask):
             deviceworker['longitude'] = round(nextlongitude, 5)
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gym"
+
+            self.save_device(deviceworker)
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
+    def teleport_gpx(self):
+        request_json = request.get_json()
+
+        uuid = request_json.get('uuid')
+        if uuid == "":
+            return ""
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        deviceworker = self.get_device(uuid, latitude, longitude)
+
+        if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        if deviceworker['fetch'] == "jump_now":
+            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['fetch'] = "teleport_gpx"
+
+            self.save_device(deviceworker)
+
+            d = {}
+            d['latitude'] = deviceworker['latitude']
+            d['longitude'] = deviceworker['longitude']
+
+            return jsonify(d)
+
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
+
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gpx":
+            self.deviceschedules[uuid] = []
+
+        if len(self.deviceschedules[uuid]) == 0:
+            routename = ""
+            if request.args:
+                routename = request.args.get('route', type=str)
+            if request.form:
+                routename = request.form.get('route', type=str)
+            if routename == "":
+                routename = uuid
+            if routename != "":
+                routename = os.path.join(
+                    self.args.root_path,
+                    'gpx',
+                    routename + ".gpx")
+            if routename == "" or not os.path.isfile(routename):
+                return self.scan_loc()
+
+            self.devicesscheduling.append(uuid)
+            deviceworker['last_updated'] = datetime.utcnow()
+            self.save_device(deviceworker)
+            self.deviceschedules[uuid] = self.get_gpx_route(routename)
+        else:
+            nextlatitude = deviceworker['latitude']
+            nextlongitude = deviceworker['longitude']
+
+        nexttarget = self.deviceschedules[uuid][0]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
+
+        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+
+        last_updated = deviceworker['last_updated']
+        difference = (datetime.utcnow() - last_updated).total_seconds()
+        if difference >= self.args.teleport_interval:
+            deviceworker['latitude'] = round(nextlatitude, 5)
+            deviceworker['longitude'] = round(nextlongitude, 5)
+            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['fetch'] = "teleport_gpx"
 
             self.save_device(deviceworker)
 
