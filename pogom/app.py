@@ -415,9 +415,9 @@ class Pogom(Flask):
         for pokemon in d['pokemons']:
             if result != "":
                 result += "\n"
-            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + pokemon['pokemon_name'].encode('utf-8')
+            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + pokemon['pokemon_name']
             if pokemon['weather_boosted_condition'] > 0 and weathertypes[pokemon['weather_boosted_condition']]:
-                result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"].encode('utf-8') + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
+                result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"] + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
             rarity = self.get_pokemon_rarity(pokemon['pokemon_id'])
             result += ", " + rarity
             now_date = datetime.utcnow()
