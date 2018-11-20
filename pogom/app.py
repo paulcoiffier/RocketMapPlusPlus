@@ -2384,6 +2384,10 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
+            nextlatitude = latitude
+            nextlongitude = longitude
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
