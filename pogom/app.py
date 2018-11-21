@@ -1840,14 +1840,14 @@ class Pogom(Flask):
         for track in gpx.tracks:
             for segment in track.segments:
                 for point in segment.points:
-                    result.append((point.latitude, point.longitude))
+                    result.append((round(point.latitude, 5), round(point.longitude, 5)))
 
         for waypoint in gpx.waypoints:
-            result.append((waypoint.latitude, waypoint.longitude))
+            result.append((round(waypoint.latitude, 5), round(waypoint.longitude, 5)))
 
         for route in gpx.routes:
             for point in route.points:
-                result.append((point.latitude, point.longitude))
+                result.append((round(point.latitude, 5), round(point.longitude, 5)))
 
         return result
 
