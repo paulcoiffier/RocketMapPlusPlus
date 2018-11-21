@@ -809,7 +809,7 @@ function gymLabel(gym, includeMembers = true) {
                         <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                             ${levelStr}
                         </span>
-                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'></span> left (${moment(raid.end).format('HH:mm')})
+                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'>00m00s</span> left (${moment(raid.end).format('HH:mm')})
                     </div>
                 `
             } else {
@@ -833,7 +833,7 @@ function gymLabel(gym, includeMembers = true) {
                         <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                             ${levelStr}
                         </span>
-                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'></span> left (${moment(raid.end).format('HH:mm')})
+                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'>00m00s</span> left (${moment(raid.end).format('HH:mm')})
                     </div>
                 `
             }
@@ -863,7 +863,7 @@ function gymLabel(gym, includeMembers = true) {
                   <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                   ${levelStr}
                   </span>
-                  Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'> (${moment(raid.start).format('HH:mm')})</span>
+                  Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
                 </div>`
         }
     } else {
