@@ -15,7 +15,7 @@ from flask import Flask, abort, jsonify, render_template, request,\
     make_response, send_from_directory, json, send_file
 from flask.json import JSONEncoder
 from flask_compress import Compress
-
+from pogom.transform import jitter_location
 from pogom.dyn_img import get_gym_icon
 from base64 import b64decode
 
@@ -2310,6 +2310,7 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gpx(self):
+        args = get_args()
         request_json = request.get_json()
 
         uuid = request_json.get('uuid')
@@ -2385,8 +2386,14 @@ class Pogom(Flask):
 
         nexttarget = self.deviceschedules[uuid][0]
 
-        nextlatitude = nexttarget[0]
-        nextlongitude = nexttarget[1]
+        if args.jitter:
+            jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
+        
+            nextlatitude = jitter_nexttarget[0]
+            nextlongitude = jitter_nexttarget[1]
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
