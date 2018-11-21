@@ -2234,6 +2234,7 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gym(self):
+        args = get_args()
         request_json = request.get_json()
 
         uuid = request_json.get('uuid')
@@ -2294,8 +2295,14 @@ class Pogom(Flask):
 
         nexttarget = self.deviceschedules[uuid][0]
 
-        nextlatitude = nexttarget[0]
-        nextlongitude = nexttarget[1]
+        if args.jitter:
+            jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
+        
+            nextlatitude = jitter_nexttarget[0]
+            nextlongitude = jitter_nexttarget[1]
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
