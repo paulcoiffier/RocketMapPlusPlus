@@ -253,6 +253,9 @@ def get_args():
     parser.add_argument('-tig', '--teleport-ignore',
                         help=('Ignore coordinates inside this radius for teleport scheduling'),
                         type=int, default=300)
+    parser.add_argument('-jit', '--jitter',
+                        help=('Apply jitter to coordinates for teleport scheduling'),
+                        action='store_true', default=True)
     parser.add_argument('-mn', '--mapname',
                         help=('Name for the map in the HTML'),
                         type=str, default='RocketMapPlusPlus')
