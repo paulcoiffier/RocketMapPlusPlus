@@ -147,6 +147,9 @@ class Pogom(Flask):
         self.deviceschedules = {}
         self.devicesscheduling = []
         self.devices = {}
+        self.deviceschecked = None
+        self.trusteddevices = {}
+        self.devicessavetime = {}
 
         self.geofences = None
 
@@ -176,7 +179,8 @@ class Pogom(Flask):
 
         self.devices[uuid] = device.copy()
 
-        if round(now()) % 30 == 0:
+        if uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
+            self.devicessavetime[uuid] = datetime.utcnow()
             if self.devices[uuid].get('last_scanned') is None:
                 self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
 
@@ -432,6 +436,32 @@ class Pogom(Flask):
     def render_service_worker_js(self):
         return send_from_directory('static/dist/js', 'serviceWorker.min.js')
 
+    def trusted_device(self, uuid):
+        canusedevice = True
+        devicename = ""
+
+        if self.deviceschecked is None or (datetime.utcnow() - self.deviceschecked).total_seconds() > 300:
+            self.trusteddevices = {}
+            if self.args.devices_file:
+                with open(self.args.devices_file) as f:
+                    for line in f:
+                        line = line.strip()
+                        if len(line) == 0:  # Empty line.
+                            continue
+                        else:  # Coordinate line.
+                            deviceid, name = line.split(":")
+                            self.trusteddevices[deviceid.strip()] = name.strip()
+
+            self.deviceschecked = datetime.utcnow()
+
+        if len(self.trusteddevices) > 0:
+            if uuid in self.trusteddevices:
+                devicename = self.trusteddevices[uuid]
+            else:
+                canusedevice = False
+
+        return canusedevice, devicename
+
     def webhook(self):
         request_json = request.get_json()
         protos = request_json.get('protos')
@@ -439,6 +469,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         if protos:
@@ -470,6 +504,8 @@ class Pogom(Flask):
             if deviceworker['fetch'] == 'IDLE':
                 deviceworker['latitude'] = lat
                 deviceworker['longitude'] = lng
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -1852,6 +1888,10 @@ class Pogom(Flask):
         return result
 
     def changeDeviceLoc(self, lat, lon, uuid):
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         deviceworker = DeviceWorker.get_existing_by_id(uuid)
 
         if not deviceworker or (not deviceworker['last_scanned'] and deviceworker['fetch'] == 'IDLE'):
@@ -1868,6 +1908,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "jump_now"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -1881,6 +1924,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         latitude = round(request_json.get('latitude', 0), 5)
@@ -1907,6 +1954,10 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -1921,6 +1972,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_spawnpoint"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -1999,6 +2053,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_spawnpoint"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2012,6 +2069,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2028,6 +2089,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_gpx"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2070,6 +2134,8 @@ class Pogom(Flask):
 
             self.devicesscheduling.append(uuid)
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
@@ -2118,6 +2184,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_gpx"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2131,6 +2200,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2147,6 +2220,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_pokestop"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2225,6 +2301,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_pokestop"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2241,6 +2320,10 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -2255,6 +2338,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gym"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2283,12 +2369,16 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
@@ -2297,7 +2387,7 @@ class Pogom(Flask):
 
         if args.jitter:
             jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
-        
+
             nextlatitude = jitter_nexttarget[0]
             nextlongitude = jitter_nexttarget[1]
         else:
@@ -2307,6 +2397,9 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['fetch'] = "teleport_gym"
+
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 
@@ -2324,6 +2417,10 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -2338,6 +2435,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gpx"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2366,6 +2466,8 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2387,6 +2489,8 @@ class Pogom(Flask):
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
@@ -2395,7 +2499,7 @@ class Pogom(Flask):
 
         if args.jitter:
             jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
-        
+
             nextlatitude = jitter_nexttarget[0]
             nextlongitude = jitter_nexttarget[1]
         else:
@@ -2405,6 +2509,8 @@ class Pogom(Flask):
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['fetch'] = "teleport_gpx"
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 
@@ -2419,6 +2525,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2438,6 +2548,8 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2545,6 +2657,9 @@ class Pogom(Flask):
         deviceworker['direction'] = direction
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
+
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 

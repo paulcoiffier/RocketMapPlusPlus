@@ -9,6 +9,8 @@ config/*
 !config/config.ini.example
 geofences/*
 !geofences/*.example
+devices/*
+!devices/*.example
 gpx/*
 !gpx/*.example
 static/dist/
