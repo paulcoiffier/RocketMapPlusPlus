@@ -1942,7 +1942,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_spawnpoint":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2049,7 +2049,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_gpx":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2168,7 +2168,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_pokestop":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_pokestop"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2275,7 +2275,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gym":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "teleport_gym"):
             self.deviceschedules[uuid] = []
 
         if difference >= self.args.teleport_interval:
@@ -2352,7 +2352,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gpx":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "teleport_gpx"):
             self.deviceschedules[uuid] = []
 
         if difference >= self.args.teleport_interval:
