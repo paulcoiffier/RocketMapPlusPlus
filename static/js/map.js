@@ -796,7 +796,7 @@ function gymLabel(gym, includeMembers = true) {
 				raidImage = `<img class='gym sprite' src='static/images/raid/${gymTypes[gym.team_id]}_${raid.level}_unknown.png'>`
 			}
             if (generateImages && raid.pokemon_id !== null) {
-				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&pkm=${raid.pokemon_id}`
+				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&pkm=${raid.pokemon_id}&form=${raid.form}`
                 if (isExRaidEligible) {
                     gym_url += '&ex_raid=1'
                 }
@@ -1522,7 +1522,7 @@ function updateGymMarker(item, marker) {
             markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '_' + item.raid.level + '_unknown.png'
 		}
         if (generateImages && item.raid.pokemon_id) {
-			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&pkm=' + item['raid']['pokemon_id']
+			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&pkm=' + item['raid']['pokemon_id'] + '&form=' + item['raid']['form']
 			if (gymExRaidEligible) {
                 markerImage += '&ex_raid=1'
 			}

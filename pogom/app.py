@@ -202,7 +202,8 @@ class Pogom(Flask):
         is_in_battle = 'in_battle' in request.args
         is_ex_raid_eligible = 'ex_raid' in request.args
         is_unknown = 'is_unknown' in request.args
-        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown), mimetype='image/png')
+        form = request.args.get('form')
+        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown, form), mimetype='image/png')
 
     def get_pokemon_rarity_code(self, pokemonid):
         rarity = self.get_pokemon_rarity(pokemonid)
@@ -1108,6 +1109,7 @@ class Pogom(Flask):
                                         raidpokemonmove2 = raidinfo['raidPokemon']['move2'] if 'raidPokemon' in raidinfo and 'move2' in raidinfo['raidPokemon'] else None
                                         if raidpokemonmove2:
                                             raidpokemonmove2 = _POKEMONMOVE.values_by_name[raidpokemonmove2].number
+                                        raidpokemonform = _FORM.values_by_name[raidinfo['raidPokemon'].get("pokemonDisplay", {}).get('form', 'FORM_UNSET')].number
 
                                         raids[fort['id']] = {
                                             'gym_id': fort['id'],
@@ -1121,7 +1123,8 @@ class Pogom(Flask):
                                             'pokemon_id': raidpokemonid,
                                             'cp': raidpokemoncp,
                                             'move_1': raidpokemonmove1,
-                                            'move_2': raidpokemonmove2
+                                            'move_2': raidpokemonmove2,
+                                            'form': raidpokemonform
                                         }
 
                                         if ('egg' in self.args.wh_types and
