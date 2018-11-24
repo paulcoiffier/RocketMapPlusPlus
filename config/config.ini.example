@@ -123,7 +123,7 @@
 #user-auth-secret-key:          # Secret key to encrypt session cookies. Use a randomly generated string.
 #user-auth-client-id:           # Discord App - OAuth2 Client ID.
 #user-auth-client-secret:       # Discord App - OAuth2 Client Secret.
-#uav-user-auth-validity:        # Check every X seconds if user authentication is still valid and refresh access token. Default: 3600
+#user-auth-validity:            # Check every X seconds if user authentication is still valid and refresh access token. Default: 3600
 #user-auth-guild-required:      # (Optional) If guild ID is specified, user must have joined that guild (server) to access the map.
 #user-auth-guild-invite:        # Invite link to redirect users if they haven't joined the above guild.
 #user-auth-role-required:       # (Optional) If specified, user must have at least one of these Discord roles. Requires a Discord App Bot to be configured with "Manage Roles" permissions.
