@@ -16,7 +16,7 @@
                     [-nostore] [-apir API_RETRIES]
                     [-wwht WEBHOOK_WHITELIST | -wblk WEBHOOK_BLACKLIST | -wwhtf WEBHOOK_WHITELIST_FILE | -wblkf WEBHOOK_BLACKLIST_FILE]
                     [-ld LOGIN_DELAY] [-lr LOGIN_RETRIES] [-mf MAX_FAILURES]
-                    [-me MAX_EMPTY] [-bsr BAD_SCAN_RETRY]
+                    [-me MAX_EMPTY] [-bsr BAD_SCAN_RETRY] [-eh EXTERNAL_HOSTNAME]
                     [-msl MIN_SECONDS_LEFT] [-dc] [-H HOST] [-P PORT]
                     [-L LOCALE] [-c] [-m MOCK] [-ns] [-os] [-sc] [-nfl] -k
                     GMAPS_KEY [--skip-empty] [-C] [-cd] [-np] [-ng] [-nr]
@@ -49,6 +49,15 @@
                     [-v | --verbosity VERBOSE] [-Rh RARITY_HOURS]
                     [-Rf RARITY_UPDATE_FREQUENCY] [-SPp STATUS_PAGE_PASSWORD]
                     [-SPf STATUS_PAGE_FILTER]
+                    [-UA] [-UAv USER_AUTH_VALIDITY]
+                    [-UAbc USER_AUTH_BLOCK_CONCURRENT]
+                    [-UAsk USER_AUTH_SECRET_KEY] [-UAcid USER_AUTH_CLIENT_ID]
+                    [-UAcs USER_AUTH_CLIENT_SECRET]
+                    [-UAbt USER_AUTH_BOT_TOKEN]
+                    [-UAgr USER_AUTH_GUILD_REQUIRED]
+                    [-UAgi USER_AUTH_GUILD_INVITE]
+                    [-UArr USER_AUTH_ROLE_REQUIRED]
+                    [-UAri USER_AUTH_ROLE_INVITE]
 
 Args that start with '--' (eg. -a) can also be set in a config file
 (/config/config.ini or specified via -cf or -scf). The recognized syntax
@@ -459,3 +468,42 @@ variables which override config file values which override defaults.
                             Filter worker status that are inactive for X minutes.
                             Default: 30, 0 to disable. [env var:
                             POGOMAP_STATUS_PAGE_FILTER]
+
+    Discord User Authentication:
+      -UA, --user-auth      Require end-users to authenticate using Discord. [env
+                            var: POGOMAP_USER_AUTH]
+      -UAv USER_AUTH_VALIDITY, --user-auth-validity USER_AUTH_VALIDITY
+                            Check every X hours if user authentication is still
+                            valid and refresh access token. [env var:
+                            POGOMAP_USER_AUTH_VALIDITY]
+      -UAbc USER_AUTH_BLOCK_CONCURRENT, --user-auth-block-concurrent USER_AUTH_BLOCK_CONCURRENT
+                            Block user access for X hours if concurrent logins are
+                            detected. Default: 0 (disabled). [env var:
+                            POGOMAP_USER_AUTH_BLOCK_CONCURRENT]
+      -UAsk USER_AUTH_SECRET_KEY, --user-auth-secret-key USER_AUTH_SECRET_KEY
+                            Secret key to encrypt session cookies. Use a randomly
+                            generated string. [env var:
+                            POGOMAP_USER_AUTH_SECRET_KEY]
+      -UAcid USER_AUTH_CLIENT_ID, --user-auth-client-id USER_AUTH_CLIENT_ID
+                            Discord Client ID for user authentication. [env var:
+                            POGOMAP_USER_AUTH_CLIENT_ID]
+      -UAcs USER_AUTH_CLIENT_SECRET, --user-auth-client-secret USER_AUTH_CLIENT_SECRET
+                            Discord Client secret for user authentication. [env
+                            var: POGOMAP_USER_AUTH_CLIENT_SECRET]
+      -UAbt USER_AUTH_BOT_TOKEN, --user-auth-bot-token USER_AUTH_BOT_TOKEN
+                            Discord Bot Token required for fetching user roles
+                            within the required guild. [env var:
+                            POGOMAP_USER_AUTH_BOT_TOKEN]
+      -UAgr USER_AUTH_GUILD_REQUIRED, --user-auth-guild-required USER_AUTH_GUILD_REQUIRED
+                            Discord Guild the users must join to be able to access
+                            the map. [env var: POGOMAP_USER_AUTH_GUILD_REQUIRED]
+      -UAgi USER_AUTH_GUILD_INVITE, --user-auth-guild-invite USER_AUTH_GUILD_INVITE
+                            Invitation link for the required guild. [env var:
+                            POGOMAP_USER_AUTH_GUILD_INVITE]
+      -UArr USER_AUTH_ROLE_REQUIRED, --user-auth-role-required USER_AUTH_ROLE_REQUIRED
+                            Discord Guild Role name(s) the users must have (at
+                            least one) in order to access the map. [env var:
+                            POGOMAP_USER_AUTH_ROLE_REQUIRED]
+      -UAri USER_AUTH_ROLE_INVITE, --user-auth-role-invite USER_AUTH_ROLE_INVITE
+                            Invitation link for the required role. [env var:
+                            POGOMAP_USER_AUTH_ROLE_INVITE]
