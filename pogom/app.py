@@ -31,7 +31,6 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, clock_between,
                     calc_pokemon_level)
-from .client_auth import check_auth
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
