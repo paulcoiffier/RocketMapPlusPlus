@@ -155,6 +155,9 @@ def get_args():
                         help=('Locale for Pokemon names (check' +
                               ' static/dist/locales for more).'),
                         default='en')
+    parser.add_argument('-eh', '--external-hostname',
+                        help='Hostname used for external requests.',
+                        default="http://127.0.0.1:5000")
     parser.add_argument('-c', '--china',
                         help='Coordinates transformer for China.',
                         action='store_true')
@@ -429,24 +432,6 @@ def get_args():
                          help=('Show debug messages from RocketMap ' +
                                'and pgoapi.'),
                          type=int, dest='verbose')
-    parser.add_argument('-uas', '--user-auth-service', default=None,
-                        help='Force end users to auth to an external service.')
-    parser.add_argument('-uascid', '--uas-client-id', default=None,
-                        help='Client ID for user external authentication.')
-    parser.add_argument('-uascs', '--uas-client-secret', default=None,
-                        help='Client Secret for user external authentication.')
-    parser.add_argument('-uasho', '--uas-host-override', default=None,
-                        help='Host override for user external authentication.')
-    parser.add_argument('-uasdrg', '--uas-discord-required-guilds', default=None,
-                        help='Required Discord Guild(s) for user external authentication.')
-    parser.add_argument('-uasdgi', '--uas-discord-guild-invite', default=None,
-                        help='Link for users not in required guild.')
-    parser.add_argument('-uasdrr', '--uas-discord-required-roles', default=None,
-                        help='Required Discord Guild Role(s) for user external authentication.')
-    parser.add_argument('-uasdai', '--uas-discord-admin-ids', default=None,
-                        help='Discord IDs of the admins running the map.')
-    parser.add_argument('-uasdbt', '--uas-discord-bot-token', default=None,
-                        help='Discord Bot Token for user external authentication.')
     rarity = parser.add_argument_group('Dynamic Rarity')
     rarity.add_argument('-Rh', '--rarity-hours',
                         help=('Number of hours of Pokemon data to use ' +
@@ -468,6 +453,39 @@ def get_args():
     parser.add_argument('-sn', '--status-name', default=str(os.getpid()),
                         help=('Enable status page database update using ' +
                               'STATUS_NAME as main worker name.'))
+    group = parser.add_argument_group('Discord User Authentication')
+    group.add_argument('-UA', '--user-auth',
+                       help='Require end-users to authenticate using Discord.',
+                       action='store_true', default=False)
+    group.add_argument('-UAv', '--user-auth-validity',
+                       help=('Check every X hours if user authentication ' +
+                             'is still valid and refresh access token.'),
+                       type=int, default=3600)
+    group.add_argument('-UAbc', '--user-auth-block-concurrent',
+                       help=('Block user access for X hours if concurrent ' +
+                             'logins are detected. Default: 0 (disabled).'),
+                       type=int, default=0)
+    group.add_argument('-UAsk', '--user-auth-secret-key', default=None,
+                       help='Secret key to encrypt session cookies. '
+                            'Use a randomly generated string.')
+    group.add_argument('-UAcid', '--user-auth-client-id', default=None,
+                       help='Discord Client ID for user authentication.')
+    group.add_argument('-UAcs', '--user-auth-client-secret', default=None,
+                       help='Discord Client secret for user authentication.')
+    group.add_argument('-UAbt', '--user-auth-bot-token', default=None,
+                       help='Discord Bot Token required for fetching user '
+                            'roles within the required guild.')
+    group.add_argument('-UAgr', '--user-auth-guild-required', default=None,
+                       help='Discord Guild the users must join to be able '
+                            'to access the map.')
+    group.add_argument('-UAgi', '--user-auth-guild-invite', default=None,
+                       help='Invitation link for the required guild.')
+    group.add_argument('-UArr', '--user-auth-role-required',
+                       help='Discord Guild Role name(s) the users must have '
+                            '(at least one) in order to access the map.',
+                       default=[], action='append')
+    group.add_argument('-UAri', '--user-auth-role-invite', default=None,
+                       help='Invitation link for the required role.')
     parser.add_argument('-gen', '--generate-images',
                         help='Use ImageMagick to generate gym images on demand.',
                         action='store_true', default=False)
@@ -479,6 +497,33 @@ def get_args():
     args.log_filename = strftime(args.log_filename)
     args.log_filename = args.log_filename.replace('<sn>', '<SN>')
     args.log_filename = args.log_filename.replace('<SN>', args.status_name)
+    
+    if args.user_auth:
+        if not args.user_auth_secret_key:
+            print(sys.argv[0] +
+                  ": error: arguments -UAs/--user-auth-secret is required.")
+            sys.exit(1)
+            
+        if not args.user_auth_bot_token:
+            print(sys.argv[0] +
+                  ": error: arguments -UAbt/--user-auth-bot-token is " +
+                  "required for fetching user roles from Discord.")
+            sys.exit(1)
+            
+        if args.user_auth_guild_required and not args.user_auth_guild_invite:
+            print(sys.argv[0] +
+                  ": error: arguments -UAgi/--user-auth-guild-invite is " +
+                  "required when using -UAgr/--user-auth-guild-required.")
+            sys.exit(1)
+            
+        if args.user_auth_role_required and not args.user_auth_guild_required:
+            print(sys.argv[0] +
+                  ": error: arguments -UAgr/--user-auth-guild-required is " +
+                  "required when using -UArr/--user-auth-role-required.")
+            sys.exit(1)
+            
+        if args.user_auth_role_required and not args.user_auth_role_invite:
+            args.user_auth_role_invite = args.user_auth_guild_invite
 
     if args.location is None:
         parser.print_usage()
@@ -935,7 +980,7 @@ def _censor_args_namespace(args, censored_tag, empty_tag):
         'location',
         'captcha_key',
         'captcha_dsk',
-        'manual_captcha_domain',
+        'external_hostname',
         'host',
         'port',
         'gmaps_key',
@@ -950,7 +995,15 @@ def _censor_args_namespace(args, censored_tag, empty_tag):
         'trusted_proxies',
         'data_dir',
         'locales_dir',
-        'shared_config'
+        'shared_config',
+        'user_auth_secret_key',
+        'user_auth_client_id',
+        'user_auth_client_secret',
+        'user_auth_bot_token',
+        'user_auth_guild_required',
+        'user_auth_guild_invite',
+        'user_auth_role_required',
+        'user_auth_role_invite'
     ]
 
     for field in fields_to_censor:
