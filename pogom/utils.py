@@ -504,25 +504,25 @@ def get_args():
                   ": error: arguments -UAs/--user-auth-secret is required.")
             sys.exit(1)
             
-         if not args.user_auth_bot_token:
+        if not args.user_auth_bot_token:
             print(sys.argv[0] +
                   ": error: arguments -UAbt/--user-auth-bot-token is " +
                   "required for fetching user roles from Discord.")
             sys.exit(1)
             
-         if args.user_auth_guild_required and not args.user_auth_guild_invite:
+        if args.user_auth_guild_required and not args.user_auth_guild_invite:
             print(sys.argv[0] +
                   ": error: arguments -UAgi/--user-auth-guild-invite is " +
                   "required when using -UAgr/--user-auth-guild-required.")
             sys.exit(1)
             
-         if args.user_auth_role_required and not args.user_auth_guild_required:
+        if args.user_auth_role_required and not args.user_auth_guild_required:
             print(sys.argv[0] +
                   ": error: arguments -UAgr/--user-auth-guild-required is " +
                   "required when using -UArr/--user-auth-role-required.")
             sys.exit(1)
             
-         if args.user_auth_role_required and not args.user_auth_role_invite:
+        if args.user_auth_role_required and not args.user_auth_role_invite:
             args.user_auth_role_invite = args.user_auth_guild_invite
 
     if args.location is None:
