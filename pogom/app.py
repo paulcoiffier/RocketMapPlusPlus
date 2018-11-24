@@ -8,7 +8,8 @@ import os
 import math
 
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import pytz
 from s2sphere import LatLng
 from bisect import bisect_left
 from flask import Flask, abort, jsonify, render_template, request,\
@@ -90,7 +91,7 @@ def convert_pokemon_list_plus_plus(pokemon):
 
     pokemon_result = []
     for p in pokemon:
-        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
+        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, tz=pytz.utc)
         poke = {
             "encounter_id": str(p["encounter_id"]),
             "pokemon_id": p['pokemon_id'],
@@ -114,7 +115,7 @@ def convert_pokestop_list_plus_plus(pokestop):
 
     pokestop_result = []
     for p in pokestop:
-        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
+        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, tz=pytz.utc)
         stop = {
             "pokestop_id": p['pokestop_id'],
             "latitude": p['latitude'],
