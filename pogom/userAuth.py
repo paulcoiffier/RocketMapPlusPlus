@@ -38,7 +38,7 @@ class DiscordAPI():
             self.hostname = args.external_hostname
 
         self.redirect_uri = '{}/auth_callback'.format(self.hostname)
-        self.validity = args.user_auth_validity * 3600
+        self.validity = args.user_auth_validity
 
         self.guild_required = args.user_auth_guild_required
         self.guild_invite_link = args.user_auth_guild_invite
