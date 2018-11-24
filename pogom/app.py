@@ -15,7 +15,7 @@ from flask import Flask, abort, jsonify, render_template, request,\
     make_response, send_from_directory, json, send_file
 from flask.json import JSONEncoder
 from flask_compress import Compress
-
+from pogom.transform import jitter_location
 from pogom.dyn_img import get_gym_icon
 from base64 import b64decode
 
@@ -123,6 +123,7 @@ class Pogom(Flask):
         self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
         self.route("/walk_pokestop", methods=['POST'])(self.walk_pokestop)
         self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
+        self.route("/teleport_gpx", methods=['POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
         self.route("/teleport_loc", methods=['POST'])(self.teleport_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
@@ -146,6 +147,9 @@ class Pogom(Flask):
         self.deviceschedules = {}
         self.devicesscheduling = []
         self.devices = {}
+        self.deviceschecked = None
+        self.trusteddevices = {}
+        self.devicessavetime = {}
 
         self.geofences = None
 
@@ -175,7 +179,11 @@ class Pogom(Flask):
 
         self.devices[uuid] = device.copy()
 
-        if round(now()) % 30 == 0:
+        if uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
+            self.devicessavetime[uuid] = datetime.utcnow()
+            if self.devices[uuid].get('last_scanned') is None:
+                self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
+
             deviceworkers = {}
             deviceworkers[uuid] = self.devices[uuid]
 
@@ -194,7 +202,8 @@ class Pogom(Flask):
         is_in_battle = 'in_battle' in request.args
         is_ex_raid_eligible = 'ex_raid' in request.args
         is_unknown = 'is_unknown' in request.args
-        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown), mimetype='image/png')
+        form = request.args.get('form')
+        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown, form), mimetype='image/png')
 
     def get_pokemon_rarity_code(self, pokemonid):
         rarity = self.get_pokemon_rarity(pokemonid)
@@ -411,7 +420,7 @@ class Pogom(Flask):
         for pokemon in d['pokemons']:
             if result != "":
                 result += "\n"
-            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + str(pokemon['pokemon_name'])
+            result += str(round(pokemon['latitude'], 5)) + "," + str(round(pokemon['longitude'], 5)) + "," + str(pokemon['pokemon_id']) + "," + pokemon['pokemon_name']
             if pokemon['weather_boosted_condition'] > 0 and weathertypes[pokemon['weather_boosted_condition']]:
                 result += ", " + weathertypes[pokemon['weather_boosted_condition']]["emoji"] + " " + weathertypes[pokemon['weather_boosted_condition']]["name"]
             rarity = self.get_pokemon_rarity(pokemon['pokemon_id'])
@@ -428,6 +437,32 @@ class Pogom(Flask):
     def render_service_worker_js(self):
         return send_from_directory('static/dist/js', 'serviceWorker.min.js')
 
+    def trusted_device(self, uuid):
+        canusedevice = True
+        devicename = ""
+
+        if self.deviceschecked is None or (datetime.utcnow() - self.deviceschecked).total_seconds() > 300:
+            self.trusteddevices = {}
+            if self.args.devices_file:
+                with open(self.args.devices_file) as f:
+                    for line in f:
+                        line = line.strip()
+                        if len(line) == 0:  # Empty line.
+                            continue
+                        else:  # Coordinate line.
+                            deviceid, name = line.split(":")
+                            self.trusteddevices[deviceid.strip()] = name.strip()
+
+            self.deviceschecked = datetime.utcnow()
+
+        if len(self.trusteddevices) > 0:
+            if uuid in self.trusteddevices:
+                devicename = self.trusteddevices[uuid]
+            else:
+                canusedevice = False
+
+        return canusedevice, devicename
+
     def webhook(self):
         request_json = request.get_json()
         protos = request_json.get('protos')
@@ -435,6 +470,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         if protos:
@@ -466,6 +505,8 @@ class Pogom(Flask):
             if deviceworker['fetch'] == 'IDLE':
                 deviceworker['latitude'] = lat
                 deviceworker['longitude'] = lng
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -1068,6 +1109,7 @@ class Pogom(Flask):
                                         raidpokemonmove2 = raidinfo['raidPokemon']['move2'] if 'raidPokemon' in raidinfo and 'move2' in raidinfo['raidPokemon'] else None
                                         if raidpokemonmove2:
                                             raidpokemonmove2 = _POKEMONMOVE.values_by_name[raidpokemonmove2].number
+                                        raidpokemonform = _FORM.values_by_name[raidinfo['raidPokemon'].get("pokemonDisplay", {}).get('form', 'FORM_UNSET')].number
 
                                         raids[fort['id']] = {
                                             'gym_id': fort['id'],
@@ -1081,7 +1123,8 @@ class Pogom(Flask):
                                             'pokemon_id': raidpokemonid,
                                             'cp': raidpokemoncp,
                                             'move_1': raidpokemonmove1,
-                                            'move_2': raidpokemonmove2
+                                            'move_2': raidpokemonmove2,
+                                            'form': raidpokemonform
                                         }
 
                                         if ('egg' in self.args.wh_types and
@@ -1230,15 +1273,15 @@ class Pogom(Flask):
                         'num_upgrades': int(gympokemon.get("numUpgrades", 0)),
                         'move_1': _POKEMONMOVE.values_by_name[gympokemon.get("move1")].number,
                         'move_2': _POKEMONMOVE.values_by_name[gympokemon.get("move2")].number,
-                        'height': float(gympokemon.get("heightM")),
-                        'weight': float(gympokemon.get("weightKg")),
-                        'stamina': int(gympokemon.get("stamina")),
-                        'stamina_max': int(gympokemon.get("staminaMax")),
-                        'cp_multiplier': float(gympokemon.get("cpMultiplier")),
+                        'height': float(gympokemon.get("heightM", 0)),
+                        'weight': float(gympokemon.get("weightKg", 0)),
+                        'stamina': int(gympokemon.get("stamina", 0)),
+                        'stamina_max': int(gympokemon.get("staminaMax", 0)),
+                        'cp_multiplier': float(gympokemon.get("cpMultiplier", 0)),
                         'additional_cp_multiplier': float(gympokemon.get("additionalCpMultiplier", 0)),
-                        'iv_defense': int(gympokemon.get("individualDefense")),
-                        'iv_stamina': int(gympokemon.get("individualStamina")),
-                        'iv_attack': int(gympokemon.get("individualAttack")),
+                        'iv_defense': int(gympokemon.get("individualDefense", 0)),
+                        'iv_stamina': int(gympokemon.get("individualStamina", 0)),
+                        'iv_attack': int(gympokemon.get("individualAttack", 0)),
                         'costume': _COSTUME.values_by_name[gympokemon.get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
                         'form': _FORM.values_by_name[gympokemon.get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
                         'shiny': gympokemon.get("pokemonDisplay", {}).get("shiny"),
@@ -1836,18 +1879,22 @@ class Pogom(Flask):
         for track in gpx.tracks:
             for segment in track.segments:
                 for point in segment.points:
-                    result.append((point.latitude, point.longitude))
+                    result.append((round(point.latitude, 5), round(point.longitude, 5)))
 
         for waypoint in gpx.waypoints:
-            result.append((waypoint.latitude, waypoint.longitude))
+            result.append((round(waypoint.latitude, 5), round(waypoint.longitude, 5)))
 
         for route in gpx.routes:
             for point in route.points:
-                result.append((point.latitude, point.longitude))
+                result.append((round(point.latitude, 5), round(point.longitude, 5)))
 
         return result
 
     def changeDeviceLoc(self, lat, lon, uuid):
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         deviceworker = DeviceWorker.get_existing_by_id(uuid)
 
         if not deviceworker or (not deviceworker['last_scanned'] and deviceworker['fetch'] == 'IDLE'):
@@ -1864,6 +1911,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "jump_now"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -1877,6 +1927,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         latitude = round(request_json.get('latitude', 0), 5)
@@ -1903,6 +1957,10 @@ class Pogom(Flask):
         if uuid == "":
             return ""
 
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -1917,6 +1975,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_spawnpoint"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -1938,7 +1999,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_spawnpoint":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -1995,6 +2056,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_spawnpoint"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2008,6 +2072,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2024,6 +2092,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_gpx"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2045,7 +2116,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_gpx":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2066,6 +2137,8 @@ class Pogom(Flask):
 
             self.devicesscheduling.append(uuid)
             deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
@@ -2114,6 +2187,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_gpx"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2127,6 +2203,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2143,6 +2223,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "walk_pokestop"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2164,7 +2247,7 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "walk_pokestop":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "walk_pokestop"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2221,6 +2304,9 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "walk_pokestop"
 
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
         self.save_device(deviceworker)
 
         d = {}
@@ -2230,10 +2316,15 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gym(self):
+        args = get_args()
         request_json = request.get_json()
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2250,6 +2341,9 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_gym"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2271,43 +2365,157 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference > self.args.scheduletimeout * 60 or deviceworker['fetch'] != "teleport_gym":
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "teleport_gym"):
             self.deviceschedules[uuid] = []
+
+        if difference >= self.args.teleport_interval:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+            deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
+            self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
-            nextlatitude = latitude
-            nextlongitude = longitude
+            deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
+            self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-        else:
-            nextlatitude = deviceworker['latitude']
-            nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+        if args.jitter:
+            jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
 
+            nextlatitude = jitter_nexttarget[0]
+            nextlongitude = jitter_nexttarget[1]
         else:
             nextlatitude = nexttarget[0]
             nextlongitude = nexttarget[1]
 
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['fetch'] = "teleport_gym"
+
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
+        self.save_device(deviceworker)
+
+        d = {}
+        d['latitude'] = deviceworker['latitude']
+        d['longitude'] = deviceworker['longitude']
+
+        return jsonify(d)
+
+    def teleport_gpx(self):
+        args = get_args()
+        request_json = request.get_json()
+
+        uuid = request_json.get('uuid')
+        if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            return ""
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        deviceworker = self.get_device(uuid, latitude, longitude)
+
+        if uuid not in self.deviceschedules:
+            self.deviceschedules[uuid] = []
+
+        if deviceworker['fetch'] == "jump_now":
+            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['fetch'] = "teleport_gpx"
+
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
+
+            self.save_device(deviceworker)
+
+            d = {}
+            d['latitude'] = deviceworker['latitude']
+            d['longitude'] = deviceworker['longitude']
+
+            return jsonify(d)
+
+        if uuid in self.devicesscheduling:
+            if len(self.deviceschedules[uuid]) == 0:
+                d = {}
+                d['latitude'] = deviceworker['latitude']
+                d['longitude'] = deviceworker['longitude']
+
+                return jsonify(d)
+            else:
+                self.devicesscheduling.remove(uuid)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if difference >= self.args.teleport_interval:
-            deviceworker['latitude'] = round(nextlatitude, 5)
-            deviceworker['longitude'] = round(nextlongitude, 5)
-            deviceworker['last_updated'] = datetime.utcnow()
-            deviceworker['fetch'] = "teleport_gym"
+        if (deviceworker['fetch'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetch'] != 'IDLE' and deviceworker['fetch'] != "teleport_gpx"):
+            self.deviceschedules[uuid] = []
 
+        if difference >= self.args.teleport_interval:
+            if len(self.deviceschedules[uuid]) > 0:
+                del self.deviceschedules[uuid][0]
+            deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
             self.save_device(deviceworker)
+
+        if len(self.deviceschedules[uuid]) == 0:
+            routename = ""
+            if request.args:
+                routename = request.args.get('route', type=str)
+            if request.form:
+                routename = request.form.get('route', type=str)
+            if routename == "":
+                routename = uuid
+            if routename != "":
+                routename = os.path.join(
+                    self.args.root_path,
+                    'gpx',
+                    routename + ".gpx")
+            if routename == "" or not os.path.isfile(routename):
+                return self.scan_loc()
+
+            self.devicesscheduling.append(uuid)
+            self.deviceschedules[uuid] = self.get_gpx_route(routename)
+            deviceworker['last_updated'] = datetime.utcnow()
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
+            self.save_device(deviceworker)
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
+
+        nexttarget = self.deviceschedules[uuid][0]
+
+        if args.jitter:
+            jitter_nexttarget = jitter_location([nexttarget[0], nexttarget[1], 0])
+
+            nextlatitude = jitter_nexttarget[0]
+            nextlongitude = jitter_nexttarget[1]
+        else:
+            nextlatitude = nexttarget[0]
+            nextlongitude = nexttarget[1]
+
+        deviceworker['latitude'] = round(nextlatitude, 5)
+        deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['fetch'] = "teleport_gpx"
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
+
+        self.save_device(deviceworker)
 
         d = {}
         d['latitude'] = deviceworker['latitude']
@@ -2320,6 +2528,10 @@ class Pogom(Flask):
 
         uuid = request_json.get('uuid')
         if uuid == "":
+            return ""
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
             return ""
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
@@ -2339,6 +2551,8 @@ class Pogom(Flask):
         if deviceworker['fetch'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2446,6 +2660,9 @@ class Pogom(Flask):
         deviceworker['direction'] = direction
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetch'] = "teleport_loc" if needtojump else "scan_loc"
+
+        if devicename != "" and devicename != deviceworker['name']:
+            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 

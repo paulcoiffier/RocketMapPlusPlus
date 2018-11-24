@@ -23,7 +23,7 @@ egg_images = {
 }
 
 
-def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown):
+def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown, form):
     init_image_dir()
     level = int(level)
 
@@ -35,8 +35,11 @@ def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible,
     badge_lines = []
     if pkm and pkm != 'null':
         # Gym with ongoing raid
-        out_filename = os.path.join(path_generated, "{}_L{}_R{}_P{}.png".format(team, level, raidlevel, pkm))
-        subject_lines = draw_subject(os.path.join(path_icons, '{}.png'.format(pkm)), 64)
+        out_filename = os.path.join(path_generated, "{}_L{}_R{}_P{}_F{}.png".format(team, level, raidlevel, pkm, form))
+        if form > 0:
+            subject_lines = draw_subject(os.path.join(path_icons, '{}_{}.png'.format(pkm, form)), 64)
+        else:
+            subject_lines = draw_subject(os.path.join(path_icons, '{}.png'.format(pkm)), 64)
         badge_lines.extend(draw_badge(80, 15, 15, "white", "black", raidlevel))
         if level > 0:
             badge_lines.extend(draw_badge(80, 80, 15, "black", "white", level))
@@ -72,7 +75,7 @@ def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible,
         subject_lines.append('-gravity center ( {} -resize 50x50 ) -geometry +0+0 -composite'.format(
             os.path.join(path_images, 'unknown.png')))
         out_filename = out_filename.replace('.png', '_Unknown.png')
-		
+
     if not os.path.isfile(out_filename):
         gym_image = os.path.join('static', 'images', 'gym', '{}.png'.format(team))
         font = os.path.join('static', 'Arial Black.ttf')
@@ -104,9 +107,10 @@ def init_image_dir():
     if not os.path.isdir(path_generated):
         try:
             os.makedirs(path_generated)
-        except OSError as exc:
+        except OSError:
             if not os.path.isdir(path_generated):
                 raise
+
 
 def default_gym_image(team, level, raidlevel, pkm):
     path = path_gym

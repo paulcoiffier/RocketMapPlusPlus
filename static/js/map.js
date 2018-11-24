@@ -100,15 +100,14 @@ const pokemonWithImages = [
     482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 493
 ]
 const genderSpecificSprites = [
-    3, 12, 19, 20, 25, 26, 41, 42, 44, 45, 64, 65, 84, 85,
-    111, 112, 118, 119, 123, 129, 130,
-    154, 165, 166, 178, 185, 186, 190, 194, 198, 202, 203,
-    207, 208, 212, 214, 215, 217, 221, 224, 229, 232,
-    256, 257, 267, 269, 272, 274, 275, 307, 308, 315, 316,
-    317, 322, 323, 332, 350, 369,
-    396, 397, 398, 400, 401, 402, 403, 404, 405, 407,
-    415, 417, 424, 443, 444, 445, 449, 450, 453, 454,
-    456, 457, 459, 460, 461, 464, 465, 473
+    449, 450
+]
+const possibleShinySprites = [
+    1, 4, 7, 10, 25, 29, 30, 31, 77, 81, 90, 92, 96, 98,
+    104, 127, 129, 133, 138, 140, 142, 147, 152, 155,
+    177, 179, 191, 198, 204, 209, 228, 246, 261, 278,
+    296, 302, 304, 307, 311, 312, 315, 320, 333, 353,
+    355, 361, 370, 374, 425
 ]
 
 const excludedRaritiesList = [
@@ -633,6 +632,9 @@ function pokemonLabel(item) {
                 iconname += '_F'
             }
         }
+        if (possibleShinySprites.indexOf(id) !== -1) {
+          iconname += '_P'
+        }
     }
 
     if (showStats && cp !== null && cpMultiplier !== null) {
@@ -794,7 +796,7 @@ function gymLabel(gym, includeMembers = true) {
 				raidImage = `<img class='gym sprite' src='static/images/raid/${gymTypes[gym.team_id]}_${raid.level}_unknown.png'>`
 			}
             if (generateImages && raid.pokemon_id !== null) {
-				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&pkm=${raid.pokemon_id}`
+				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&pkm=${raid.pokemon_id}&form=${raid.form}`
                 if (isExRaidEligible) {
                     gym_url += '&ex_raid=1'
                 }
@@ -809,7 +811,7 @@ function gymLabel(gym, includeMembers = true) {
                         <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                             ${levelStr}
                         </span>
-                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'></span> left (${moment(raid.end).format('HH:mm')})
+                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'>00m00s</span> left (${moment(raid.end).format('HH:mm')})
                     </div>
                 `
             } else {
@@ -833,7 +835,7 @@ function gymLabel(gym, includeMembers = true) {
                         <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                             ${levelStr}
                         </span>
-                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'></span> left (${moment(raid.end).format('HH:mm')})
+                        <span class='raid countdown label-countdown' disappears-at='${raid.end}'>00m00s</span> left (${moment(raid.end).format('HH:mm')})
                     </div>
                 `
             }
@@ -863,7 +865,7 @@ function gymLabel(gym, includeMembers = true) {
                   <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
                   ${levelStr}
                   </span>
-                  Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'> (${moment(raid.start).format('HH:mm')})</span>
+                  Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
                 </div>`
         }
     } else {
@@ -922,6 +924,9 @@ function gymLabel(gym, includeMembers = true) {
                     } else {
                         iconname += '_F'
                     }
+                }
+                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1) {
+                  iconname += '_P'
                 }
             }
             memberStr += `
@@ -1040,6 +1045,9 @@ function pokestopLabel(pokestop, includeMembers = true) {
                     } else {
                         iconname += '_F'
                     }
+                }
+                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1) {
+                  iconname += '_P'
                 }
             }
 
@@ -1424,6 +1432,9 @@ function customizePokemonMarker(marker, item, skipNotification) {
                 iconname += '_F'
             }
         }
+        if (possibleShinySprites.indexOf(item['pokemon_id']) !== -1) {
+          iconname += '_P'
+        }
     }
 
     if (isNotifyPoke(item)) {
@@ -1511,7 +1522,7 @@ function updateGymMarker(item, marker) {
             markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '_' + item.raid.level + '_unknown.png'
 		}
         if (generateImages && item.raid.pokemon_id) {
-			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&pkm=' + item['raid']['pokemon_id']
+			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&pkm=' + item['raid']['pokemon_id'] + '&form=' + item['raid']['form']
 			if (gymExRaidEligible) {
                 markerImage += '&ex_raid=1'
 			}
@@ -2886,6 +2897,9 @@ function getSidebarGymMember(pokemon) {
                 iconname += '_F'
             }
         }
+        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1) {
+          iconname += '_P'
+        }
     }
 
     return `
@@ -3064,6 +3078,9 @@ function getSidebarPokestopMember(pokemon) {
             } else {
                 iconname += '_F'
             }
+        }
+        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1) {
+          iconname += '_P'
         }
     }
 

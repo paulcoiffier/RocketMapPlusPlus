@@ -43,7 +43,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 49
+db_schema_version = 50
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1090,6 +1090,7 @@ class Raid(BaseModel):
     cp = IntegerField(null=True)
     move_1 = SmallIntegerField(null=True)
     move_2 = SmallIntegerField(null=True)
+    form = SmallIntegerField(null=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
 
 
@@ -4056,6 +4057,11 @@ def database_migrate(db, old_ver):
         migrate(
             migrator.add_column('deviceworker', 'discord_id',
                                 Utf8mb4CharField(max_length=100, default=""))
+        )
+
+    if old_ver < 50:
+        migrate(
+            migrator.add_column('raid', 'form', SmallIntegerField(null=True))
         )
 
     # Always log that we're done.
