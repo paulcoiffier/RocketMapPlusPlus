@@ -121,6 +121,7 @@ class Pogom(Flask):
         self.json_encoder = CustomJSONEncoder
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
+        self.route("/auth_logout", methods=['GET'])(self.auth_logout)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
@@ -457,7 +458,7 @@ class Pogom(Flask):
 
     def auth_logout(self):
         session.clear()
-        return make_response(redirect('/'))
+        return make_response(redirect('https://discordapp.com/channels/@me'))
 
     def render_robots_txt(self):
         return render_template('robots.txt')
@@ -1567,8 +1568,6 @@ class Pogom(Flask):
         if request.endpoint == 'submit_token':
             return
         if request.endpoint == 'get_account_stats':
-            return
-        if request.endpoint == 'auth_logout':
             return
 
         return self.discord_api.check_auth(
