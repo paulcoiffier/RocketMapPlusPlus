@@ -8,7 +8,7 @@ import os
 import math
 
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from s2sphere import LatLng
 from bisect import bisect_left
 from flask import Flask, abort, jsonify, render_template, request,\
@@ -83,6 +83,76 @@ def convert_pokemon_list(pokemon):
     return pokemon
 
 
+def convert_pokemon_list_plus_plus(pokemon):
+    # Performance:  disable the garbage collector prior to creating a
+    # (potentially) large dict with append().
+    gc.disable()
+
+    pokemon_result = []
+    for p in pokemon:
+        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
+        poke = {
+            "encounter_id": str(p["encounter_id"]),
+            "pokemon_id": p['pokemon_id'],
+            "latitude": p['latitude'],
+            "longitude": p['longitude'],
+            "created_date": p['last_modified'],
+            "disappear_time": int((p['disappear_time'] - epoch).total_seconds())
+        }
+
+        pokemon_result.append(poke)
+
+    # Re-enable the GC.
+    gc.enable()
+    return pokemon_result
+
+
+def convert_pokestop_list_plus_plus(pokestop):
+    # Performance:  disable the garbage collector prior to creating a
+    # (potentially) large dict with append().
+    gc.disable()
+
+    pokestop_result = []
+    for p in pokestop:
+        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
+        stop = {
+            "pokestop_id": p['pokestop_id'],
+            "latitude": p['latitude'],
+            "longitude": p['longitude'],
+            "lure_expiration": int((p['lure_expiration'] - epoch).total_seconds())
+        }
+
+        pokestop_result.append(stop)
+
+    # Re-enable the GC.
+    gc.enable()
+    return pokestop_result
+
+
+def convert_gym_list_plus_plus(gym):
+    # Performance:  disable the garbage collector prior to creating a
+    # (potentially) large dict with append().
+    gc.disable()
+
+    gym_result = []
+    for g in gym:
+        gy = {
+            "gym_id": g['gym_id'],
+            "latitude": g['latitude'],
+            "longitude": g['longitude'],
+            "points": 0,
+            "guardingPokemonIdentifier": g['guard_pokemon_id'],
+            "freeslots": g['slots_available'],
+            "team": g['team_id'],
+        }
+
+        gym_result.append(gy)
+
+    # Re-enable the GC.
+    gc.enable()
+    return gym_result
+
+
 class Pogom(Flask):
 
     def __init__(self, import_name, **kwargs):
@@ -122,6 +192,7 @@ class Pogom(Flask):
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
+        self.route("/radar_fetch", methods=['GET'])(self.radar_fetch)
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
         self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
@@ -1895,6 +1966,43 @@ class Pogom(Flask):
             d['geofences'] = geofences
 
         d['deviceworkers'] = DeviceWorker.get_active()
+
+        return jsonify(d)
+
+    def radar_fetch(self):
+        # Make sure fingerprint isn't blacklisted.
+        fingerprint_blacklisted = any([
+            fingerprints['no_referrer'](request),
+            fingerprints['iPokeGo'](request)
+        ])
+
+        if fingerprint_blacklisted:
+            log.debug('User denied access: blacklisted fingerprint.')
+            abort(403)
+
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+        d = {}
+
+        swLat = request.args.get('swLat')
+        swLng = request.args.get('swLng')
+        neLat = request.args.get('neLat')
+        neLng = request.args.get('neLng')
+
+        if not args.no_pokemon:
+            d['pokemons'] = convert_pokemon_list_plus_plus(
+                Pokemon.get_active(
+                    swLat, swLng, neLat, neLng))
+
+        if not args.no_pokestops:
+            d['pokestops'] = convert_pokestop_list_plus_plus(
+                Pokestop.get_stops(swLat, swLng, neLat, neLng))
+
+        if not args.no_gyms:
+            d['gyms'] = convert_gym_list_plus_plus(
+                Gym.get_gyms(swLat, swLng, neLat, neLng))
 
         return jsonify(d)
 
