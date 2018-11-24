@@ -441,20 +441,20 @@ class Pogom(Flask):
         if not code:
             log.error('User authentication code not found in callback.')
             abort(403)
-            
+
         response = self.discord_api.exchange_code(code)
         if not response:
             log.error('Failed OAuth request for user authentication.')
             abort(403)
-            
+
         valid = self.discord_api.validate_auth(session, response)
         if not valid['auth'] and not valid['url']:
             abort(403)
         elif not valid['auth']:
             return make_response(redirect(valid['url']))
-        
+
         return make_response(redirect('/'))
-    
+
     def auth_logout(self):
         session.clear()
         return make_response(redirect('/'))
@@ -1137,7 +1137,7 @@ class Pogom(Flask):
                                         raidpokemonmove2 = raidinfo['raidPokemon']['move2'] if 'raidPokemon' in raidinfo and 'move2' in raidinfo['raidPokemon'] else None
                                         if raidpokemonmove2:
                                             raidpokemonmove2 = _POKEMONMOVE.values_by_name[raidpokemonmove2].number
-                                        raidpokemonform = _FORM.values_by_name[raidinfo['raidPokemon'].get("pokemonDisplay", {}).get('form', 'FORM_UNSET')].number
+                                        raidpokemonform = _FORM.values_by_name[raidinfo.get('raidPokemon', {}).get("pokemonDisplay", {}).get('form', 'FORM_UNSET')].number
 
                                         raids[fort['id']] = {
                                             'gym_id': fort['id'],
@@ -1558,7 +1558,7 @@ class Pogom(Flask):
         if self._ip_is_blacklisted(ip_addr):
             log.debug('Denied access to %s: blacklisted IP.', ip_addr)
             abort(403)
-            
+
         # Verify user authentication.
         if not args.user_auth:
             return
@@ -1570,7 +1570,7 @@ class Pogom(Flask):
             return
         if request.endpoint == 'auth_logout':
             return
-        
+
         return self.discord_api.check_auth(
             session, request.headers.get('User-Agent'), ip_addr)
 
