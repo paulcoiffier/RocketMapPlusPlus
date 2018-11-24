@@ -251,7 +251,7 @@ class DiscordAPI():
                     log.error('Failed to refresh OAuth user authentication.')
                     return self.redirect_to_auth()
 
-                valid = self.discord_api.validate_auth(session, response)
+                valid = self.validate_auth(session, response)
                 if not valid['auth'] and not valid['url']:
                     return self.redirect_to_auth()
                 elif not valid['auth']:
