@@ -24,7 +24,7 @@ class DiscordAPI():
         self.client_id = args.user_auth_client_id
         self.client_secret = args.user_auth_client_secret
         self.aes_cipher = AESCipher(args.user_auth_secret_key)
-        self.auth_cache = TTLCache(maxsize=10000, ttl=300)
+        self.auth_cache = TTLCache(maxsize=10000, ttl=60)
 
         self.block_concurrent = args.user_auth_block_concurrent
         if args.user_auth_block_concurrent:
@@ -74,13 +74,14 @@ class DiscordAPI():
 
     # https://discordapp.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
     def exchange_code(self, code):
-        uri = '/oauth2/token'
+        uri = 'oauth2/token'
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'authorization_code',
             'code': code,
-            'redirect_uri': self.redirect_uri
+            'redirect_uri': self.redirect_uri,
+            'scope': 'identify guilds'
         }
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -89,13 +90,14 @@ class DiscordAPI():
         return self.post_request(uri, data, headers)
 
     def refresh_token(self, refresh_token):
-        uri = '/oauth2/token'
+        uri = 'oauth2/token'
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'refresh_token',
-            'code': refresh_token,
-            'redirect_uri': self.redirect_uri
+            'refresh_token': refresh_token,
+            'redirect_uri': self.redirect_uri,
+            'scope': 'identify guilds'
         }
         headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
