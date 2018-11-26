@@ -458,7 +458,7 @@ class Pogom(Flask):
 
     def auth_logout(self):
         session.clear()
-        return make_response(redirect('https://discordapp.com/channels/@me'))
+        return make_response(redirect('/'))
 
     def render_robots_txt(self):
         return render_template('robots.txt')
