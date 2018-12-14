@@ -1,18 +1,31 @@
 .pokestop {
-  font-size: 14px;
-  font-weight: 900;
-  text-align: center;
+  color: rgb(93,109,126);
+  font-size: 11px;
+  font-weight: 500;
 
   &.container {
     display: grid;
     justify-content: center;
   }
 
+  &.pokestop-icon.sprite {
+    display: block;
+    height: 32px;
+    width: 32px;
+    margin-left: auto;
+    margin-right: auto;
+  }  
+
+  &.img.sprite {
+    height: 64px;
+    width: 64px;
+    border-radius: 32px;
+    border: 2px solid rgb(29, 139, 240);
+    display: none;
+  }
+
   &.info {
-    color: rgb(93,109,126);
-    font-size: 11px;
-    font-weight: 500;
-    text-align: left;
+
     &.last-modified:before {
       content: '\f040';
       display: inline-block;
@@ -30,7 +43,7 @@
       width: 16px;
       -webkit-font-smoothing: antialiased;
     }
-
+    
     &.navigate:before {
       content: '\f018';
       display: inline-block;
@@ -46,46 +59,85 @@
     margin-bottom: 5px;
   }
 
+  &.members {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  &.member {
+    display: inline-block;
+    margin-left: 1px;
+
+    &.name {
+      font-size: 10px;
+      font-weight: 500;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 0px;
+      vertical-align: middle;
+    }
+
+    &.sprite {
+      display: block;
+      height: 32px;
+      width: 32px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+    }
+  }
+
+  &.name {
+    font-size: 14px;
+    font-weight: 900;
+    margin-bottom: 5px;
+    text-decoration: underline;
+    text-align: center;
+    
+    &.lure {
+      color: rgb(249,53,133);
+    }
+
+    &.nolure {
+      color: rgb(54,198,255);
+    }
+  }
+
   &.nolure {
     color: rgb(54,198,255);
     margin-bottom: 5px;
   }
 
   &.quest {
-    border: 1px solid #c4c4c4;
-    margin: 5px 0 5px 0;
-    border-radius: 4px;
+    border-width: 1px 0px 1px 0px;
+    border-style: solid;
+    border-color: #c4c4c4;
+    border-radius: 0px;
+    margin: 5px 0px 5px 0px;
     display: flex;
-    padding: 0 10px 0 5px;
+    padding: 5px 0px 5px 0px;
     align-items: center;
-    justify-content: center;
+    justify-content: left;
     flex-wrap: wrap;
+
     .quest-icon {
-      height: 48px;
-      width: 48px;
+      padding-right: 5px;
+      height: 32px;
+      width: 37px;
+    }
+
+    .reward-icon {
+      padding-left: 5px;
+      height: 32px;
+      width: 37px;
     }
 
     .quest-text {
       word-break: break-all;
       text-decoration: none;
       font-size: 12px;
+      font-weight: 500;
       color: #5d6d7e;
-    }
-  }
-
-  &.navigate {
-    color: rgb(93,109,126);
-    font-size: 11px;
-    font-weight: 500;
-
-    &.navigate:before {
-      content: '\f018';
-      display: inline-block;
-      font-family: FontAwesome;
-      margin: 5px 3px 0px 0px;
-      height: 16px;
-      width: 16px;
-      -webkit-font-smoothing: antialiased;
     }
   }
 }
@@ -119,16 +171,4 @@ a.pokestop:link {
   &.nolure {
     color: rgb(54,198,255);
   }
-}
-
-.pokestop.sprite {
-  display: block;
-  height: 32px;
-  width: 32px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.pokestop.img {
-  display: none;
 }
