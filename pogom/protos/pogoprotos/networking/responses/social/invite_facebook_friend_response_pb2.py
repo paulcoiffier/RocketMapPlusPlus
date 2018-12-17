@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.responses.social',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nLpogoprotos/networking/responses/social/invite_facebook_friend_response.proto\x12&pogoprotos.networking.responses.social\"\xa9\x02\n\x1cInviteFacebookFriendResponse\x12[\n\x06result\x18\x01 \x01(\x0e\x32K.pogoprotos.networking.responses.social.InviteFacebookFriendResponse.Result\"\xab\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rERROR_UNKNOWN\x10\x02\x12\x1a\n\x16\x45RROR_ALREADY_A_FRIEND\x10\x03\x12\x1f\n\x1b\x45RROR_PLAYER_DOES_NOT_EXIST\x10\x04\x12\x1b\n\x17\x45RROR_PLAYER_INBOX_FULL\x10\x05\x12\x1c\n\x18\x45RROR_PLAYER_OUTBOX_FULL\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\nLpogoprotos/networking/responses/social/invite_facebook_friend_response.proto\x12&pogoprotos.networking.responses.social\"\xba\x04\n\x1cInviteFacebookFriendResponse\x12[\n\x06result\x18\x01 \x01(\x0e\x32K.pogoprotos.networking.responses.social.InviteFacebookFriendResponse.Result\"\xbc\x03\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rERROR_UNKNOWN\x10\x02\x12\x1a\n\x16\x45RROR_PLAYER_NOT_FOUND\x10\x03\x12\x1c\n\x18\x45RROR_PLAYER_OUTBOX_FULL\x10\x04\x12\x1b\n\x17\x45RROR_PLAYER_INBOX_FULL\x10\x05\x12 \n\x1c\x45RROR_SENDER_HAS_MAX_FRIENDS\x10\x06\x12\"\n\x1e\x45RROR_RECEIVER_HAS_MAX_FRIENDS\x10\x07\x12\x1a\n\x16\x45RROR_ALREADY_A_FRIEND\x10\x08\x12\x1d\n\x19\x45RROR_INVITE_ALREADY_SENT\x10\t\x12!\n\x1d\x45RROR_INVITE_ALREADY_RECEIVED\x10\n\x12)\n%ERROR_CANNOT_SEND_INVITES_TO_YOURSELF\x10\x0b\x12\x1e\n\x1a\x45RROR_FRIEND_CACHE_EXPIRED\x10\x0c\x12\x1b\n\x17\x45RROR_FRIEND_NOT_CACHED\x10\r\x12$\n ERROR_INVALID_SENDER_FACEBOOK_ID\x10\x0e\x62\x06proto3')
 )
 
 
@@ -43,11 +43,11 @@ _INVITEFACEBOOKFRIENDRESPONSE_RESULT = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR_ALREADY_A_FRIEND', index=3, number=3,
+      name='ERROR_PLAYER_NOT_FOUND', index=3, number=3,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR_PLAYER_DOES_NOT_EXIST', index=4, number=4,
+      name='ERROR_PLAYER_OUTBOX_FULL', index=4, number=4,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -55,14 +55,46 @@ _INVITEFACEBOOKFRIENDRESPONSE_RESULT = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR_PLAYER_OUTBOX_FULL', index=6, number=6,
+      name='ERROR_SENDER_HAS_MAX_FRIENDS', index=6, number=6,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_RECEIVER_HAS_MAX_FRIENDS', index=7, number=7,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_ALREADY_A_FRIEND', index=8, number=8,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_INVITE_ALREADY_SENT', index=9, number=9,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_INVITE_ALREADY_RECEIVED', index=10, number=10,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_CANNOT_SEND_INVITES_TO_YOURSELF', index=11, number=11,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_FRIEND_CACHE_EXPIRED', index=12, number=12,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_FRIEND_NOT_CACHED', index=13, number=13,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR_INVALID_SENDER_FACEBOOK_ID', index=14, number=14,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=247,
-  serialized_end=418,
+  serialized_end=691,
 )
 _sym_db.RegisterEnumDescriptor(_INVITEFACEBOOKFRIENDRESPONSE_RESULT)
 
@@ -95,7 +127,7 @@ _INVITEFACEBOOKFRIENDRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=121,
-  serialized_end=418,
+  serialized_end=691,
 )
 
 _INVITEFACEBOOKFRIENDRESPONSE.fields_by_name['result'].enum_type = _INVITEFACEBOOKFRIENDRESPONSE_RESULT

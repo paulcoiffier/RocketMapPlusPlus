@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.responses',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n9pogoprotos/networking/responses/get_player_response.proto\x12\x1fpogoprotos.networking.responses\x1a!pogoprotos/data/player_data.proto\"\x83\x02\n\x11GetPlayerResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.pogoprotos.data.PlayerData\x12\x0e\n\x06\x62\x61nned\x18\x03 \x01(\x08\x12\x0c\n\x04warn\x18\x04 \x01(\x08\x12\x13\n\x0bwas_created\x18\x05 \x01(\x08\x12!\n\x19warn_message_acknowledged\x18\x06 \x01(\x08\x12\x15\n\rwas_suspended\x18\x07 \x01(\x08\x12&\n\x1esuspended_message_acknowledged\x18\x08 \x01(\x08\x12\x16\n\x0ewarn_expire_ms\x18\t \x01(\x03\x62\x06proto3')
+  serialized_pb=_b('\n9pogoprotos/networking/responses/get_player_response.proto\x12\x1fpogoprotos.networking.responses\x1a!pogoprotos/data/player_data.proto\"\x9c\x02\n\x11GetPlayerResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.pogoprotos.data.PlayerData\x12\x0e\n\x06\x62\x61nned\x18\x03 \x01(\x08\x12\x0c\n\x04warn\x18\x04 \x01(\x08\x12\x13\n\x0bwas_created\x18\x05 \x01(\x08\x12!\n\x19warn_message_acknowledged\x18\x06 \x01(\x08\x12\x15\n\rwas_suspended\x18\x07 \x01(\x08\x12&\n\x1esuspended_message_acknowledged\x18\x08 \x01(\x08\x12\x16\n\x0ewarn_expire_ms\x18\t \x01(\x03\x12\x17\n\x0fuser_permission\x18\n \x03(\x05\x62\x06proto3')
   ,
   dependencies=[pogoprotos_dot_data_dot_player__data__pb2.DESCRIPTOR,])
 
@@ -97,6 +97,13 @@ _GETPLAYERRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='user_permission', full_name='pogoprotos.networking.responses.GetPlayerResponse.user_permission', index=9,
+      number=10, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -110,7 +117,7 @@ _GETPLAYERRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=130,
-  serialized_end=389,
+  serialized_end=414,
 )
 
 _GETPLAYERRESPONSE.fields_by_name['player_data'].message_type = pogoprotos_dot_data_dot_player__data__pb2._PLAYERDATA

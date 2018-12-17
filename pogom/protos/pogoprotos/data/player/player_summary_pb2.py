@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.player',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n+pogoprotos/data/player/player_summary.proto\x12\x16pogoprotos.data.player\"W\n\rPlayerSummary\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x13\n\x0bpublic_data\x18\x03 \x01(\x0c\x12\x0c\n\x04team\x18\x04 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n+pogoprotos/data/player/player_summary.proto\x12\x16pogoprotos.data.player\"k\n\rPlayerSummary\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x13\n\x0bpublic_data\x18\x03 \x01(\x0c\x12\x0c\n\x04team\x18\x04 \x01(\t\x12\x12\n\nfb_user_id\x18\x05 \x01(\tb\x06proto3')
 )
 
 
@@ -60,6 +60,13 @@ _PLAYERSUMMARY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='fb_user_id', full_name='pogoprotos.data.player.PlayerSummary.fb_user_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -73,7 +80,7 @@ _PLAYERSUMMARY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=71,
-  serialized_end=158,
+  serialized_end=178,
 )
 
 DESCRIPTOR.message_types_by_name['PlayerSummary'] = _PLAYERSUMMARY

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.requests',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n1pogoprotos/networking/requests/request_type.proto\x12\x1epogoprotos.networking.requests*\xbb\x15\n\x0bRequestType\x12\x10\n\x0cMETHOD_UNSET\x10\x00\x12\x0e\n\nGET_PLAYER\x10\x02\x12\x1a\n\x16GET_HOLOHOLO_INVENTORY\x10\x04\x12\x15\n\x11\x44OWNLOAD_SETTINGS\x10\x05\x12\x1b\n\x17\x44OWNLOAD_ITEM_TEMPLATES\x10\x06\x12\"\n\x1e\x44OWNLOAD_REMOTE_CONFIG_VERSION\x10\x07\x12\x1e\n\x1aREGISTER_BACKGROUND_DEVICE\x10\x08\x12\x12\n\x0eGET_PLAYER_DAY\x10\t\x12\x1a\n\x16\x41\x43KNOWLEDGE_PUNISHMENT\x10\n\x12\x0f\n\x0b\x46ORT_SEARCH\x10\x65\x12\r\n\tENCOUNTER\x10\x66\x12\x11\n\rCATCH_POKEMON\x10g\x12\x10\n\x0c\x46ORT_DETAILS\x10h\x12\x13\n\x0fGET_MAP_OBJECTS\x10j\x12\x17\n\x13\x46ORT_DEPLOY_POKEMON\x10n\x12\x17\n\x13\x46ORT_RECALL_POKEMON\x10o\x12\x13\n\x0fRELEASE_POKEMON\x10p\x12\x13\n\x0fUSE_ITEM_POTION\x10q\x12\x14\n\x10USE_ITEM_CAPTURE\x10r\x12\x11\n\rUSE_ITEM_FLEE\x10s\x12\x13\n\x0fUSE_ITEM_REVIVE\x10t\x12\x16\n\x12GET_PLAYER_PROFILE\x10y\x12\x12\n\x0e\x45VOLVE_POKEMON\x10}\x12\x14\n\x10GET_HATCHED_EGGS\x10~\x12\x1f\n\x1b\x45NCOUNTER_TUTORIAL_COMPLETE\x10\x7f\x12\x15\n\x10LEVEL_UP_REWARDS\x10\x80\x01\x12\x19\n\x14\x43HECK_AWARDED_BADGES\x10\x81\x01\x12\x1b\n\x16RECYCLE_INVENTORY_ITEM\x10\x89\x01\x12\x18\n\x13\x43OLLECT_DAILY_BONUS\x10\x8a\x01\x12\x16\n\x11USE_ITEM_XP_BOOST\x10\x8b\x01\x12\x1b\n\x16USE_ITEM_EGG_INCUBATOR\x10\x8c\x01\x12\x10\n\x0bUSE_INCENSE\x10\x8d\x01\x12\x18\n\x13GET_INCENSE_POKEMON\x10\x8e\x01\x12\x16\n\x11INCENSE_ENCOUNTER\x10\x8f\x01\x12\x16\n\x11\x41\x44\x44_FORT_MODIFIER\x10\x90\x01\x12\x13\n\x0e\x44ISK_ENCOUNTER\x10\x91\x01\x12\x14\n\x0fUPGRADE_POKEMON\x10\x93\x01\x12\x19\n\x14SET_FAVORITE_POKEMON\x10\x94\x01\x12\x15\n\x10NICKNAME_POKEMON\x10\x95\x01\x12\x10\n\x0b\x45QUIP_BADGE\x10\x96\x01\x12\x19\n\x14SET_CONTACT_SETTINGS\x10\x97\x01\x12\x16\n\x11SET_BUDDY_POKEMON\x10\x98\x01\x12\x15\n\x10GET_BUDDY_WALKED\x10\x99\x01\x12\x17\n\x12USE_ITEM_ENCOUNTER\x10\x9a\x01\x12\x0f\n\nGYM_DEPLOY\x10\x9b\x01\x12\x11\n\x0cGYM_GET_INFO\x10\x9c\x01\x12\x16\n\x11GYM_START_SESSION\x10\x9d\x01\x12\x16\n\x11GYM_BATTLE_ATTACK\x10\x9e\x01\x12\x0f\n\nJOIN_LOBBY\x10\x9f\x01\x12\x10\n\x0bLEAVE_LOBBY\x10\xa0\x01\x12\x19\n\x14SET_LOBBY_VISIBILITY\x10\xa1\x01\x12\x16\n\x11SET_LOBBY_POKEMON\x10\xa2\x01\x12\x15\n\x10GET_RAID_DETAILS\x10\xa3\x01\x12\x15\n\x10GYM_FEED_POKEMON\x10\xa4\x01\x12\x16\n\x11START_RAID_BATTLE\x10\xa5\x01\x12\x10\n\x0b\x41TTACK_RAID\x10\xa6\x01\x12\x13\n\x0e\x41WARD_POKECOIN\x10\xa7\x01\x12\x1c\n\x17USE_ITEM_STARDUST_BOOST\x10\xa8\x01\x12\x15\n\x10GET_ASSET_DIGEST\x10\xac\x02\x12\x16\n\x11GET_DOWNLOAD_URLS\x10\xad\x02\x12\x13\n\x0e\x43LAIM_CODENAME\x10\x93\x03\x12\x0f\n\nSET_AVATAR\x10\x94\x03\x12\x14\n\x0fSET_PLAYER_TEAM\x10\x95\x03\x12\x1b\n\x16MARK_TUTORIAL_COMPLETE\x10\x96\x03\x12\x1f\n\x1aUPDATE_PERFORMANCE_METRICS\x10\x97\x03\x12\x14\n\x0f\x43HECK_CHALLENGE\x10\xd8\x04\x12\x15\n\x10VERIFY_CHALLENGE\x10\xd9\x04\x12\t\n\x04\x45\x43HO\x10\x9a\x05\x12\x17\n\x12SFIDA_REGISTRATION\x10\xa0\x06\x12\x15\n\x10SFIDA_ACTION_LOG\x10\xa1\x06\x12\x18\n\x13SFIDA_CERTIFICATION\x10\xa2\x06\x12\x11\n\x0cSFIDA_UPDATE\x10\xa3\x06\x12\x11\n\x0cSFIDA_ACTION\x10\xa4\x06\x12\x11\n\x0cSFIDA_DOWSER\x10\xa5\x06\x12\x12\n\rSFIDA_CAPTURE\x10\xa6\x06\x12\x1f\n\x1aLIST_AVATAR_CUSTOMIZATIONS\x10\xa7\x06\x12\x1e\n\x19SET_AVATAR_ITEM_AS_VIEWED\x10\xa8\x06\x12\x0e\n\tGET_INBOX\x10\xa9\x06\x12\x14\n\x0fLIST_GYM_BADGES\x10\xab\x06\x12\x1a\n\x15GET_GYM_BADGE_DETAILS\x10\xac\x06\x12\x19\n\x14USE_ITEM_MOVE_REROLL\x10\xad\x06\x12\x18\n\x13USE_ITEM_RARE_CANDY\x10\xae\x06\x12\x1b\n\x16\x41WARD_FREE_RAID_TICKET\x10\xaf\x06\x12\x13\n\x0e\x46\x45TCH_ALL_NEWS\x10\xb0\x06\x12\x1b\n\x16MARK_READ_NEWS_ARTICLE\x10\xb1\x06\x12\x1c\n\x17GET_PLAYER_DISPLAY_INFO\x10\xb2\x06\x12\x1d\n\x18\x42\x45LUGA_TRANSACTION_START\x10\xb3\x06\x12 \n\x1b\x42\x45LUGA_TRANSACTION_COMPLETE\x10\xb4\x06\x12\x13\n\x0eGET_NEW_QUESTS\x10\x84\x07\x12\x16\n\x11GET_QUEST_DETAILS\x10\x85\x07\x12\x13\n\x0e\x43OMPLETE_QUEST\x10\x86\x07\x12\x11\n\x0cREMOVE_QUEST\x10\x87\x07\x12\x14\n\x0fQUEST_ENCOUNTER\x10\x88\x07\x12\x1e\n\x19\x43OMPLETE_QUEST_STAMP_CARD\x10\x89\x07\x12\x0e\n\tSEND_GIFT\x10\xb6\x07\x12\x0e\n\tOPEN_GIFT\x10\xb7\x07\x12\x11\n\x0cGIFT_DETAILS\x10\xb8\x07\x12\x10\n\x0b\x44\x45LETE_GIFT\x10\xb9\x07\x12\x19\n\x14SAVE_PLAYER_SNAPSHOT\x10\xba\x07\x12%\n GET_FRIENDSHIP_MILESTONE_REWARDS\x10\xbb\x07\x12\x14\n\x0f\x43HECK_SEND_GIFT\x10\xbc\x07\x12\x18\n\x13SET_FRIEND_NICKNAME\x10\xbd\x07\x12\x1f\n\x1a\x44\x45LETE_GIFT_FROM_INVENTORY\x10\xbe\x07\x12 \n\x1bSAVE_SOCIAL_PLAYER_SETTINGS\x10\xbf\x07\x12\x17\n\x12SHARE_EX_RAID_PASS\x10\xc0\x07\x12\x1d\n\x18\x43HECK_SHARE_EX_RAID_PASS\x10\xc1\x07\x12 \n\x1b\x44\x45\x43LINE_SHARED_EX_RAID_PASS\x10\xc2\x07\x12\x11\n\x0cOPEN_TRADING\x10\xca\x07\x12\x13\n\x0eUPDATE_TRADING\x10\xcb\x07\x12\x14\n\x0f\x43ONFIRM_TRADING\x10\xcc\x07\x12\x13\n\x0e\x43\x41NCEL_TRADING\x10\xcd\x07\x12\x10\n\x0bGET_TRADING\x10\xce\x07\x12\x18\n\x13GET_FITNESS_REWARDS\x10\xd4\x07\x12\x0f\n\nSEND_PROBE\x10\xfc\x07\x12\x0f\n\nPROBE_DATA\x10\xfd\x07\x12\x10\n\x0b\x43OMBAT_DATA\x10\xfe\x07\x62\x06proto3')
+  serialized_pb=_b('\n1pogoprotos/networking/requests/request_type.proto\x12\x1epogoprotos.networking.requests*\xb4\x1a\n\x0bRequestType\x12\x10\n\x0cMETHOD_UNSET\x10\x00\x12\x0e\n\nGET_PLAYER\x10\x02\x12\x1a\n\x16GET_HOLOHOLO_INVENTORY\x10\x04\x12\x15\n\x11\x44OWNLOAD_SETTINGS\x10\x05\x12\x1b\n\x17\x44OWNLOAD_ITEM_TEMPLATES\x10\x06\x12\"\n\x1e\x44OWNLOAD_REMOTE_CONFIG_VERSION\x10\x07\x12\x1e\n\x1aREGISTER_BACKGROUND_DEVICE\x10\x08\x12\x12\n\x0eGET_PLAYER_DAY\x10\t\x12\x1a\n\x16\x41\x43KNOWLEDGE_PUNISHMENT\x10\n\x12\x0f\n\x0b\x46ORT_SEARCH\x10\x65\x12\r\n\tENCOUNTER\x10\x66\x12\x11\n\rCATCH_POKEMON\x10g\x12\x10\n\x0c\x46ORT_DETAILS\x10h\x12\x13\n\x0fGET_MAP_OBJECTS\x10j\x12\x17\n\x13\x46ORT_DEPLOY_POKEMON\x10n\x12\x17\n\x13\x46ORT_RECALL_POKEMON\x10o\x12\x13\n\x0fRELEASE_POKEMON\x10p\x12\x13\n\x0fUSE_ITEM_POTION\x10q\x12\x14\n\x10USE_ITEM_CAPTURE\x10r\x12\x11\n\rUSE_ITEM_FLEE\x10s\x12\x13\n\x0fUSE_ITEM_REVIVE\x10t\x12\x16\n\x12GET_PLAYER_PROFILE\x10y\x12\x12\n\x0e\x45VOLVE_POKEMON\x10}\x12\x14\n\x10GET_HATCHED_EGGS\x10~\x12\x1f\n\x1b\x45NCOUNTER_TUTORIAL_COMPLETE\x10\x7f\x12\x15\n\x10LEVEL_UP_REWARDS\x10\x80\x01\x12\x19\n\x14\x43HECK_AWARDED_BADGES\x10\x81\x01\x12\x1b\n\x16RECYCLE_INVENTORY_ITEM\x10\x89\x01\x12\x18\n\x13\x43OLLECT_DAILY_BONUS\x10\x8a\x01\x12\x16\n\x11USE_ITEM_XP_BOOST\x10\x8b\x01\x12\x1b\n\x16USE_ITEM_EGG_INCUBATOR\x10\x8c\x01\x12\x10\n\x0bUSE_INCENSE\x10\x8d\x01\x12\x18\n\x13GET_INCENSE_POKEMON\x10\x8e\x01\x12\x16\n\x11INCENSE_ENCOUNTER\x10\x8f\x01\x12\x16\n\x11\x41\x44\x44_FORT_MODIFIER\x10\x90\x01\x12\x13\n\x0e\x44ISK_ENCOUNTER\x10\x91\x01\x12\x14\n\x0fUPGRADE_POKEMON\x10\x93\x01\x12\x19\n\x14SET_FAVORITE_POKEMON\x10\x94\x01\x12\x15\n\x10NICKNAME_POKEMON\x10\x95\x01\x12\x10\n\x0b\x45QUIP_BADGE\x10\x96\x01\x12\x19\n\x14SET_CONTACT_SETTINGS\x10\x97\x01\x12\x16\n\x11SET_BUDDY_POKEMON\x10\x98\x01\x12\x15\n\x10GET_BUDDY_WALKED\x10\x99\x01\x12\x17\n\x12USE_ITEM_ENCOUNTER\x10\x9a\x01\x12\x0f\n\nGYM_DEPLOY\x10\x9b\x01\x12\x11\n\x0cGYM_GET_INFO\x10\x9c\x01\x12\x16\n\x11GYM_START_SESSION\x10\x9d\x01\x12\x16\n\x11GYM_BATTLE_ATTACK\x10\x9e\x01\x12\x0f\n\nJOIN_LOBBY\x10\x9f\x01\x12\x10\n\x0bLEAVE_LOBBY\x10\xa0\x01\x12\x19\n\x14SET_LOBBY_VISIBILITY\x10\xa1\x01\x12\x16\n\x11SET_LOBBY_POKEMON\x10\xa2\x01\x12\x15\n\x10GET_RAID_DETAILS\x10\xa3\x01\x12\x15\n\x10GYM_FEED_POKEMON\x10\xa4\x01\x12\x16\n\x11START_RAID_BATTLE\x10\xa5\x01\x12\x10\n\x0b\x41TTACK_RAID\x10\xa6\x01\x12\x13\n\x0e\x41WARD_POKECOIN\x10\xa7\x01\x12\x1c\n\x17USE_ITEM_STARDUST_BOOST\x10\xa8\x01\x12\x15\n\x10GET_ASSET_DIGEST\x10\xac\x02\x12\x16\n\x11GET_DOWNLOAD_URLS\x10\xad\x02\x12\x13\n\x0e\x43LAIM_CODENAME\x10\x93\x03\x12\x0f\n\nSET_AVATAR\x10\x94\x03\x12\x14\n\x0fSET_PLAYER_TEAM\x10\x95\x03\x12\x1b\n\x16MARK_TUTORIAL_COMPLETE\x10\x96\x03\x12\x1f\n\x1aUPDATE_PERFORMANCE_METRICS\x10\x97\x03\x12\x14\n\x0f\x43HECK_CHALLENGE\x10\xd8\x04\x12\x15\n\x10VERIFY_CHALLENGE\x10\xd9\x04\x12\t\n\x04\x45\x43HO\x10\x9a\x05\x12\x17\n\x12SFIDA_REGISTRATION\x10\xa0\x06\x12\x15\n\x10SFIDA_ACTION_LOG\x10\xa1\x06\x12\x18\n\x13SFIDA_CERTIFICATION\x10\xa2\x06\x12\x11\n\x0cSFIDA_UPDATE\x10\xa3\x06\x12\x11\n\x0cSFIDA_ACTION\x10\xa4\x06\x12\x11\n\x0cSFIDA_DOWSER\x10\xa5\x06\x12\x12\n\rSFIDA_CAPTURE\x10\xa6\x06\x12\x1f\n\x1aLIST_AVATAR_CUSTOMIZATIONS\x10\xa7\x06\x12\x1e\n\x19SET_AVATAR_ITEM_AS_VIEWED\x10\xa8\x06\x12\x0e\n\tGET_INBOX\x10\xa9\x06\x12\x14\n\x0fLIST_GYM_BADGES\x10\xab\x06\x12\x1a\n\x15GET_GYM_BADGE_DETAILS\x10\xac\x06\x12\x19\n\x14USE_ITEM_MOVE_REROLL\x10\xad\x06\x12\x18\n\x13USE_ITEM_RARE_CANDY\x10\xae\x06\x12\x1b\n\x16\x41WARD_FREE_RAID_TICKET\x10\xaf\x06\x12\x13\n\x0e\x46\x45TCH_ALL_NEWS\x10\xb0\x06\x12\x1b\n\x16MARK_READ_NEWS_ARTICLE\x10\xb1\x06\x12\x1c\n\x17GET_PLAYER_DISPLAY_INFO\x10\xb2\x06\x12\x1d\n\x18\x42\x45LUGA_TRANSACTION_START\x10\xb3\x06\x12 \n\x1b\x42\x45LUGA_TRANSACTION_COMPLETE\x10\xb4\x06\x12\x13\n\x0eGET_NEW_QUESTS\x10\x84\x07\x12\x16\n\x11GET_QUEST_DETAILS\x10\x85\x07\x12\x13\n\x0e\x43OMPLETE_QUEST\x10\x86\x07\x12\x11\n\x0cREMOVE_QUEST\x10\x87\x07\x12\x14\n\x0fQUEST_ENCOUNTER\x10\x88\x07\x12\x1e\n\x19\x43OMPLETE_QUEST_STAMP_CARD\x10\x89\x07\x12\x0e\n\tSEND_GIFT\x10\xb6\x07\x12\x0e\n\tOPEN_GIFT\x10\xb7\x07\x12\x11\n\x0cGIFT_DETAILS\x10\xb8\x07\x12\x10\n\x0b\x44\x45LETE_GIFT\x10\xb9\x07\x12\x19\n\x14SAVE_PLAYER_SNAPSHOT\x10\xba\x07\x12%\n GET_FRIENDSHIP_MILESTONE_REWARDS\x10\xbb\x07\x12\x14\n\x0f\x43HECK_SEND_GIFT\x10\xbc\x07\x12\x18\n\x13SET_FRIEND_NICKNAME\x10\xbd\x07\x12\x1f\n\x1a\x44\x45LETE_GIFT_FROM_INVENTORY\x10\xbe\x07\x12 \n\x1bSAVE_SOCIAL_PLAYER_SETTINGS\x10\xbf\x07\x12\x17\n\x12SHARE_EX_RAID_PASS\x10\xc0\x07\x12\x1d\n\x18\x43HECK_SHARE_EX_RAID_PASS\x10\xc1\x07\x12 \n\x1b\x44\x45\x43LINE_SHARED_EX_RAID_PASS\x10\xc2\x07\x12\x11\n\x0cOPEN_TRADING\x10\xca\x07\x12\x13\n\x0eUPDATE_TRADING\x10\xcb\x07\x12\x14\n\x0f\x43ONFIRM_TRADING\x10\xcc\x07\x12\x13\n\x0e\x43\x41NCEL_TRADING\x10\xcd\x07\x12\x10\n\x0bGET_TRADING\x10\xce\x07\x12\x18\n\x13GET_FITNESS_REWARDS\x10\xd4\x07\x12\x1e\n\x19GET_COMBAT_PLAYER_PROFILE\x10\xde\x07\x12!\n\x1cGENERATE_COMBAT_CHALLENGE_ID\x10\xdf\x07\x12\x1c\n\x17\x43REATE_COMBAT_CHALLENGE\x10\xe0\x07\x12\x1a\n\x15OPEN_COMBAT_CHALLENGE\x10\xe1\x07\x12\x19\n\x14GET_COMBAT_CHALLENGE\x10\xe2\x07\x12\x1c\n\x17\x41\x43\x43\x45PT_COMBAT_CHALLENGE\x10\xe3\x07\x12\x1d\n\x18\x44\x45\x43LINE_COMBAT_CHALLENGE\x10\xe4\x07\x12\x1c\n\x17\x43\x41NCEL_COMBAT_CHALLENGE\x10\xe5\x07\x12%\n SUBMIT_COMBAT_CHALLENGE_POKEMONS\x10\xe6\x07\x12#\n\x1eSAVE_COMBAT_PLAYER_PREFERENCES\x10\xe7\x07\x12\x18\n\x13OPEN_COMBAT_SESSION\x10\xe8\x07\x12\x12\n\rUPDATE_COMBAT\x10\xe9\x07\x12\x10\n\x0bQUIT_COMBAT\x10\xea\x07\x12\x17\n\x12GET_COMBAT_RESULTS\x10\xeb\x07\x12\x18\n\x13UNLOCK_SPECIAL_MOVE\x10\xec\x07\x12\x1b\n\x16GET_NPC_COMBAT_REWARDS\x10\xed\x07\x12\x1a\n\x15\x43OMBAT_FRIEND_REQUEST\x10\xee\x07\x12\x1c\n\x17OPEN_NPC_COMBAT_SESSION\x10\xef\x07\x12\x1a\n\x15START_TUTORIAL_ACTION\x10\xf0\x07\x12\x1c\n\x17GET_TUTORIAL_EGG_ACTION\x10\xf1\x07\x12\x0f\n\nSEND_PROBE\x10\xfc\x07\x12\x0f\n\nPROBE_DATA\x10\xfd\x07\x12\x10\n\x0b\x43OMBAT_DATA\x10\xfe\x07\x12\x1a\n\x15\x43OMBAT_CHALLENGE_DATA\x10\xff\x07\x12\x18\n\x13GET_SIGNED_GMAP_URL\x10\xd1\x08\x62\x06proto3')
 )
 
 _REQUESTTYPE = _descriptor.EnumDescriptor(
@@ -482,22 +482,110 @@ _REQUESTTYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_PROBE', index=113, number=1020,
+      name='GET_COMBAT_PLAYER_PROFILE', index=113, number=990,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PROBE_DATA', index=114, number=1021,
+      name='GENERATE_COMBAT_CHALLENGE_ID', index=114, number=991,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='COMBAT_DATA', index=115, number=1022,
+      name='CREATE_COMBAT_CHALLENGE', index=115, number=992,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='OPEN_COMBAT_CHALLENGE', index=116, number=993,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GET_COMBAT_CHALLENGE', index=117, number=994,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACCEPT_COMBAT_CHALLENGE', index=118, number=995,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DECLINE_COMBAT_CHALLENGE', index=119, number=996,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CANCEL_COMBAT_CHALLENGE', index=120, number=997,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SUBMIT_COMBAT_CHALLENGE_POKEMONS', index=121, number=998,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SAVE_COMBAT_PLAYER_PREFERENCES', index=122, number=999,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='OPEN_COMBAT_SESSION', index=123, number=1000,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UPDATE_COMBAT', index=124, number=1001,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='QUIT_COMBAT', index=125, number=1002,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GET_COMBAT_RESULTS', index=126, number=1003,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UNLOCK_SPECIAL_MOVE', index=127, number=1004,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GET_NPC_COMBAT_REWARDS', index=128, number=1005,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='COMBAT_FRIEND_REQUEST', index=129, number=1006,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='OPEN_NPC_COMBAT_SESSION', index=130, number=1007,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='START_TUTORIAL_ACTION', index=131, number=1008,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GET_TUTORIAL_EGG_ACTION', index=132, number=1009,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SEND_PROBE', index=133, number=1020,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PROBE_DATA', index=134, number=1021,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='COMBAT_DATA', index=135, number=1022,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='COMBAT_CHALLENGE_DATA', index=136, number=1023,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GET_SIGNED_GMAP_URL', index=137, number=1105,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=86,
-  serialized_end=2833,
+  serialized_end=3466,
 )
 _sym_db.RegisterEnumDescriptor(_REQUESTTYPE)
 
@@ -615,9 +703,31 @@ CONFIRM_TRADING = 972
 CANCEL_TRADING = 973
 GET_TRADING = 974
 GET_FITNESS_REWARDS = 980
+GET_COMBAT_PLAYER_PROFILE = 990
+GENERATE_COMBAT_CHALLENGE_ID = 991
+CREATE_COMBAT_CHALLENGE = 992
+OPEN_COMBAT_CHALLENGE = 993
+GET_COMBAT_CHALLENGE = 994
+ACCEPT_COMBAT_CHALLENGE = 995
+DECLINE_COMBAT_CHALLENGE = 996
+CANCEL_COMBAT_CHALLENGE = 997
+SUBMIT_COMBAT_CHALLENGE_POKEMONS = 998
+SAVE_COMBAT_PLAYER_PREFERENCES = 999
+OPEN_COMBAT_SESSION = 1000
+UPDATE_COMBAT = 1001
+QUIT_COMBAT = 1002
+GET_COMBAT_RESULTS = 1003
+UNLOCK_SPECIAL_MOVE = 1004
+GET_NPC_COMBAT_REWARDS = 1005
+COMBAT_FRIEND_REQUEST = 1006
+OPEN_NPC_COMBAT_SESSION = 1007
+START_TUTORIAL_ACTION = 1008
+GET_TUTORIAL_EGG_ACTION = 1009
 SEND_PROBE = 1020
 PROBE_DATA = 1021
 COMBAT_DATA = 1022
+COMBAT_CHALLENGE_DATA = 1023
+GET_SIGNED_GMAP_URL = 1105
 
 
 DESCRIPTOR.enum_types_by_name['RequestType'] = _REQUESTTYPE

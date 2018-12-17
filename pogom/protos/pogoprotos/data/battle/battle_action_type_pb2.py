@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.battle',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n/pogoprotos/data/battle/battle_action_type.proto\x12\x16pogoprotos.data.battle*\xfc\x01\n\x10\x42\x61ttleActionType\x12\x10\n\x0c\x41\x43TION_UNSET\x10\x00\x12\x11\n\rACTION_ATTACK\x10\x01\x12\x10\n\x0c\x41\x43TION_DODGE\x10\x02\x12\x19\n\x15\x41\x43TION_SPECIAL_ATTACK\x10\x03\x12\x17\n\x13\x41\x43TION_SWAP_POKEMON\x10\x04\x12\x10\n\x0c\x41\x43TION_FAINT\x10\x05\x12\x16\n\x12\x41\x43TION_PLAYER_JOIN\x10\x06\x12\x16\n\x12\x41\x43TION_PLAYER_QUIT\x10\x07\x12\x12\n\x0e\x41\x43TION_VICTORY\x10\x08\x12\x11\n\rACTION_DEFEAT\x10\t\x12\x14\n\x10\x41\x43TION_TIMED_OUT\x10\nb\x06proto3')
+  serialized_pb=_b('\n/pogoprotos/data/battle/battle_action_type.proto\x12\x16pogoprotos.data.battle*\x99\x02\n\x10\x42\x61ttleActionType\x12\x10\n\x0c\x41\x43TION_UNSET\x10\x00\x12\x11\n\rACTION_ATTACK\x10\x01\x12\x10\n\x0c\x41\x43TION_DODGE\x10\x02\x12\x19\n\x15\x41\x43TION_SPECIAL_ATTACK\x10\x03\x12\x17\n\x13\x41\x43TION_SWAP_POKEMON\x10\x04\x12\x10\n\x0c\x41\x43TION_FAINT\x10\x05\x12\x16\n\x12\x41\x43TION_PLAYER_JOIN\x10\x06\x12\x16\n\x12\x41\x43TION_PLAYER_QUIT\x10\x07\x12\x12\n\x0e\x41\x43TION_VICTORY\x10\x08\x12\x11\n\rACTION_DEFEAT\x10\t\x12\x14\n\x10\x41\x43TION_TIMED_OUT\x10\n\x12\x1b\n\x17\x41\x43TION_SPECIAL_ATTACK_2\x10\x0b\x62\x06proto3')
 )
 
 _BATTLEACTIONTYPE = _descriptor.EnumDescriptor(
@@ -73,11 +73,15 @@ _BATTLEACTIONTYPE = _descriptor.EnumDescriptor(
       name='ACTION_TIMED_OUT', index=10, number=10,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACTION_SPECIAL_ATTACK_2', index=11, number=11,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=76,
-  serialized_end=328,
+  serialized_end=357,
 )
 _sym_db.RegisterEnumDescriptor(_BATTLEACTIONTYPE)
 
@@ -93,6 +97,7 @@ ACTION_PLAYER_QUIT = 7
 ACTION_VICTORY = 8
 ACTION_DEFEAT = 9
 ACTION_TIMED_OUT = 10
+ACTION_SPECIAL_ATTACK_2 = 11
 
 
 DESCRIPTOR.enum_types_by_name['BattleActionType'] = _BATTLEACTIONTYPE

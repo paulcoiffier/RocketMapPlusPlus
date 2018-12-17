@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.responses.social',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nFpogoprotos/networking/responses/social/get_friends_list_response.proto\x12&pogoprotos.networking.responses.social\"\x83\x03\n\x16GetFriendsListResponse\x12U\n\x06result\x18\x01 \x01(\x0e\x32\x45.pogoprotos.networking.responses.social.GetFriendsListResponse.Result\x12U\n\x06\x66riend\x18\x02 \x03(\x0b\x32\x45.pogoprotos.networking.responses.social.GetFriendsListResponse.Friend\x1a\x85\x01\n\x06\x46riend\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x0c\n\x04team\x18\x03 \x01(\t\x12\r\n\x05score\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61ta_with_me\x18\x05 \x01(\x0c\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x12\n\ncreated_ms\x18\x07 \x01(\x03\"3\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rERROR_UNKNOWN\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\nFpogoprotos/networking/responses/social/get_friends_list_response.proto\x12&pogoprotos.networking.responses.social\"\xb7\x03\n\x16GetFriendsListResponse\x12U\n\x06result\x18\x01 \x01(\x0e\x32\x45.pogoprotos.networking.responses.social.GetFriendsListResponse.Result\x12U\n\x06\x66riend\x18\x02 \x03(\x0b\x32\x45.pogoprotos.networking.responses.social.GetFriendsListResponse.Friend\x1a\xb9\x01\n\x06\x46riend\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x0c\n\x04team\x18\x03 \x01(\t\x12\r\n\x05score\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61ta_with_me\x18\x05 \x01(\x0c\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x12\n\ncreated_ms\x18\x07 \x01(\x03\x12\x12\n\nfb_user_id\x18\x08 \x01(\t\x12\x1e\n\x16is_facebook_friendship\x18\t \x01(\x08\"3\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rERROR_UNKNOWN\x10\x02\x62\x06proto3')
 )
 
 
@@ -45,8 +45,8 @@ _GETFRIENDSLISTRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=451,
-  serialized_end=502,
+  serialized_start=503,
+  serialized_end=554,
 )
 _sym_db.RegisterEnumDescriptor(_GETFRIENDSLISTRESPONSE_RESULT)
 
@@ -107,6 +107,20 @@ _GETFRIENDSLISTRESPONSE_FRIEND = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='fb_user_id', full_name='pogoprotos.networking.responses.social.GetFriendsListResponse.Friend.fb_user_id', index=7,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='is_facebook_friendship', full_name='pogoprotos.networking.responses.social.GetFriendsListResponse.Friend.is_facebook_friendship', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -120,7 +134,7 @@ _GETFRIENDSLISTRESPONSE_FRIEND = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=316,
-  serialized_end=449,
+  serialized_end=501,
 )
 
 _GETFRIENDSLISTRESPONSE = _descriptor.Descriptor(
@@ -158,7 +172,7 @@ _GETFRIENDSLISTRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=115,
-  serialized_end=502,
+  serialized_end=554,
 )
 
 _GETFRIENDSLISTRESPONSE_FRIEND.containing_type = _GETFRIENDSLISTRESPONSE

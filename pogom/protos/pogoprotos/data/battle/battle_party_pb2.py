@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.battle',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n)pogoprotos/data/battle/battle_party.proto\x12\x16pogoprotos.data.battle\"=\n\x0b\x42\x61ttleParty\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bteam_number\x18\x02 \x01(\x05\x12\x0b\n\x03ids\x18\x03 \x03(\x04\x62\x06proto3')
+  serialized_pb=_b('\n)pogoprotos/data/battle/battle_party.proto\x12\x16pogoprotos.data.battle\"W\n\x0b\x42\x61ttleParty\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bteam_number\x18\x02 \x01(\x05\x12\x0b\n\x03ids\x18\x03 \x03(\x04\x12\x18\n\x10\x63ombat_league_id\x18\x04 \x01(\tb\x06proto3')
 )
 
 
@@ -53,6 +53,13 @@ _BATTLEPARTY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_league_id', full_name='pogoprotos.data.battle.BattleParty.combat_league_id', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -66,7 +73,7 @@ _BATTLEPARTY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=69,
-  serialized_end=130,
+  serialized_end=156,
 )
 
 DESCRIPTOR.message_types_by_name['BattleParty'] = _BATTLEPARTY

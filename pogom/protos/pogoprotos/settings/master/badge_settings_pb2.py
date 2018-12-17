@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.settings.master',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n/pogoprotos/settings/master/badge_settings.proto\x12\x1apogoprotos.settings.master\x1a!pogoprotos/enums/badge_type.proto\x1a\x30pogoprotos/data/badge/badge_capture_reward.proto\x1a\x35pogoprotos/settings/master/event_badge_settings.proto\"\x8b\x02\n\rBadgeSettings\x12/\n\nbadge_type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\x12\x41\n\x0e\x63\x61pture_reward\x18\x04 \x03(\x0b\x32).pogoprotos.data.badge.BadgeCaptureReward\x12\x13\n\x0b\x65vent_badge\x18\x05 \x01(\x08\x12L\n\x14\x65vent_badge_settings\x18\x06 \x01(\x0b\x32..pogoprotos.settings.master.EventBadgeSettingsb\x06proto3')
+  serialized_pb=_b('\n/pogoprotos/settings/master/badge_settings.proto\x12\x1apogoprotos.settings.master\x1a!pogoprotos/enums/badge_type.proto\x1a\x30pogoprotos/data/badge/badge_capture_reward.proto\x1a\x35pogoprotos/settings/master/event_badge_settings.proto\"\xae\x02\n\rBadgeSettings\x12/\n\nbadge_type\x18\x01 \x01(\x0e\x32\x1b.pogoprotos.enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\x12\x41\n\x0e\x63\x61pture_reward\x18\x04 \x03(\x0b\x32).pogoprotos.data.badge.BadgeCaptureReward\x12\x13\n\x0b\x65vent_badge\x18\x05 \x01(\x08\x12L\n\x14\x65vent_badge_settings\x18\x06 \x01(\x0b\x32..pogoprotos.settings.master.EventBadgeSettings\x12!\n\x19\x63ombat_league_template_id\x18\x07 \x01(\tb\x06proto3')
   ,
   dependencies=[pogoprotos_dot_enums_dot_badge__type__pb2.DESCRIPTOR,pogoprotos_dot_data_dot_badge_dot_badge__capture__reward__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_event__badge__settings__pb2.DESCRIPTOR,])
 
@@ -78,6 +78,13 @@ _BADGESETTINGS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_league_template_id', full_name='pogoprotos.settings.master.BadgeSettings.combat_league_template_id', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -91,7 +98,7 @@ _BADGESETTINGS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=220,
-  serialized_end=487,
+  serialized_end=522,
 )
 
 _BADGESETTINGS.fields_by_name['badge_type'].enum_type = pogoprotos_dot_enums_dot_badge__type__pb2._BADGETYPE

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.friends',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n$pogoprotos/data/friends/friend.proto\x12\x17pogoprotos.data.friends\"\x85\x01\n\x06\x46riend\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x0c\n\x04team\x18\x03 \x01(\t\x12\r\n\x05score\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61ta_with_me\x18\x05 \x01(\x0c\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x12\n\ncreated_ms\x18\x07 \x01(\x03\x62\x06proto3')
+  serialized_pb=_b('\n$pogoprotos/data/friends/friend.proto\x12\x17pogoprotos.data.friends\"\xb9\x01\n\x06\x46riend\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x10\n\x08\x63odename\x18\x02 \x01(\t\x12\x0c\n\x04team\x18\x03 \x01(\t\x12\r\n\x05score\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61ta_with_me\x18\x05 \x01(\x0c\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x12\n\ncreated_ms\x18\x07 \x01(\x03\x12\x12\n\nfb_user_id\x18\x08 \x01(\t\x12\x1e\n\x16is_facebook_friendship\x18\t \x01(\x08\x62\x06proto3')
 )
 
 
@@ -81,6 +81,20 @@ _FRIEND = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='fb_user_id', full_name='pogoprotos.data.friends.Friend.fb_user_id', index=7,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='is_facebook_friendship', full_name='pogoprotos.data.friends.Friend.is_facebook_friendship', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -94,7 +108,7 @@ _FRIEND = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=66,
-  serialized_end=199,
+  serialized_end=251,
 )
 
 DESCRIPTOR.message_types_by_name['Friend'] = _FRIEND

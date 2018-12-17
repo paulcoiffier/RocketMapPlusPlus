@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.enums',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n%pogoprotos/enums/tutorial_state.proto\x12\x10pogoprotos.enums*\x8f\x04\n\rTutorialState\x12\x10\n\x0cLEGAL_SCREEN\x10\x00\x12\x14\n\x10\x41VATAR_SELECTION\x10\x01\x12\x14\n\x10\x41\x43\x43OUNT_CREATION\x10\x02\x12\x13\n\x0fPOKEMON_CAPTURE\x10\x03\x12\x12\n\x0eNAME_SELECTION\x10\x04\x12\x11\n\rPOKEMON_BERRY\x10\x05\x12\x1b\n\x17USE_ITEM_TUTORIAL_STATE\x10\x06\x12\"\n\x1e\x46IRST_TIME_EXPERIENCE_COMPLETE\x10\x07\x12\x15\n\x11POKESTOP_TUTORIAL\x10\x08\x12\x10\n\x0cGYM_TUTORIAL\x10\t\x12\x1c\n\x18\x43HALLENGE_QUEST_TUTORIAL\x10\n\x12\x1f\n\x1bPRIVACY_POLICY_CONFIRMATION\x10\x0b\x12\x14\n\x10TRADING_TUTORIAL\x10\x0c\x12\x1b\n\x17POI_SUBMISSION_TUTORIAL\x10\r\x12\x15\n\x11V1_START_TUTORIAL\x10\x0e\x12\x15\n\x11V2_START_TUTORIAL\x10\x0f\x12\x18\n\x14V2_CUSTOMIZED_AVATAR\x10\x10\x12\x15\n\x11V2_CAUGHT_STARTER\x10\x11\x12 \n\x1cV2_FINISHED_TUTORIAL_CATCHES\x10\x12\x12\x15\n\x11V2_NAME_SELECTION\x10\x13\x12\x10\n\x0cV2_EGG_GIVEN\x10\x14\x62\x06proto3')
+  serialized_pb=_b('\n%pogoprotos/enums/tutorial_state.proto\x12\x10pogoprotos.enums*\xcc\x04\n\rTutorialState\x12\x10\n\x0cLEGAL_SCREEN\x10\x00\x12\x14\n\x10\x41VATAR_SELECTION\x10\x01\x12\x14\n\x10\x41\x43\x43OUNT_CREATION\x10\x02\x12\x13\n\x0fPOKEMON_CAPTURE\x10\x03\x12\x12\n\x0eNAME_SELECTION\x10\x04\x12\x11\n\rPOKEMON_BERRY\x10\x05\x12\x1b\n\x17USE_ITEM_TUTORIAL_STATE\x10\x06\x12\"\n\x1e\x46IRST_TIME_EXPERIENCE_COMPLETE\x10\x07\x12\x15\n\x11POKESTOP_TUTORIAL\x10\x08\x12\x10\n\x0cGYM_TUTORIAL\x10\t\x12\x1c\n\x18\x43HALLENGE_QUEST_TUTORIAL\x10\n\x12\x1f\n\x1bPRIVACY_POLICY_CONFIRMATION\x10\x0b\x12\x14\n\x10TRADING_TUTORIAL\x10\x0c\x12\x1b\n\x17POI_SUBMISSION_TUTORIAL\x10\r\x12\x15\n\x11V1_START_TUTORIAL\x10\x0e\x12\x15\n\x11V2_START_TUTORIAL\x10\x0f\x12\x18\n\x14V2_CUSTOMIZED_AVATAR\x10\x10\x12\x18\n\x14V2_CAUGHT_FIRST_WILD\x10\x11\x12 \n\x1cV2_FINISHED_TUTORIAL_CATCHES\x10\x12\x12\x15\n\x11V2_NAME_SELECTION\x10\x13\x12\x10\n\x0cV2_EGG_GIVEN\x10\x14\x12\x19\n\x15V2_START_EGG_TUTORIAL\x10\x15\x12\x1d\n\x19V2_COMPLETED_EGG_TUTORIAL\x10\x16\x62\x06proto3')
 )
 
 _TUTORIALSTATE = _descriptor.EnumDescriptor(
@@ -98,7 +98,7 @@ _TUTORIALSTATE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='V2_CAUGHT_STARTER', index=17, number=17,
+      name='V2_CAUGHT_FIRST_WILD', index=17, number=17,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -113,11 +113,19 @@ _TUTORIALSTATE = _descriptor.EnumDescriptor(
       name='V2_EGG_GIVEN', index=20, number=20,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='V2_START_EGG_TUTORIAL', index=21, number=21,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='V2_COMPLETED_EGG_TUTORIAL', index=22, number=22,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=60,
-  serialized_end=587,
+  serialized_end=648,
 )
 _sym_db.RegisterEnumDescriptor(_TUTORIALSTATE)
 
@@ -139,10 +147,12 @@ POI_SUBMISSION_TUTORIAL = 13
 V1_START_TUTORIAL = 14
 V2_START_TUTORIAL = 15
 V2_CUSTOMIZED_AVATAR = 16
-V2_CAUGHT_STARTER = 17
+V2_CAUGHT_FIRST_WILD = 17
 V2_FINISHED_TUTORIAL_CATCHES = 18
 V2_NAME_SELECTION = 19
 V2_EGG_GIVEN = 20
+V2_START_EGG_TUTORIAL = 21
+V2_COMPLETED_EGG_TUTORIAL = 22
 
 
 DESCRIPTOR.enum_types_by_name['TutorialState'] = _TUTORIALSTATE

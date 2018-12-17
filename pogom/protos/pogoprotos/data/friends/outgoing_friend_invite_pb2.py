@@ -12,6 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from pogoprotos.enums import invitation_type_pb2 as pogoprotos_dot_enums_dot_invitation__type__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.data.friends',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n4pogoprotos/data/friends/outgoing_friend_invite.proto\x12\x17pogoprotos.data.friends\"\xc2\x01\n\x14OutgoingFriendInvite\x12\x44\n\x06status\x18\x01 \x01(\x0e\x32\x34.pogoprotos.data.friends.OutgoingFriendInvite.Status\x12\x11\n\tplayer_id\x18\x02 \x01(\t\x12\x12\n\ncreated_ms\x18\x03 \x01(\x03\"=\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07PENDING\x10\x01\x12\r\n\tCANCELLED\x10\x02\x12\x0c\n\x08\x44\x45\x43LINED\x10\x03\x62\x06proto3')
-)
+  serialized_pb=_b('\n4pogoprotos/data/friends/outgoing_friend_invite.proto\x12\x17pogoprotos.data.friends\x1a&pogoprotos/enums/invitation_type.proto\"\x90\x02\n\x14OutgoingFriendInvite\x12\x44\n\x06status\x18\x01 \x01(\x0e\x32\x34.pogoprotos.data.friends.OutgoingFriendInvite.Status\x12\x11\n\tplayer_id\x18\x02 \x01(\t\x12\x12\n\ncreated_ms\x18\x03 \x01(\x03\x12\x39\n\x0finvitation_type\x18\x04 \x01(\x0e\x32 .pogoprotos.enums.InvitationType\x12\x11\n\tfull_name\x18\x05 \x01(\t\"=\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07PENDING\x10\x01\x12\r\n\tCANCELLED\x10\x02\x12\x0c\n\x08\x44\x45\x43LINED\x10\x03\x62\x06proto3')
+  ,
+  dependencies=[pogoprotos_dot_enums_dot_invitation__type__pb2.DESCRIPTOR,])
 
 
 
@@ -49,8 +51,8 @@ _OUTGOINGFRIENDINVITE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=215,
-  serialized_end=276,
+  serialized_start=333,
+  serialized_end=394,
 )
 _sym_db.RegisterEnumDescriptor(_OUTGOINGFRIENDINVITE_STATUS)
 
@@ -83,6 +85,20 @@ _OUTGOINGFRIENDINVITE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='invitation_type', full_name='pogoprotos.data.friends.OutgoingFriendInvite.invitation_type', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='full_name', full_name='pogoprotos.data.friends.OutgoingFriendInvite.full_name', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -96,11 +112,12 @@ _OUTGOINGFRIENDINVITE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=82,
-  serialized_end=276,
+  serialized_start=122,
+  serialized_end=394,
 )
 
 _OUTGOINGFRIENDINVITE.fields_by_name['status'].enum_type = _OUTGOINGFRIENDINVITE_STATUS
+_OUTGOINGFRIENDINVITE.fields_by_name['invitation_type'].enum_type = pogoprotos_dot_enums_dot_invitation__type__pb2._INVITATIONTYPE
 _OUTGOINGFRIENDINVITE_STATUS.containing_type = _OUTGOINGFRIENDINVITE
 DESCRIPTOR.message_types_by_name['OutgoingFriendInvite'] = _OUTGOINGFRIENDINVITE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.settings',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n3pogoprotos/settings/telemetry_global_settings.proto\x12\x13pogoprotos.settings\"\xe5\x01\n\x17TelemetryGlobalSettings\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19session_sampling_fraction\x18\x02 \x01(\x01\x12\x1a\n\x12max_buffer_size_kb\x18\x03 \x01(\x05\x12\x12\n\nbatch_size\x18\x04 \x01(\x05\x12\x1a\n\x12update_interval_ms\x18\x05 \x01(\x03\x12%\n\x1d\x66rame_rate_sample_interval_ms\x18\x06 \x01(\x03\x12#\n\x1b\x66rame_rate_sample_period_ms\x18\x07 \x01(\x03\x62\x06proto3')
+  serialized_pb=_b('\n3pogoprotos/settings/telemetry_global_settings.proto\x12\x13pogoprotos.settings\"\x8a\x02\n\x17TelemetryGlobalSettings\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19session_sampling_fraction\x18\x02 \x01(\x01\x12\x1a\n\x12max_buffer_size_kb\x18\x03 \x01(\x05\x12\x12\n\nbatch_size\x18\x04 \x01(\x05\x12\x1a\n\x12update_interval_ms\x18\x05 \x01(\x03\x12%\n\x1d\x66rame_rate_sample_interval_ms\x18\x06 \x01(\x03\x12#\n\x1b\x66rame_rate_sample_period_ms\x18\x07 \x01(\x03\x12#\n\x1b\x65nable_omni_wrapper_sending\x18\x08 \x01(\x08\x62\x06proto3')
 )
 
 
@@ -81,6 +81,13 @@ _TELEMETRYGLOBALSETTINGS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='enable_omni_wrapper_sending', full_name='pogoprotos.settings.TelemetryGlobalSettings.enable_omni_wrapper_sending', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -94,7 +101,7 @@ _TELEMETRYGLOBALSETTINGS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=77,
-  serialized_end=306,
+  serialized_end=343,
 )
 
 DESCRIPTOR.message_types_by_name['TelemetryGlobalSettings'] = _TELEMETRYGLOBALSETTINGS

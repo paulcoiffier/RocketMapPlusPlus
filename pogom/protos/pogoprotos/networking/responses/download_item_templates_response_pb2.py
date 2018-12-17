@@ -41,7 +41,15 @@ from pogoprotos.settings.master import friendship_level_milestone_settings_pb2 a
 from pogoprotos.settings.master import lucky_pokemon_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_lucky__pokemon__settings__pb2
 from pogoprotos.settings.master import ex_raid_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_ex__raid__settings__pb2
 from pogoprotos.settings.master import background_mode_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_background__mode__settings__pb2
+from pogoprotos.settings.master import combat_move_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__move__settings__pb2
+from pogoprotos.settings.master import combat_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__settings__pb2
+from pogoprotos.settings.master import combat_stat_stage_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__stat__stage__settings__pb2
+from pogoprotos.settings.master import combat_npc_trainer_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__npc__trainer__pb2
+from pogoprotos.settings.master import combat_npc_personality_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__npc__personality__pb2
+from pogoprotos.settings.master import onboarding_v2_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_onboarding__v2__settings__pb2
+from pogoprotos.settings.master import combat_league_settings_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__league__settings__pb2
 from pogoprotos.settings.master import beluga_pokemon_whitelist_pb2 as pogoprotos_dot_settings_dot_master_dot_beluga__pokemon__whitelist__pb2
+from pogoprotos.settings.master import combat_league_pb2 as pogoprotos_dot_settings_dot_master_dot_combat__league__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -49,9 +57,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.responses',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nFpogoprotos/networking/responses/download_item_templates_response.proto\x12\x1fpogoprotos.networking.responses\x1a>pogoprotos/settings/master/avatar_customization_settings.proto\x1a/pogoprotos/settings/master/badge_settings.proto\x1a\x30pogoprotos/settings/master/camera_settings.proto\x1a\x33pogoprotos/settings/master/encounter_settings.proto\x1a\x38pogoprotos/settings/master/equipped_badge_settings.proto\x1a.pogoprotos/settings/master/form_settings.proto\x1a\x34pogoprotos/settings/master/gym_battle_settings.proto\x1a\x33pogoprotos/settings/master/gym_level_settings.proto\x1a\x31pogoprotos/settings/master/iap_item_display.proto\x1a-pogoprotos/settings/master/iap_settings.proto\x1a.pogoprotos/settings/master/item_settings.proto\x1a\x37pogoprotos/settings/master/move_sequence_settings.proto\x1a.pogoprotos/settings/master/move_settings.proto\x1a\x36pogoprotos/settings/master/player_level_settings.proto\x1a\x31pogoprotos/settings/master/pokemon_settings.proto\x1a\x39pogoprotos/settings/master/pokemon_upgrade_settings.proto\x1a/pogoprotos/settings/master/quest_settings.proto\x1a\x38pogoprotos/settings/master/type_effective_settings.proto\x1a\x30pogoprotos/settings/master/gender_settings.proto\x1a\x37pogoprotos/settings/master/gym_badge_gmt_settings.proto\x1a\x31pogoprotos/settings/master/weather_affinity.proto\x1a.pogoprotos/settings/master/weather_bonus.proto\x1a\x36pogoprotos/settings/master/pokemon_scale_setting.proto\x1a:pogoprotos/settings/master/iap_item_category_display.proto\x1a\x34pogoprotos/settings/master/onboarding_settings.proto\x1a\x44pogoprotos/settings/master/friendship_level_milestone_settings.proto\x1a\x37pogoprotos/settings/master/lucky_pokemon_settings.proto\x1a\x31pogoprotos/settings/master/ex_raid_settings.proto\x1a\x39pogoprotos/settings/master/background_mode_settings.proto\x1a\x39pogoprotos/settings/master/beluga_pokemon_whitelist.proto\"\x9b\x14\n\x1d\x44ownloadItemTemplatesResponse\x12U\n\x06result\x18\x01 \x01(\x0e\x32\x45.pogoprotos.networking.responses.DownloadItemTemplatesResponse.Result\x12\x63\n\x0eitem_templates\x18\x02 \x03(\x0b\x32K.pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x12\x13\n\x0bpage_offset\x18\x04 \x01(\x05\x1a\xdb\x11\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x45\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32+.pogoprotos.settings.master.PokemonSettings\x12?\n\ritem_settings\x18\x03 \x01(\x0b\x32(.pogoprotos.settings.master.ItemSettings\x12?\n\rmove_settings\x18\x04 \x01(\x0b\x32(.pogoprotos.settings.master.MoveSettings\x12P\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x30.pogoprotos.settings.master.MoveSequenceSettings\x12I\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x31.pogoprotos.settings.master.TypeEffectiveSettings\x12\x41\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32).pogoprotos.settings.master.BadgeSettings\x12:\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32*.pogoprotos.settings.master.CameraSettings\x12\x45\n\x0cplayer_level\x18\x0c \x01(\x0b\x32/.pogoprotos.settings.master.PlayerLevelSettings\x12?\n\tgym_level\x18\r \x01(\x0b\x32,.pogoprotos.settings.master.GymLevelSettings\x12\x46\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32-.pogoprotos.settings.master.GymBattleSettings\x12I\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32-.pogoprotos.settings.master.EncounterSettings\x12\x44\n\x10iap_item_display\x18\x10 \x01(\x0b\x32*.pogoprotos.settings.master.IapItemDisplay\x12=\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\'.pogoprotos.settings.master.IapSettings\x12L\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x32.pogoprotos.settings.master.PokemonUpgradeSettings\x12J\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x31.pogoprotos.settings.master.EquippedBadgeSettings\x12\x41\n\x0equest_settings\x18\x14 \x01(\x0b\x32).pogoprotos.settings.master.QuestSettings\x12U\n\x14\x61vatar_customization\x18\x15 \x01(\x0b\x32\x37.pogoprotos.settings.master.AvatarCustomizationSettings\x12?\n\rform_settings\x18\x16 \x01(\x0b\x32(.pogoprotos.settings.master.FormSettings\x12\x43\n\x0fgender_settings\x18\x17 \x01(\x0b\x32*.pogoprotos.settings.master.GenderSettings\x12K\n\x12gym_badge_settings\x18\x18 \x01(\x0b\x32/.pogoprotos.settings.master.GymBadgeGmtSettings\x12G\n\x12weather_affinities\x18\x19 \x01(\x0b\x32+.pogoprotos.settings.master.WeatherAffinity\x12H\n\x16weather_bonus_settings\x18\x1a \x01(\x0b\x32(.pogoprotos.settings.master.WeatherBonus\x12O\n\x16pokemon_scale_settings\x18\x1b \x01(\x0b\x32/.pogoprotos.settings.master.PokemonScaleSetting\x12P\n\x14iap_category_display\x18\x1c \x01(\x0b\x32\x32.pogoprotos.settings.master.IapItemCategoryDisplay\x12T\n\x18\x62\x65luga_pokemon_whitelist\x18\x1d \x01(\x0b\x32\x32.pogoprotos.settings.master.BelugaPokemonWhitelist\x12K\n\x13onboarding_settings\x18\x1e \x01(\x0b\x32..pogoprotos.settings.master.OnboardingSettings\x12\x63\n\x1d\x66riendship_milestone_settings\x18\x1f \x01(\x0b\x32<.pogoprotos.settings.master.FriendshipLevelMilestoneSettings\x12P\n\x16lucky_pokemon_settings\x18  \x01(\x0b\x32\x30.pogoprotos.settings.master.LuckyPokemonSettings\x12\x44\n\x10\x65x_raid_settings\x18$ \x01(\x0b\x32*.pogoprotos.settings.master.ExRaidSettings\x12T\n\x18\x62\x61\x63kground_mode_settings\x18& \x01(\x0b\x32\x32.pogoprotos.settings.master.BackgroundModeSettings\"5\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04PAGE\x10\x02\x12\t\n\x05RETRY\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\nFpogoprotos/networking/responses/download_item_templates_response.proto\x12\x1fpogoprotos.networking.responses\x1a>pogoprotos/settings/master/avatar_customization_settings.proto\x1a/pogoprotos/settings/master/badge_settings.proto\x1a\x30pogoprotos/settings/master/camera_settings.proto\x1a\x33pogoprotos/settings/master/encounter_settings.proto\x1a\x38pogoprotos/settings/master/equipped_badge_settings.proto\x1a.pogoprotos/settings/master/form_settings.proto\x1a\x34pogoprotos/settings/master/gym_battle_settings.proto\x1a\x33pogoprotos/settings/master/gym_level_settings.proto\x1a\x31pogoprotos/settings/master/iap_item_display.proto\x1a-pogoprotos/settings/master/iap_settings.proto\x1a.pogoprotos/settings/master/item_settings.proto\x1a\x37pogoprotos/settings/master/move_sequence_settings.proto\x1a.pogoprotos/settings/master/move_settings.proto\x1a\x36pogoprotos/settings/master/player_level_settings.proto\x1a\x31pogoprotos/settings/master/pokemon_settings.proto\x1a\x39pogoprotos/settings/master/pokemon_upgrade_settings.proto\x1a/pogoprotos/settings/master/quest_settings.proto\x1a\x38pogoprotos/settings/master/type_effective_settings.proto\x1a\x30pogoprotos/settings/master/gender_settings.proto\x1a\x37pogoprotos/settings/master/gym_badge_gmt_settings.proto\x1a\x31pogoprotos/settings/master/weather_affinity.proto\x1a.pogoprotos/settings/master/weather_bonus.proto\x1a\x36pogoprotos/settings/master/pokemon_scale_setting.proto\x1a:pogoprotos/settings/master/iap_item_category_display.proto\x1a\x34pogoprotos/settings/master/onboarding_settings.proto\x1a\x44pogoprotos/settings/master/friendship_level_milestone_settings.proto\x1a\x37pogoprotos/settings/master/lucky_pokemon_settings.proto\x1a\x31pogoprotos/settings/master/ex_raid_settings.proto\x1a\x39pogoprotos/settings/master/background_mode_settings.proto\x1a\x35pogoprotos/settings/master/combat_move_settings.proto\x1a\x30pogoprotos/settings/master/combat_settings.proto\x1a;pogoprotos/settings/master/combat_stat_stage_settings.proto\x1a\x33pogoprotos/settings/master/combat_npc_trainer.proto\x1a\x37pogoprotos/settings/master/combat_npc_personality.proto\x1a\x37pogoprotos/settings/master/onboarding_v2_settings.proto\x1a\x37pogoprotos/settings/master/combat_league_settings.proto\x1a\x39pogoprotos/settings/master/beluga_pokemon_whitelist.proto\x1a.pogoprotos/settings/master/combat_league.proto\"\xff\x18\n\x1d\x44ownloadItemTemplatesResponse\x12U\n\x06result\x18\x01 \x01(\x0e\x32\x45.pogoprotos.networking.responses.DownloadItemTemplatesResponse.Result\x12\x63\n\x0eitem_templates\x18\x02 \x03(\x0b\x32K.pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x12\x13\n\x0bpage_offset\x18\x04 \x01(\x05\x1a\xbf\x16\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x45\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32+.pogoprotos.settings.master.PokemonSettings\x12?\n\ritem_settings\x18\x03 \x01(\x0b\x32(.pogoprotos.settings.master.ItemSettings\x12?\n\rmove_settings\x18\x04 \x01(\x0b\x32(.pogoprotos.settings.master.MoveSettings\x12P\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x30.pogoprotos.settings.master.MoveSequenceSettings\x12I\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x31.pogoprotos.settings.master.TypeEffectiveSettings\x12\x41\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32).pogoprotos.settings.master.BadgeSettings\x12:\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32*.pogoprotos.settings.master.CameraSettings\x12\x45\n\x0cplayer_level\x18\x0c \x01(\x0b\x32/.pogoprotos.settings.master.PlayerLevelSettings\x12?\n\tgym_level\x18\r \x01(\x0b\x32,.pogoprotos.settings.master.GymLevelSettings\x12\x46\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32-.pogoprotos.settings.master.GymBattleSettings\x12I\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32-.pogoprotos.settings.master.EncounterSettings\x12\x44\n\x10iap_item_display\x18\x10 \x01(\x0b\x32*.pogoprotos.settings.master.IapItemDisplay\x12=\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\'.pogoprotos.settings.master.IapSettings\x12L\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x32.pogoprotos.settings.master.PokemonUpgradeSettings\x12J\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x31.pogoprotos.settings.master.EquippedBadgeSettings\x12\x41\n\x0equest_settings\x18\x14 \x01(\x0b\x32).pogoprotos.settings.master.QuestSettings\x12U\n\x14\x61vatar_customization\x18\x15 \x01(\x0b\x32\x37.pogoprotos.settings.master.AvatarCustomizationSettings\x12?\n\rform_settings\x18\x16 \x01(\x0b\x32(.pogoprotos.settings.master.FormSettings\x12\x43\n\x0fgender_settings\x18\x17 \x01(\x0b\x32*.pogoprotos.settings.master.GenderSettings\x12K\n\x12gym_badge_settings\x18\x18 \x01(\x0b\x32/.pogoprotos.settings.master.GymBadgeGmtSettings\x12G\n\x12weather_affinities\x18\x19 \x01(\x0b\x32+.pogoprotos.settings.master.WeatherAffinity\x12H\n\x16weather_bonus_settings\x18\x1a \x01(\x0b\x32(.pogoprotos.settings.master.WeatherBonus\x12O\n\x16pokemon_scale_settings\x18\x1b \x01(\x0b\x32/.pogoprotos.settings.master.PokemonScaleSetting\x12P\n\x14iap_category_display\x18\x1c \x01(\x0b\x32\x32.pogoprotos.settings.master.IapItemCategoryDisplay\x12T\n\x18\x62\x65luga_pokemon_whitelist\x18\x1d \x01(\x0b\x32\x32.pogoprotos.settings.master.BelugaPokemonWhitelist\x12K\n\x13onboarding_settings\x18\x1e \x01(\x0b\x32..pogoprotos.settings.master.OnboardingSettings\x12\x63\n\x1d\x66riendship_milestone_settings\x18\x1f \x01(\x0b\x32<.pogoprotos.settings.master.FriendshipLevelMilestoneSettings\x12P\n\x16lucky_pokemon_settings\x18  \x01(\x0b\x32\x30.pogoprotos.settings.master.LuckyPokemonSettings\x12\x43\n\x0f\x63ombat_settings\x18! \x01(\x0b\x32*.pogoprotos.settings.master.CombatSettings\x12P\n\x16\x63ombat_league_settings\x18\" \x01(\x0b\x32\x30.pogoprotos.settings.master.CombatLeagueSettings\x12?\n\rcombat_league\x18# \x01(\x0b\x32(.pogoprotos.settings.master.CombatLeague\x12\x44\n\x10\x65x_raid_settings\x18$ \x01(\x0b\x32*.pogoprotos.settings.master.ExRaidSettings\x12\x43\n\x0b\x63ombat_move\x18% \x01(\x0b\x32..pogoprotos.settings.master.CombatMoveSettings\x12T\n\x18\x62\x61\x63kground_mode_settings\x18& \x01(\x0b\x32\x32.pogoprotos.settings.master.BackgroundModeSettings\x12W\n\x1a\x63ombat_stat_stage_settings\x18\' \x01(\x0b\x32\x33.pogoprotos.settings.master.CombatStatStageSettings\x12H\n\x12\x63ombat_npc_trainer\x18( \x01(\x0b\x32,.pogoprotos.settings.master.CombatNpcTrainer\x12P\n\x16\x63ombat_npc_personality\x18) \x01(\x0b\x32\x30.pogoprotos.settings.master.CombatNpcPersonality\x12P\n\x16onboarding_v2_settings\x18* \x01(\x0b\x32\x30.pogoprotos.settings.master.OnboardingV2Settings\"5\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04PAGE\x10\x02\x12\t\n\x05RETRY\x10\x03\x62\x06proto3')
   ,
-  dependencies=[pogoprotos_dot_settings_dot_master_dot_avatar__customization__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_badge__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_camera__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_encounter__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_equipped__badge__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_form__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__battle__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__level__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__item__display__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_item__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_move__sequence__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_move__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_player__level__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__upgrade__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_quest__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_type__effective__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gender__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__badge__gmt__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_weather__affinity__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_weather__bonus__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__scale__setting__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__item__category__display__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_onboarding__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_friendship__level__milestone__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_lucky__pokemon__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_ex__raid__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_background__mode__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_beluga__pokemon__whitelist__pb2.DESCRIPTOR,])
+  dependencies=[pogoprotos_dot_settings_dot_master_dot_avatar__customization__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_badge__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_camera__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_encounter__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_equipped__badge__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_form__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__battle__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__level__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__item__display__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_item__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_move__sequence__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_move__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_player__level__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__upgrade__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_quest__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_type__effective__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gender__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_gym__badge__gmt__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_weather__affinity__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_weather__bonus__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_pokemon__scale__setting__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_iap__item__category__display__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_onboarding__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_friendship__level__milestone__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_lucky__pokemon__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_ex__raid__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_background__mode__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__move__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__stat__stage__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__npc__trainer__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__npc__personality__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_onboarding__v2__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__league__settings__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_beluga__pokemon__whitelist__pb2.DESCRIPTOR,pogoprotos_dot_settings_dot_master_dot_combat__league__pb2.DESCRIPTOR,])
 
 
 
@@ -80,8 +88,8 @@ _DOWNLOADITEMTEMPLATESRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4267,
-  serialized_end=4320,
+  serialized_start=5317,
+  serialized_end=5370,
 )
 _sym_db.RegisterEnumDescriptor(_DOWNLOADITEMTEMPLATESRESPONSE_RESULT)
 
@@ -297,15 +305,71 @@ _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='ex_raid_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.ex_raid_settings', index=29,
+      name='combat_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_settings', index=29,
+      number=33, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_league_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_league_settings', index=30,
+      number=34, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_league', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_league', index=31,
+      number=35, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='ex_raid_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.ex_raid_settings', index=32,
       number=36, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='background_mode_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.background_mode_settings', index=30,
+      name='combat_move', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_move', index=33,
+      number=37, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='background_mode_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.background_mode_settings', index=34,
       number=38, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_stat_stage_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_stat_stage_settings', index=35,
+      number=39, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_npc_trainer', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_npc_trainer', index=36,
+      number=40, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='combat_npc_personality', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.combat_npc_personality', index=37,
+      number=41, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='onboarding_v2_settings', full_name='pogoprotos.networking.responses.DownloadItemTemplatesResponse.ItemTemplate.onboarding_v2_settings', index=38,
+      number=42, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -322,8 +386,8 @@ _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1998,
-  serialized_end=4265,
+  serialized_start=2436,
+  serialized_end=5315,
 )
 
 _DOWNLOADITEMTEMPLATESRESPONSE = _descriptor.Descriptor(
@@ -374,8 +438,8 @@ _DOWNLOADITEMTEMPLATESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1733,
-  serialized_end=4320,
+  serialized_start=2171,
+  serialized_end=5370,
 )
 
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['pokemon_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_pokemon__settings__pb2._POKEMONSETTINGS
@@ -406,8 +470,16 @@ _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['beluga_pokemon_white
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['onboarding_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_onboarding__settings__pb2._ONBOARDINGSETTINGS
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['friendship_milestone_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_friendship__level__milestone__settings__pb2._FRIENDSHIPLEVELMILESTONESETTINGS
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['lucky_pokemon_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_lucky__pokemon__settings__pb2._LUCKYPOKEMONSETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__settings__pb2._COMBATSETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_league_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__league__settings__pb2._COMBATLEAGUESETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_league'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__league__pb2._COMBATLEAGUE
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['ex_raid_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_ex__raid__settings__pb2._EXRAIDSETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_move'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__move__settings__pb2._COMBATMOVESETTINGS
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['background_mode_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_background__mode__settings__pb2._BACKGROUNDMODESETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_stat_stage_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__stat__stage__settings__pb2._COMBATSTATSTAGESETTINGS
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_npc_trainer'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__npc__trainer__pb2._COMBATNPCTRAINER
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['combat_npc_personality'].message_type = pogoprotos_dot_settings_dot_master_dot_combat__npc__personality__pb2._COMBATNPCPERSONALITY
+_DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['onboarding_v2_settings'].message_type = pogoprotos_dot_settings_dot_master_dot_onboarding__v2__settings__pb2._ONBOARDINGV2SETTINGS
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.containing_type = _DOWNLOADITEMTEMPLATESRESPONSE
 _DOWNLOADITEMTEMPLATESRESPONSE.fields_by_name['result'].enum_type = _DOWNLOADITEMTEMPLATESRESPONSE_RESULT
 _DOWNLOADITEMTEMPLATESRESPONSE.fields_by_name['item_templates'].message_type = _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE

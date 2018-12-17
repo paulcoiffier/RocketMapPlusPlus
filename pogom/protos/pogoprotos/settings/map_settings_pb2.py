@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.settings',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n&pogoprotos/settings/map_settings.proto\x12\x13pogoprotos.settings\"\xf7\x02\n\x0bMapSettings\x12\x1d\n\x15pokemon_visible_range\x18\x01 \x01(\x01\x12\x1d\n\x15poke_nav_range_meters\x18\x02 \x01(\x01\x12\x1e\n\x16\x65ncounter_range_meters\x18\x03 \x01(\x01\x12+\n#get_map_objects_min_refresh_seconds\x18\x04 \x01(\x02\x12+\n#get_map_objects_max_refresh_seconds\x18\x05 \x01(\x02\x12+\n#get_map_objects_min_distance_meters\x18\x06 \x01(\x02\x12\x1b\n\x13google_maps_api_key\x18\x07 \x01(\t\x12!\n\x19min_nearby_hide_sightings\x18\x08 \x01(\x05\x12\x1e\n\x16\x65nable_special_weather\x18\t \x01(\x08\x12#\n\x1bspecial_weather_probability\x18\n \x01(\x02\x62\x06proto3')
+  serialized_pb=_b('\n&pogoprotos/settings/map_settings.proto\x12\x13pogoprotos.settings\"\x96\x03\n\x0bMapSettings\x12\x1d\n\x15pokemon_visible_range\x18\x01 \x01(\x01\x12\x1d\n\x15poke_nav_range_meters\x18\x02 \x01(\x01\x12\x1e\n\x16\x65ncounter_range_meters\x18\x03 \x01(\x01\x12+\n#get_map_objects_min_refresh_seconds\x18\x04 \x01(\x02\x12+\n#get_map_objects_max_refresh_seconds\x18\x05 \x01(\x02\x12+\n#get_map_objects_min_distance_meters\x18\x06 \x01(\x02\x12\x1b\n\x13google_maps_api_key\x18\x07 \x01(\t\x12!\n\x19min_nearby_hide_sightings\x18\x08 \x01(\x05\x12\x1e\n\x16\x65nable_special_weather\x18\t \x01(\x08\x12#\n\x1bspecial_weather_probability\x18\n \x01(\x02\x12\x1d\n\x15google_maps_client_id\x18\x0b \x01(\tb\x06proto3')
 )
 
 
@@ -102,6 +102,13 @@ _MAPSETTINGS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='google_maps_client_id', full_name='pogoprotos.settings.MapSettings.google_maps_client_id', index=10,
+      number=11, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -115,7 +122,7 @@ _MAPSETTINGS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=64,
-  serialized_end=439,
+  serialized_end=470,
 )
 
 DESCRIPTOR.message_types_by_name['MapSettings'] = _MAPSETTINGS

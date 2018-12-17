@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.requests.messages',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nJpogoprotos/networking/requests/messages/use_item_move_reroll_message.proto\x12\'pogoprotos.networking.requests.messages\x1a\'pogoprotos/inventory/item/item_id.proto\"b\n\x18UseItemMoveRerollMessage\x12\x32\n\x07item_id\x18\x01 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemId\x12\x12\n\npokemon_id\x18\x02 \x01(\x06\x62\x06proto3')
+  serialized_pb=_b('\nJpogoprotos/networking/requests/messages/use_item_move_reroll_message.proto\x12\'pogoprotos.networking.requests.messages\x1a\'pogoprotos/inventory/item/item_id.proto\"\x80\x01\n\x18UseItemMoveRerollMessage\x12\x32\n\x07item_id\x18\x01 \x01(\x0e\x32!.pogoprotos.inventory.item.ItemId\x12\x12\n\npokemon_id\x18\x02 \x01(\x06\x12\x1c\n\x14reroll_unlocked_move\x18\x03 \x01(\x08\x62\x06proto3')
   ,
   dependencies=[pogoprotos_dot_inventory_dot_item_dot_item__id__pb2.DESCRIPTOR,])
 
@@ -48,6 +48,13 @@ _USEITEMMOVEREROLLMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='reroll_unlocked_move', full_name='pogoprotos.networking.requests.messages.UseItemMoveRerollMessage.reroll_unlocked_move', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -60,8 +67,8 @@ _USEITEMMOVEREROLLMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=160,
-  serialized_end=258,
+  serialized_start=161,
+  serialized_end=289,
 )
 
 _USEITEMMOVEREROLLMESSAGE.fields_by_name['item_id'].enum_type = pogoprotos_dot_inventory_dot_item_dot_item__id__pb2._ITEMID

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.requests.social',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\nJpogoprotos/networking/requests/social/invite_facebook_friend_message.proto\x12%pogoprotos.networking.requests.social\"5\n\x1bInviteFacebookFriendMessage\x12\x16\n\x0e\x62usiness_token\x18\x01 \x01(\tb\x06proto3')
+  serialized_pb=_b('\nJpogoprotos/networking/requests/social/invite_facebook_friend_message.proto\x12%pogoprotos.networking.requests.social\"Q\n\x1bInviteFacebookFriendMessage\x12\x17\n\x0f\x66\x62_access_token\x18\x01 \x01(\t\x12\x19\n\x11\x66riend_fb_user_id\x18\x02 \x01(\tb\x06proto3')
 )
 
 
@@ -33,8 +33,15 @@ _INVITEFACEBOOKFRIENDMESSAGE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='business_token', full_name='pogoprotos.networking.requests.social.InviteFacebookFriendMessage.business_token', index=0,
+      name='fb_access_token', full_name='pogoprotos.networking.requests.social.InviteFacebookFriendMessage.fb_access_token', index=0,
       number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='friend_fb_user_id', full_name='pogoprotos.networking.requests.social.InviteFacebookFriendMessage.friend_fb_user_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -52,7 +59,7 @@ _INVITEFACEBOOKFRIENDMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=117,
-  serialized_end=170,
+  serialized_end=198,
 )
 
 DESCRIPTOR.message_types_by_name['InviteFacebookFriendMessage'] = _INVITEFACEBOOKFRIENDMESSAGE
