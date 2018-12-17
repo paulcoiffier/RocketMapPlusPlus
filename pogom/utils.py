@@ -660,7 +660,419 @@ def get_quest_icon(reward_type, reward_item):
         result = reward_item
     return result
 
+def get_quest_quest_text(quest_json):
+    if quest_json is None:
+       return ""
 
+    quest_text = u""
+
+    quest_type = quest_json.get('questType', "")
+    quest_goal = quest_json.get('goal', {})
+    quest_goal_conditions = quest_goal.get('condition', [])
+    quest_goal_target = quest_goal.get('target', 0)
+
+    if quest_type == "QUEST_UNKNOWN_TYPE":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_FIRST_CATCH_OF_THE_DAY":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_FIRST_POKESTOP_OF_THE_DAY":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_MULTI_PART":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_CATCH_POKEMON":
+        pokemon_type_text = ""
+        pokemon_category_text = ""
+        weather_boost_text = ""
+
+        quest_catch_pokemon = quest_json.get('catchPokemon', {})
+
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_POKEMON_TYPE":
+                withPokemonType = quest_goal_condition.get('withPokemonType', {})
+                pokemon_types = withPokemonType.get('pokemonType', [])
+                i = 0
+                for pokemon_type in pokemon_types:
+                    i += 1
+                    if len(pokemon_type_text) == 0:
+                        pokemon_type_text = u" "
+                    elif i == len(pokemon_types):
+                        pokemon_type_text += " or "
+                    else:
+                        pokemon_type_text += ", "
+                    pokemon_type_text += pokemon_type[13:].title()
+                if len(pokemon_type_text) > 0:
+                    pokemon_type_text += "-type"
+            elif quest_goal_condition_type == "WITH_POKEMON_CATEGORY":
+                withPokemonCategory = quest_goal_condition.get('withPokemonCategory', {})
+                pokemon_ids = withPokemonCategory.get('pokemonIds', [])
+                i = 0
+                for pokemon_id in pokemon_ids:
+                    i += 1
+                    if len(pokemon_category_text) == 0:
+                        pokemon_category_text = u" "
+                    elif i == len(pokemon_ids):
+                        pokemon_category_text += " or "
+                    else:
+                        pokemon_category_text += ", "
+                    pokemon_category_text += pokemon_id.title()
+            elif quest_goal_condition_type == "WITH_WEATHER_BOOST":
+                weather_boost_text = " with Weather Boost"
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if len(pokemon_category_text) == 0:
+            pokemon_category_text = u" Pok\u00E9mon"
+
+        if quest_goal_target == 1:
+            quest_text = u"Catch a{}{}{}".format(pokemon_type_text, pokemon_category_text, weather_boost_text)
+        else:
+            quest_text = u"Catch {}{}{}{}".format(quest_goal_target, pokemon_type_text, pokemon_category_text, weather_boost_text)
+    elif quest_type == "QUEST_SPIN_POKESTOP":
+        unique_pokestop_text = ""
+
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_UNIQUE_POKESTOP":
+                unique_pokestop_text = " you haven't visited before"
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = u"Spin a Pok\u00E9Stop or Gym{}".format(unique_pokestop_text)
+        else:
+            quest_text = u"Spin {} Pok\u00E9Stops or Gyms{}".format(quest_goal_target, unique_pokestop_text)
+    elif quest_type == "QUEST_HATCH_EGG":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = "Hatch an Egg"
+        else:
+            quest_text = "Hatch {} Eggs".format(quest_goal_target)
+    elif quest_type == "QUEST_COMPLETE_GYM_BATTLE":
+        NeedToWin = False
+        SuperEffecitveCharge = False
+        
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_WIN_GYM_BATTLE_STATUS":
+                NeedToWin = True
+            elif quest_goal_condition_type == "WITH_SUPER_EFFECTIVE_CHARGE":
+                SuperEffecitveCharge = True
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            if SuperEffecitveCharge:
+                quest_text = "Use a supereffective Charged Attack in a Gym battle"
+            elif NeedToWin:
+                quest_text = "Win a Gym battle"
+            else:
+                quest_text = "Battle in a Gym"
+        else:
+            if SuperEffecitveCharge:
+                quest_text = "Use a supereffective Charged Attack in {} Gym battles".format(quest_goal_target)
+            elif NeedToWin:
+                quest_text = "Win {} Gym battles".format(quest_goal_target)
+            else:
+                quest_text = "Battle in a Gym {} times".format(quest_goal_target)
+      
+    elif quest_type == "QUEST_COMPLETE_RAID_BATTLE":
+        NeedToWin = False
+        raid_levels = []
+        raid_level_text = ""
+        
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_WIN_RAID_STATUS":
+                NeedToWin = True
+            elif quest_goal_condition_type == "WITH_RAID_LEVEL":
+                quest_goal_condition_with_raid_level = quest_goal_condition.get('withRaidLevel', {})
+                raid_levels = quest_goal_condition_with_raid_level.get('raidLevel', [])
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+                    
+        if len(raid_levels) == 0 or len(raid_levels) == 5:
+            raid_level_text = ""
+        elif len(raid_levels) == 1:
+            raid_level_text = " level " + raid_levels[0][11:]
+        else:
+            raid_level_text = " level " + raid_levels[0][11:] + " or higher"
+
+        if quest_goal_target == 1:
+            if NeedToWin:
+                quest_text = "Win a{} Raid".format(raid_level_text)
+            else:
+                quest_text = "Battle in a{} Raid".format(raid_level_text)
+        else:
+            if NeedToWin:
+                quest_text = "Win {}{} Raids".format(quest_goal_target, raid_level_text)
+            else:
+                quest_text = "Battle in {}{} Raids".format(quest_goal_target, raid_level_text)
+    elif quest_type == "QUEST_COMPLETE_QUEST":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_TRANSFER_POKEMON":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = u"Transfer a Pok\u00E9mon"
+        else:
+            quest_text = u"Transfer {} Pok\u00E9mon".format(quest_goal_target)
+    elif quest_type == "QUEST_FAVORITE_POKEMON":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_AUTOCOMPLETE":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_USE_BERRY_IN_ENCOUNTER":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = u"Use a Berry to help catch Pok\u00E9mon"
+        else:
+            quest_text = u"Use {} Berries to help catch Pok\u00E9mon".format(quest_goal_target)
+    elif quest_type == "QUEST_UPGRADE_POKEMON":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = u"Power up a Pok\u00E9mon"
+        else:
+            quest_text = u"Power up Pok\u00E9mon {} times".format(quest_goal_target)
+    elif quest_type == "QUEST_EVOLVE_POKEMON":
+        pokemon_type_text = ""
+        pokemon_category_text = ""
+
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_POKEMON_TYPE":
+                withPokemonType = quest_goal_condition.get('withPokemonType', {})
+                pokemon_types = withPokemonType.get('pokemonType', [])
+                i = 0
+                for pokemon_type in pokemon_types:
+                    i += 1
+                    if len(pokemon_type_text) == 0:
+                        pokemon_type_text = " "
+                    elif i == len(pokemon_types):
+                        pokemon_type_text += " or "
+                    else:
+                        pokemon_type_text += ", "
+                    pokemon_type_text += pokemon_type[13:].title()
+                if len(pokemon_type_text) > 0:
+                    pokemon_type_text += "-type"
+            elif quest_goal_condition_type == "WITH_POKEMON_CATEGORY":
+                withPokemonCategory = quest_goal_condition.get('withPokemonCategory', {})
+                pokemon_ids = withPokemonCategory.get('pokemonIds', [])
+                i = 0
+                for pokemon_id in pokemon_ids:
+                    i += 1
+                    if len(pokemon_category_text) == 0:
+                        pokemon_category_text = " "
+                    elif i == len(pokemon_ids):
+                        pokemon_category_text += " or "
+                    else:
+                        pokemon_category_text += ", "
+                    pokemon_category_text += pokemon_id.title()
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+                  
+        if len(pokemon_category_text) == 0:
+            pokemon_category_text = u" Pok\u00E9mon"
+
+        if quest_goal_target == 1:
+            quest_text = u"Evolve a{}{}".format(pokemon_type_text, pokemon_category_text)
+        else:
+            quest_text = u"Evolve {}{}{}".format(quest_goal_target, pokemon_type_text, pokemon_category_text)
+    elif quest_type == "QUEST_LAND_THROW":
+        NiceThrow = False
+        GreatThrow = False
+        ExcellentThrow = False
+        CurveBall = False
+        InARow = False
+        n_text = ""
+        throw_type_text = ""
+        curveball_text = ""
+        in_a_row_text = ""
+
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            if quest_goal_condition_type == "WITH_THROW_TYPE":
+                withThrowType = quest_goal_condition.get('withThrowType', {})
+                ThrowType = withThrowType.get('throwType', "")
+                if ThrowType == "ACTIVITY_CATCH_NICE_THROW":
+                    NiceThrow = True
+                elif ThrowType == "ACTIVITY_CATCH_GREAT_THROW":
+                    GreatThrow = True
+                elif ThrowType == "ACTIVITY_CATCH_EXCELLENT_THROW":
+                    ExcellentThrow = True
+            elif quest_goal_condition_type == "WITH_THROW_TYPE_IN_A_ROW":
+                InARow =  True
+                withThrowType = quest_goal_condition.get('withThrowType', {})
+                ThrowType = withThrowType.get('throwType', "")
+                if ThrowType == "ACTIVITY_CATCH_NICE_THROW":
+                    NiceThrow = True
+                elif ThrowType == "ACTIVITY_CATCH_GREAT_THROW":
+                    GreatThrow = True
+                elif ThrowType == "ACTIVITY_CATCH_EXCELLENT_THROW":
+                    ExcellentThrow = True
+            elif quest_goal_condition_type == "WITH_CURVE_BALL":
+                CurveBall = True
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if NiceThrow:
+            throw_type_text = " Nice"
+        elif GreatThrow:
+            throw_type_text = " Great"
+        elif ExcellentThrow:
+            n_text = "n"
+            throw_type_text = " Excellent"
+        if CurveBall:
+            curveball_text = " Curveball"
+        if InARow:
+            in_a_row_text = " in a row"
+            
+        if quest_goal_target == 1:
+           quest_text = "Make a{}{}{} Throw".format(n_text, throw_type_text, curveball_text)
+        else:
+           quest_text = "Make {}{}{} Throws{}".format(quest_goal_target, throw_type_text, curveball_text, in_a_row_text)
+           
+    elif quest_type == "QUEST_GET_BUDDY_CANDY":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = "Earn a Candy walking with your buddy"
+        else:
+            quest_text = "Earn {} Candies walking with your buddy".format(quest_goal_target)
+    elif quest_type == "QUEST_BADGE_RANK":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_PLAYER_LEVEL":
+        quest_text = "Reach level {}".format(quest_goal_target)
+    elif quest_type == "QUEST_JOIN_RAID":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_COMPLETE_BATTLE":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_ADD_FRIEND":
+        return "Quest Not Supported! - {}".format(quest_type)
+    elif quest_type == "QUEST_TRADE_POKEMON":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = u"Trade a Pok\u00E9mon"
+        else:
+            quest_text = u"Trade {} Pok\u00E9mon".format(quest_goal_target)
+    elif quest_type == "QUEST_SEND_GIFT":
+        for quest_goal_condition in quest_goal_conditions:
+            quest_goal_condition_type = quest_goal_condition.get('type', "")
+            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+
+        if quest_goal_target == 1:
+            quest_text = "Send a Gift to a friend"
+        else:
+            quest_text = "Send {} Gifts to friends".format(quest_goal_target)
+    elif quest_type == "QUEST_EVOLVE_INTO_POKEMON":
+        return "Quest Not Supported! - {}".format(quest_type)
+    else:
+        return "Quest Not Supported! - {}".format(quest_type)
+        
+    if quest_text == "":
+        quest_text = "Not Supported"
+        
+    return quest_text
+
+def get_quest_reward_text(quest_json):
+    if quest_json is None:
+       return ""
+
+    reward_text = u""
+
+    quest_rewards = quest_json.get('questRewards', [])
+
+    for quest_reward in quest_rewards:
+        reward_type = quest_reward.get('type', "")
+        
+        if reward_type == "UNSET":
+            return "Reward Not Supported! - {}".format(reward_type)
+        elif reward_type == "EXPERIENCE":
+            return "Reward Not Supported! - {}".format(reward_type)
+        elif reward_type == "ITEM":
+            reward_item = quest_reward.get('item', {})
+            reward_item_item = reward_item.get('item', "")
+            reward_item_amount = reward_item.get('amount', 0)
+
+            if reward_item_item == "ITEM_POKE_BALL":
+                reward_text = u"{} Pok\u00E9 {}".format(reward_item_amount, "Ball" if reward_item_amount == 1 else "Balls")
+            elif reward_item_item == "ITEM_GREAT_BALL":
+                reward_text = "{} Great {}".format(reward_item_amount, "Ball" if reward_item_amount == 1 else "Balls")
+            elif reward_item_item == "ITEM_ULTRA_BALL":
+                reward_text = "{} Ultra {}".format(reward_item_amount, "Ball" if reward_item_amount == 1 else "Balls")
+            elif reward_item_item == "ITEM_MASTER_BALL":
+                reward_text = "{} Master {}".format(reward_item_amount, "Ball" if reward_item_amount == 1 else "Balls")
+            elif reward_item_item == "ITEM_PREMIER_BALL":
+                reward_text = "{} Premier {}".format(reward_item_amount, "Ball" if reward_item_amount == 1 else "Balls")
+            elif reward_item_item == "ITEM_POTION":
+                reward_text = "{} {}".format(reward_item_amount, "Potion" if reward_item_amount == 1 else "Potions")
+            elif reward_item_item == "ITEM_SUPER_POTION":
+                reward_text = "{} Super {}".format(reward_item_amount, "Potion" if reward_item_amount == 1 else "Potions")
+            elif reward_item_item == "ITEM_HYPER_POTION":
+                reward_text = "{} Hyper {}".format(reward_item_amount, "Potion" if reward_item_amount == 1 else "Potions")
+            elif reward_item_item == "ITEM_MAX_POTION":
+                reward_text = "{} Max {}".format(reward_item_amount, "Potion" if reward_item_amount == 1 else "Potions")
+            elif reward_item_item == "ITEM_REVIVE":
+                reward_text = "{} {}".format(reward_item_amount, "Revive" if reward_item_amount == 1 else "Revives")
+            elif reward_item_item == "ITEM_MAX_REVIVE":
+                reward_text = "{} Max {}".format(reward_item_amount, "Revive" if reward_item_amount == 1 else "Revives")
+            elif reward_item_item == "ITEM_RAZZ_BERRY":
+                reward_text = "{} Razz {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_BLUK_BERRY":
+                reward_text = "{} Bluk {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_NANAB_BERRY":
+                reward_text = "{} Nanab {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_WEPAR_BERRY":
+                reward_text = "{} Wepar {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_PINAP_BERRY":
+                reward_text = "{} Pinap {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_GOLDEN_RAZZ_BERRY":
+                reward_text = "{} Golden Razz {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_GOLDEN_NANAB_BERRY":
+                reward_text = "{} Golden Nanab {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_GOLDEN_PINAP_BERRY":
+                reward_text = "{} Silver Pinap {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
+            elif reward_item_item == "ITEM_RARE_CANDY":
+                reward_text = "{} Rare {}".format(reward_item_amount, "Candy" if reward_item_amount == 1 else "Candies")
+            else:
+                return "Reward Item Not Supported! - {} -> {} ({})".format(reward_type, reward_item_item, reward_item_amount)
+              
+        elif reward_type == "STARDUST":
+            reward_amount = quest_reward.get('stardust', 0)
+            reward_text = "{} Stardust".format(reward_amount)
+        elif reward_type == "CANDY":
+            return "Reward Not Supported! - {}".format(reward_type)
+        elif reward_type == "AVATAR_CLOTHING":
+            return "Reward Not Supported! - {}".format(reward_type)
+        elif reward_type == "QUEST":
+            return "Reward Not Supported! - {}".format(reward_type)
+        elif reward_type == "POKEMON_ENCOUNTER":
+            reward_pokemon_encounter = quest_reward.get('pokemonEncounter', {})
+            reward_pokemon_encounter_pokemonid = reward_pokemon_encounter.get('pokemonId', "")
+            reward_text = "{} Encounter".format(reward_pokemon_encounter_pokemonid.title())
+        else:
+            return "Reward Not Supported! - {}".format(reward_type)
+
+    if reward_text == "":
+        reward_text = "Not Supported"
+
+    return reward_text
+    
 def get_pokemon_types(pokemon_id):
     pokemon_types = get_pokemon_data(pokemon_id)['types']
     return map(lambda x: {"type": i8ln(x['type']), "color": x['color']},

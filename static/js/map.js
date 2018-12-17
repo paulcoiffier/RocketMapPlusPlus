@@ -493,7 +493,7 @@ function initSidebar() {
     $('#min-level-gyms-filter-switch').val(Store.get('minGymLevel'))
     $('#max-level-gyms-filter-switch').val(Store.get('maxGymLevel'))
     $('#last-update-gyms-switch').val(Store.get('showLastUpdatedGymsOnly'))
-    $('#ex-raid-gyms-only-switch').val(Store.get('showExRaidGymsOnly'))
+    $('#ex-raid-gyms-only-switch').prop('checked', Store.get('showExRaidGymsOnly'))
     $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
     $('#pokemon-stats-switch').prop('checked', Store.get('showPokemonStats'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
@@ -1010,7 +1010,7 @@ function deviceworkerLabel(deviceworker) {
     return str
 }
 
-function pokestopLabel(pokestop, includeMembers = true) {
+function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
     var str
     var memberStr = ''
     var questStr = ''
@@ -1023,30 +1023,62 @@ function pokestopLabel(pokestop, includeMembers = true) {
     const lastModifiedStr = getDateStr(pokestop.last_modified)
 
     var hasNearby = false
+    var hasQuest = false
+    
+    if(pokestop.pokemon.length) {
+        hasNearby = true
+    }
 
-    if (includeMembers) {
-        memberStr = '<div>'
+    if(pokestop.quest && pokestop.quest.type) {
+        hasQuest = true
+    }
+
+    if (includeQuest)
+    {
+        if(pokestop.quest && pokestop.quest.type) {
+            questStr = `<div class='pokestop quest'>
+                            <img class='quest-icon' src='static/icons/quest.png'>
+                            <span class='quest-text'>${pokestop.quest.quest_text}<br>${pokestop.quest.reward_text}</span>
+                            <img class='reward-icon' src='static/icons/${pokestop.quest.icon}.png'>
+                        </div>`
+        }
+    }
+
+    if (includeMembers)
+    {
+        memberStr = `<div class='pokestop members'>`
 
         pokestop.pokemon.forEach((member) => {
-            hasNearby = true
             var iconname = `${member.pokemon_id}`
-            if (member.form > 0) {
-                if (member.form < 37) {
-                    iconname += `_${member.form}`
-                } else {
-                    if (member.form % 2 == 0) {
-                        iconname += `_A`
+            if (member.form > 0)
+            {
+                if (member.form >= 45 && member.form <= 80)
+                {
+                    if (member.form % 2 == 0)
+                    {
+                        iconname += '_A'
                     }
                 }
-            } else {
-                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
-                    if (member.gender == 1) {
+                else
+                {
+                    iconname += `_${member.form}`
+                }
+            }
+            else
+            {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1)
+                {
+                    if (member.gender == 1)
+                    {
                         iconname += '_M'
-                    } else {
+                    }
+                    else
+                    {
                         iconname += '_F'
                     }
                 }
-                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1) {
+                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
+                {
                   iconname += '_P'
                 }
             }
@@ -1056,10 +1088,10 @@ function pokestopLabel(pokestop, includeMembers = true) {
               <center>
                 <div>
                   <div>
-                    <img class='pokemon sprite' src='static/icons/${iconname}.png'>
+                    <img class='pokestop member sprite' src='static/icons/${iconname}.png'>
                   </div>
                   <div>
-                    <span class='gym pokemon'>${member.pokemon_name}</span>
+                    <span class='pokestop member name'>${member.pokemon_name}</span>
                   </div>
                 </div>
               </center>
@@ -1069,23 +1101,15 @@ function pokestopLabel(pokestop, includeMembers = true) {
         memberStr += '</div>'
     }
 
-    if(pokestop.quest && pokestop.quest.type) {
-        questStr = `<div class='pokestop quest'>
-                        <img class='quest-icon' src='static/icons/${pokestop.quest.icon}.png'>
-                        <span class='quest-text'>${pokestop.quest.text}</span>
-                    </div>`
-    }
-
-    pokestop.pokemon.forEach((member) => {
-        hasNearby = true
-    })
-
     var icon = 'Pokestop'
     if (expireTime) {
         icon += 'Lured'
     }
     if (hasNearby) {
         icon += '_Nearby'
+    }
+    if (hasQuest) {
+        icon += '_Quest'
     }
     let iconSrc = `static/images/pokestop/${icon}.png`
     let titleText = pokestop.name ? pokestop.name : 'Pokestop'
@@ -1115,13 +1139,13 @@ function pokestopLabel(pokestop, includeMembers = true) {
               ${expireTimeStr}
               <div>
                 <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
-                <img class='pokestop img' src='${imgSrc}'>
+                <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${questStr}
               ${memberStr}
               <div class='pokestop container'>
-               <div>
-                  <span class='pokestop navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'; class='pokestop nolure'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                <div class='pokestop info navigate'>
+                  <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a>
                 </div>
                 <div class='pokestop info last-scanned'>
                     Last Scanned: ${lastScannedStr}
@@ -1130,8 +1154,7 @@ function pokestopLabel(pokestop, includeMembers = true) {
                     Last Modified: ${lastModifiedStr}
                 </div>
               </div>
-            </div>
-          </div>`
+            </div>`
 
     return str
 }
@@ -1641,6 +1664,7 @@ function setupPokestopMarker(item) {
 function updatePokestopMarker(item, marker) {
     const hasActiveLure = item['lure_expiration']
     const hasNearby = Boolean(item.pokemon.length)
+    const hasQuest = Boolean(item.quest && item.quest.type)
 
     let markerImage = 'static/images/pokestop/Pokestop.png'
 
@@ -1650,6 +1674,10 @@ function updatePokestopMarker(item, marker) {
 
     if (hasNearby) {
         markerImage = markerImage.replace('.png', '_Nearby.png')
+    }
+
+    if (hasQuest) {
+        markerImage = markerImage.replace('.png', '_Quest.png')
     }
 
     marker.setIcon({
@@ -3013,7 +3041,7 @@ function showPokestopDetails(id) { // eslint-disable-line no-unused-vars
             pokemonHtml = ''
         }
 
-        var topPart = pokestopLabel(result, false)
+        var topPart = pokestopLabel(result, true, false)
         sidebar.innerHTML = `${topPart}${pokemonHtml}`
 
         sidebarClose = document.createElement('a')
