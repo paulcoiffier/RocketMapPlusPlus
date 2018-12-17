@@ -1351,6 +1351,9 @@ class Pogom(Flask):
                         'quest_type': quest_json['questType'],
                         'goal': quest_json['goal']['target'],
                         'reward_type': quest_json['questRewards'][0]['type'],
+                        'reward_item': None,
+                        'reward_amount': None,
+                        'quest_json': json.dumps(quest_json)
                     }
                     if quest_json["questRewards"][0]["type"] == "STARDUST":
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]

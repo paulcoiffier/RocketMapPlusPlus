@@ -24,12 +24,13 @@ from cachetools import cached
 from timeit import default_timer
 import geopy
 from collections import OrderedDict
+from flask import json
 
 from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
                     get_move_name, get_move_damage, get_move_energy,
                     get_move_type, calc_pokemon_level, peewee_attr_to_col,
-                    get_quest_icon)
+                    get_quest_icon, get_quest_quest_text, get_quest_reward_text)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
@@ -43,7 +44,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 50
+db_schema_version = 51
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -418,6 +419,7 @@ class Quest(BaseModel):
     reward_type = Utf8mb4CharField(max_length=50)
     reward_item = Utf8mb4CharField(max_length=50, null=True)
     reward_amount = IntegerField(null=True)
+    quest_json = TextField(null=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
 
     @staticmethod
@@ -595,7 +597,8 @@ class Pokestop(LatLongModel):
                           Quest.pokestop_id,
                           Quest.quest_type,
                           Quest.reward_type,
-                          Quest.reward_item)
+                          Quest.reward_item,
+                          Quest.quest_json)
                       .where(Quest.pokestop_id << pokestop_ids)
                       .dicts())
             for q in quests:
@@ -603,6 +606,12 @@ class Pokestop(LatLongModel):
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
                 pokestops[q['pokestop_id']]['quest']['item'] = q['reward_item']
                 pokestops[q['pokestop_id']]['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
+                if q['quest_json'] is None:
+                    quest_json = None
+                else:
+                    quest_json = json.loads(q['quest_json'])
+                pokestops[q['pokestop_id']]['quest']['quest_text'] = get_quest_quest_text(quest_json)
+                pokestops[q['pokestop_id']]['quest']['reward_text'] = get_quest_reward_text(quest_json)
 
         # Re-enable the GC.
         gc.enable()
@@ -681,7 +690,8 @@ class Pokestop(LatLongModel):
                  .select(
                      Quest.quest_type,
                      Quest.reward_type,
-                     Quest.reward_item)
+                     Quest.reward_item,
+                     Quest.quest_json)
                  .where(Quest.pokestop_id == id)
                  .dicts())
         for q in quest:
@@ -689,6 +699,12 @@ class Pokestop(LatLongModel):
             result['quest']['type'] = q['reward_type']
             result['quest']['item'] = q['reward_item']
             result['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
+            if q['quest_json'] is None:
+                quest_json = None
+            else:
+                quest_json = json.loads(q['quest_json'])
+            result['quest']['quest_text'] = get_quest_quest_text(quest_json)
+            result['quest']['reward_text'] = get_quest_reward_text(quest_json)
 
         return result
 
@@ -4062,6 +4078,11 @@ def database_migrate(db, old_ver):
     if old_ver < 50:
         migrate(
             migrator.add_column('raid', 'form', SmallIntegerField(null=True))
+        )
+
+    if old_ver < 51:
+        db.execute_sql(
+            'ALTER TABLE `quest` ADD COLUMN `quest_json` LONGTEXT NULL AFTER `reward_amount`;'
         )
 
     # Always log that we're done.
