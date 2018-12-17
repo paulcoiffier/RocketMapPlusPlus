@@ -91,7 +91,7 @@ def convert_pokemon_list_plus_plus(pokemon):
 
     pokemon_result = []
     for p in pokemon:
-        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, tz=pytz.utc)
+        epoch = datetime.utcfromtimestamp(0)
         poke = {
             "encounter_id": str(p["encounter_id"]),
             "pokemon_id": p['pokemon_id'],
@@ -115,7 +115,7 @@ def convert_pokestop_list_plus_plus(pokestop):
 
     pokestop_result = []
     for p in pokestop:
-        epoch = datetime(1970, 1, 1, 0, 0, 0, 0, tz=pytz.utc)
+        epoch = datetime.utcfromtimestamp(0)
         stop = {
             "pokestop_id": p['pokestop_id'],
             "latitude": p['latitude'],
@@ -1972,14 +1972,14 @@ class Pogom(Flask):
 
     def radar_fetch(self):
         # Make sure fingerprint isn't blacklisted.
-        fingerprint_blacklisted = any([
-            fingerprints['no_referrer'](request),
-            fingerprints['iPokeGo'](request)
-        ])
+#        fingerprint_blacklisted = any([
+#            fingerprints['no_referrer'](request),
+#            fingerprints['iPokeGo'](request)
+#        ])
 
-        if fingerprint_blacklisted:
-            log.debug('User denied access: blacklisted fingerprint.')
-            abort(403)
+#        if fingerprint_blacklisted:
+#            log.debug('User denied access: blacklisted fingerprint.')
+#            abort(403)
 
         self.heartbeat[0] = now()
         args = get_args()
@@ -1997,13 +1997,13 @@ class Pogom(Flask):
                 Pokemon.get_active(
                     swLat, swLng, neLat, neLng))
 
-        if not args.no_pokestops:
-            d['pokestops'] = convert_pokestop_list_plus_plus(
-                Pokestop.get_stops(swLat, swLng, neLat, neLng))
+#        if not args.no_pokestops:
+#            d['pokestops'] = convert_pokestop_list_plus_plus(
+#                Pokestop.get_stops(swLat, swLng, neLat, neLng))
 
-        if not args.no_gyms:
-            d['gyms'] = convert_gym_list_plus_plus(
-                Gym.get_gyms(swLat, swLng, neLat, neLng))
+#        if not args.no_gyms:
+#            d['gyms'] = convert_gym_list_plus_plus(
+#                Gym.get_gyms(swLat, swLng, neLat, neLng))
 
         return jsonify(d)
 
