@@ -42,6 +42,7 @@ from protos.pogoprotos.networking.responses.fort_search_response_pb2 import Fort
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
 from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
 from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import GymGetInfoResponse
+from protos.pogoprotos.networking.responses.fort_details_response_pb2 import FortDetailsResponse
 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
@@ -1333,6 +1334,36 @@ class Pogom(Flask):
                 if 'gym-info' in self.args.wh_types:
                     self.wh_update_queue.put(('gym_details', webhook_data))
 
+            if "FortDetailsResponse" in proto:
+                fort_details_response_string = b64decode(proto["FortDetailsResponse"])
+
+                fdr = FortDetailsResponse()
+
+                try:
+                    fdr.ParseFromString(fort_details_response_string)
+                    fort_details_response_json = json.loads(MessageToJson(fdr))
+                except:
+                    continue
+
+                fort_id = fort_details_response_json.get("fortId")
+                if not fort_id:
+                    continue
+
+                fort_type = fort_details_response_json.get("type", "")
+
+                if fort_type == "CHECKPOINT":
+                    fort_name = fort_details_response_json.get("name", "")
+                    fort_description = fort_details_response_json.get("description", "")
+                    fort_imageurls = fort_details_response_json.get("imageUrls", [])
+                    fort_imageurl = fort_imageurls[0] if len(fort_imageurls) else ""
+
+                    pokestop_details[fort_id] = {
+                        'pokestop_id': fort_id,
+                        'name': fort_name,
+                        'description': fort_description,
+                        'url': fort_imageurl
+                    }
+                    
             if "FortSearchResponse" in proto:
                 fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
