@@ -949,7 +949,7 @@ class Pogom(Flask):
                                 if nearby_pokemons[long(encounter_id)]['form'] < -1:
                                     nearby_pokemons[long(encounter_id)]['form'] = -1
 
-                                pokestopdetails = Pokestop.get_pokestop_details(p['fortId'])
+                                pokestopdetails = pokestop_details.get(p['fortId'], Pokestop.get_pokestop_details(p['fortId']))
                                 pokestop_url = p.get('fortImageUrl', "")
                                 if pokestopdetails:
                                     pokestop_name = pokestopdetails.get("name")
@@ -1003,7 +1003,7 @@ class Pogom(Flask):
                                         'active_fort_modifier': active_pokemon_id
                                     }
 
-                                    pokestopdetails = Pokestop.get_pokestop_details(fort['id'])
+                                    pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
                                     pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     pokestop_description = ""
                                     pokestop_url = fort.get('imageUrl', "")
@@ -1066,7 +1066,7 @@ class Pogom(Flask):
 
                                     gym_id = fort['id']
 
-                                    gymdetails = Gym.get_gym_details(gym_id)
+                                    gymdetails = gym_details.get(gym_id, Gym.get_gym_details(gym_id))
                                     gym_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     gym_description = ""
                                     gym_url = fort.get('imageUrl', "")
@@ -1238,7 +1238,7 @@ class Pogom(Flask):
 
                 gym_encountered[gym_id] = gyms[gym_id].copy()
 
-                gymdetails = Gym.get_gym_details(gym_id)
+                gymdetails = gym_details.get(gym_id, Gym.get_gym_details(gym_id))
                 gym_name = gym_get_info_response_json["name"]
                 gym_description = gym_get_info_response_json.get("description", "")
                 gym_url = gym_get_info_response_json.get("url", "")
