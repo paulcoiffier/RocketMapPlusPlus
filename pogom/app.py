@@ -949,7 +949,7 @@ class Pogom(Flask):
                                 if nearby_pokemons[long(encounter_id)]['form'] < -1:
                                     nearby_pokemons[long(encounter_id)]['form'] = -1
 
-                                pokestopdetails = pokestop_details.get(pokestop_id, Pokestop.get_pokestop_details(pokestop_id))
+                                pokestopdetails = pokestop_details.get(p['fortId'], Pokestop.get_pokestop_details(p['fortId']))
                                 pokestop_url = p.get('fortImageUrl', "")
                                 if pokestopdetails:
                                     pokestop_name = pokestopdetails.get("name")
