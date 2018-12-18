@@ -949,7 +949,7 @@ class Pogom(Flask):
                                 if nearby_pokemons[long(encounter_id)]['form'] < -1:
                                     nearby_pokemons[long(encounter_id)]['form'] = -1
 
-                                pokestopdetails = Pokestop.get_pokestop_details(p['fortId'])
+                                pokestopdetails = pokestop_details.get(pokestop_id, Pokestop.get_pokestop_details(pokestop_id))
                                 pokestop_url = p.get('fortImageUrl', "")
                                 if pokestopdetails:
                                     pokestop_name = pokestopdetails.get("name")
@@ -1003,7 +1003,7 @@ class Pogom(Flask):
                                         'active_fort_modifier': active_pokemon_id
                                     }
 
-                                    pokestopdetails = Pokestop.get_pokestop_details(fort['id'])
+                                    pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
                                     pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     pokestop_description = ""
                                     pokestop_url = fort.get('imageUrl', "")
