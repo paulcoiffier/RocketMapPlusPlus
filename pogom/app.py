@@ -1363,7 +1363,7 @@ class Pogom(Flask):
                         'description': fort_description,
                         'url': fort_imageurl
                     }
-                    
+
             if "FortSearchResponse" in proto:
                 fort_search_response_string = b64decode(proto['FortSearchResponse'])
 
@@ -1384,7 +1384,8 @@ class Pogom(Flask):
                         'reward_type': quest_json['questRewards'][0]['type'],
                         'reward_item': None,
                         'reward_amount': None,
-                        'quest_json': json.dumps(quest_json)
+                        'quest_json': json.dumps(quest_json),
+                        'last_scanned': datetime.utcnow()
                     }
                     if quest_json["questRewards"][0]["type"] == "STARDUST":
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
