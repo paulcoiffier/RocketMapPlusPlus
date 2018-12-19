@@ -256,6 +256,9 @@ def get_args():
     parser.add_argument('-tig', '--teleport-ignore',
                         help=('Ignore coordinates inside this radius for teleport scheduling'),
                         type=int, default=300)
+    parser.add_argument('-qed', '--quest-expiration-days',
+                        help=('Number of days before quest info expires (use 0 for no expiration)'),
+                        type=int, default=1)
     parser.add_argument('-jit', '--jitter',
                         help=('Apply jitter to coordinates for teleport scheduling'),
                         action='store_true', default=True)
@@ -497,31 +500,31 @@ def get_args():
     args.log_filename = strftime(args.log_filename)
     args.log_filename = args.log_filename.replace('<sn>', '<SN>')
     args.log_filename = args.log_filename.replace('<SN>', args.status_name)
-    
+
     if args.user_auth:
         if not args.user_auth_secret_key:
             print(sys.argv[0] +
                   ": error: arguments -UAs/--user-auth-secret is required.")
             sys.exit(1)
-            
+
         if not args.user_auth_bot_token:
             print(sys.argv[0] +
                   ": error: arguments -UAbt/--user-auth-bot-token is " +
                   "required for fetching user roles from Discord.")
             sys.exit(1)
-            
+
         if args.user_auth_guild_required and not args.user_auth_guild_invite:
             print(sys.argv[0] +
                   ": error: arguments -UAgi/--user-auth-guild-invite is " +
                   "required when using -UAgr/--user-auth-guild-required.")
             sys.exit(1)
-            
+
         if args.user_auth_role_required and not args.user_auth_guild_required:
             print(sys.argv[0] +
                   ": error: arguments -UAgr/--user-auth-guild-required is " +
                   "required when using -UArr/--user-auth-role-required.")
             sys.exit(1)
-            
+
         if args.user_auth_role_required and not args.user_auth_role_invite:
             args.user_auth_role_invite = args.user_auth_guild_invite
 
@@ -754,7 +757,7 @@ def get_quest_quest_text(quest_json):
     elif quest_type == "QUEST_COMPLETE_GYM_BATTLE":
         NeedToWin = False
         SuperEffecitveCharge = False
-        
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
             if quest_goal_condition_type == "WITH_WIN_GYM_BATTLE_STATUS":
@@ -778,12 +781,12 @@ def get_quest_quest_text(quest_json):
                 quest_text = "Win {} Gym battles".format(quest_goal_target)
             else:
                 quest_text = "Battle in a Gym {} times".format(quest_goal_target)
-      
+
     elif quest_type == "QUEST_COMPLETE_RAID_BATTLE":
         NeedToWin = False
         raid_levels = []
         raid_level_text = ""
-        
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
             if quest_goal_condition_type == "WITH_WIN_RAID_STATUS":
@@ -793,7 +796,7 @@ def get_quest_quest_text(quest_json):
                 raid_levels = quest_goal_condition_with_raid_level.get('raidLevel', [])
             else:
                 return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
-                    
+
         if len(raid_levels) == 0 or len(raid_levels) == 5:
             raid_level_text = ""
         elif len(raid_levels) == 1:
@@ -880,7 +883,7 @@ def get_quest_quest_text(quest_json):
                     pokemon_category_text += pokemon_id.title()
             else:
                 return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
-                  
+
         if len(pokemon_category_text) == 0:
             pokemon_category_text = u" Pok\u00E9mon"
 
@@ -936,12 +939,12 @@ def get_quest_quest_text(quest_json):
             curveball_text = " Curveball"
         if InARow:
             in_a_row_text = " in a row"
-            
+
         if quest_goal_target == 1:
            quest_text = "Make a{}{}{} Throw".format(n_text, throw_type_text, curveball_text)
         else:
            quest_text = "Make {}{}{} Throws{}".format(quest_goal_target, throw_type_text, curveball_text, in_a_row_text)
-           
+
     elif quest_type == "QUEST_GET_BUDDY_CANDY":
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
@@ -983,10 +986,10 @@ def get_quest_quest_text(quest_json):
         return "Quest Not Supported! - {}".format(quest_type)
     else:
         return "Quest Not Supported! - {}".format(quest_type)
-        
+
     if quest_text == "":
         quest_text = "Not Supported"
-        
+
     return quest_text
 
 def get_quest_reward_text(quest_json):
@@ -999,7 +1002,7 @@ def get_quest_reward_text(quest_json):
 
     for quest_reward in quest_rewards:
         reward_type = quest_reward.get('type', "")
-        
+
         if reward_type == "UNSET":
             return "Reward Not Supported! - {}".format(reward_type)
         elif reward_type == "EXPERIENCE":
@@ -1051,7 +1054,7 @@ def get_quest_reward_text(quest_json):
                 reward_text = "{} Rare {}".format(reward_item_amount, "Candy" if reward_item_amount == 1 else "Candies")
             else:
                 return "Reward Item Not Supported! - {} -> {} ({})".format(reward_type, reward_item_item, reward_item_amount)
-              
+
         elif reward_type == "STARDUST":
             reward_amount = quest_reward.get('stardust', 0)
             reward_text = "{} Stardust".format(reward_amount)
@@ -1072,7 +1075,7 @@ def get_quest_reward_text(quest_json):
         reward_text = "Not Supported"
 
     return reward_text
-    
+
 def get_pokemon_types(pokemon_id):
     pokemon_types = get_pokemon_data(pokemon_id)['types']
     return map(lambda x: {"type": i8ln(x['type']), "color": x['color']},
