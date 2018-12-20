@@ -439,15 +439,31 @@ class Quest(BaseModel):
                        on=(Quest.pokestop_id == Pokestop.pokestop_id)))
 
         if not (swLat and swLng and neLat and neLng):
-            query = (query
-                     .dicts())
+            if args.quest_expiration_days > 0:
+                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+                query = (query
+                         .where(Quest.last_scanned >= period)
+                         .dicts())
+            else:
+                query = (query
+                         .dicts())
         else:
-            query = (query
-                     .where((Pokestop.latitude >= swLat) &
-                            (Pokestop.longitude >= swLng) &
-                            (Pokestop.latitude <= neLat) &
-                            (Pokestop.longitude <= neLng))
-                     .dicts())
+            if args.quest_expiration_days > 0:
+                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+                query = (query
+                         .where((Quest.last_scanned >= period) &
+                                (Pokestop.latitude >= swLat) &
+                                (Pokestop.longitude >= swLng) &
+                                (Pokestop.latitude <= neLat) &
+                                (Pokestop.longitude <= neLng))
+                         .dicts())
+            else:
+                query = (query
+                         .where((Pokestop.latitude >= swLat) &
+                                (Pokestop.longitude >= swLng) &
+                                (Pokestop.latitude <= neLat) &
+                                (Pokestop.longitude <= neLng))
+                         .dicts())
 
 #        quests = {}
 #        for quest in query:
@@ -592,15 +608,28 @@ class Pokestop(LatLongModel):
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
 
-            quests = (Quest
-                      .select(
-                          Quest.pokestop_id,
-                          Quest.quest_type,
-                          Quest.reward_type,
-                          Quest.reward_item,
-                          Quest.quest_json)
-                      .where(Quest.pokestop_id << pokestop_ids)
-                      .dicts())
+            if args.quest_expiration_days > 0:
+                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+                quests = (Quest
+                          .select(
+                              Quest.pokestop_id,
+                              Quest.quest_type,
+                              Quest.reward_type,
+                              Quest.reward_item,
+                              Quest.quest_json)
+                          .where((Quest.pokestop_id << pokestop_ids) &
+                                 (Quest.last_scanned >= period))
+                          .dicts())
+            else:
+                quests = (Quest
+                          .select(
+                              Quest.pokestop_id,
+                              Quest.quest_type,
+                              Quest.reward_type,
+                              Quest.reward_item,
+                              Quest.quest_json)
+                          .where(Quest.pokestop_id << pokestop_ids)
+                          .dicts())
             for q in quests:
                 pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
@@ -686,14 +715,26 @@ class Pokestop(LatLongModel):
             result['pokemon'].append(p)
 
         result['quest'] = {}
-        quest = (Quest
-                 .select(
-                     Quest.quest_type,
-                     Quest.reward_type,
-                     Quest.reward_item,
-                     Quest.quest_json)
-                 .where(Quest.pokestop_id == id)
-                 .dicts())
+        if args.quest_expiration_days > 0:
+            period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+            quest = (Quest
+                     .select(
+                         Quest.quest_type,
+                         Quest.reward_type,
+                         Quest.reward_item,
+                         Quest.quest_json)
+                     .where((Quest.pokestop_id == id) &
+                            (Quest.last_scanned >= period))
+                     .dicts())
+        else:
+            quest = (Quest
+                     .select(
+                         Quest.quest_type,
+                         Quest.reward_type,
+                         Quest.reward_item,
+                         Quest.quest_json)
+                     .where(Quest.pokestop_id == id)
+                     .dicts())
         for q in quest:
             result['quest']['text'] = q['quest_type']
             result['quest']['type'] = q['reward_type']
