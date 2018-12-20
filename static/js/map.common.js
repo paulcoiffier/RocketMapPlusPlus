@@ -953,9 +953,13 @@ var StoreOptions = {
         default: true,
         type: StoreTypes.Boolean
     },
-    'showLuredPokestopsOnly': {
+    'showPokestopsWithQuestStatus': {
         default: 0,
         type: StoreTypes.Number
+    },
+    'showLuredPokestopsOnly': {
+        default: false,
+        type: StoreTypes.Boolean
     },
     'usePokestopSidebar': {
         default: false,
@@ -1222,19 +1226,30 @@ function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true, i
     })
 
     var iconname = item['pokemon_id']
-    if (item['form'] > 0) {
-        if (item['form'] < 37) {
-            iconname += item['form']
-        } else {
-            if (item['form'] % 2 == 0) {
-                iconname += `_A`
+    if (item['form'] > 0)
+    {
+        if (item['form'] >= 45 && item['form'] <= 80)
+        {
+            if (item['form'] % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
-            if (item['gender'] == 1) {
+        else
+        {
+            iconname += `_${item['form']}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            if (item['gender'] == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -1262,19 +1277,30 @@ function updatePokemonMarker(item, map, scaleByRarity = true, isNotifyPkmn = fal
     marker.setIcon(icon)
 
     var iconname = item['pokemon_id']
-    if (item['form'] > 0) {
-        if (item['form'] < 37) {
-            iconname += item['form']
-        } else {
-            if (item['form'] % 2 == 0) {
-                iconname += `_A`
+    if (item['form'] > 0)
+    {
+        if (item['form'] >= 45 && item['form'] <= 80)
+        {
+            if (item['form'] % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
-            if (item['gender'] == 1) {
+        else
+        {
+            iconname += `_${item['form']}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            if (item['gender'] == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }

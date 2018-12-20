@@ -20,7 +20,8 @@ var $selectTeamGymsOnly
 var $selectLastUpdateGymsOnly
 var $selectMinGymLevel
 var $selectMaxGymLevel
-var $selectLuredPokestopsOnly
+var $selectPokestopsWithQuestStatus
+var $switchLuredPokestopsOnly
 var $selectSearchIconMarker
 var $selectLocationIconMarker
 var $switchGymSidebar
@@ -499,7 +500,9 @@ function initSidebar() {
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
     $('#pokestop-sidebar-switch').prop('checked', Store.get('usePokestopSidebar'))
     $('#pokestop-sidebar-wrapper').toggle(Store.get('showPokestops'))
-    $('#lured-pokestops-only-switch').val(Store.get('showLuredPokestopsOnly'))
+    $('#pokestops-with-quest-status-select').val(Store.get('showPokestopsWithQuestStatus'))
+    $('#pokestops-with-quest-status-wrapper').toggle(Store.get('showPokestops'))
+    $('#lured-pokestops-only-switch').prop('checked', Store.get('showLuredPokestopsOnly'))
     $('#lured-pokestops-only-wrapper').toggle(Store.get('showPokestops'))
     $('#geoloc-switch').prop('checked', Store.get('geoLocate'))
     $('#lock-marker-switch').prop('checked', Store.get('lockMarker'))
@@ -616,19 +619,30 @@ function pokemonLabel(item) {
     </div>`
 
     var iconname = `${id}`
-    if (form > 0) {
-        if (form < 37) {
-            iconname += `_${form}`
-        } else {
-            if (form % 2 == 0) {
-                iconname += `_A`
+    if (form > 0)
+    {
+        if (form >= 45 && form <= 80)
+        {
+            if (form % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(id) !== -1) {
-            if (gender == 1) {
+        else
+        {
+            iconname += `_${form}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(id) !== -1)
+        {
+            if (gender == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -903,25 +917,37 @@ function gymLabel(gym, includeMembers = true) {
                 <div class='gym info last-modified'>
                     Last Modified: ${lastModifiedStr}
                 </div>
-            </div>
-        </div>`
-    if (includeMembers) {
+            </div>`
+
+    if (includeMembers)
+    {
         memberStr = '<div>'
         gym.pokemon.forEach((member) => {
             var iconname = `${member.pokemon_id}`
-            if (member.form > 0) {
-                if (member.form < 37) {
-                    iconname += `_${member.form}`
-                } else {
-                    if (member.form % 2 == 0) {
-                        iconname += `_A`
+            if (member.form > 0)
+            {
+                if (member.form >= 45 && member.form <= 80)
+                {
+                    if (member.form % 2 == 0)
+                    {
+                        iconname += '_A'
                     }
                 }
-            } else {
-                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1) {
-                    if (member.gender == 1) {
+                else
+                {
+                    iconname += `_${member.form}`
+                }
+            }
+            else
+            {
+                if (genderSpecificSprites.indexOf(member.pokemon_id) !== -1)
+                {
+                    if (member.gender == 1)
+                    {
                         iconname += '_M'
-                    } else {
+                    }
+                    else
+                    {
                         iconname += '_F'
                     }
                 }
@@ -1022,16 +1048,8 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
     const lastScannedStr = getDateStr(pokestop.last_updated)
     const lastModifiedStr = getDateStr(pokestop.last_modified)
 
-    var hasNearby = false
-    var hasQuest = false
-    
-    if(pokestop.pokemon.length) {
-        hasNearby = true
-    }
-
-    if(pokestop.quest && pokestop.quest.type) {
-        hasQuest = true
-    }
+    var hasNearby = Boolean(pokestop.pokemon && pokestop.pokemon.length)
+    var hasQuest = Boolean(pokestop.quest && pokestop.quest.type)
 
     if (includeQuest)
     {
@@ -1148,10 +1166,10 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
                   <a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a>
                 </div>
                 <div class='pokestop info last-scanned'>
-                    Last Scanned: ${lastScannedStr}
+                  Last Scanned: ${lastScannedStr}
                 </div>
                 <div class='pokestop info last-modified'>
-                    Last Modified: ${lastModifiedStr}
+                  Last Modified: ${lastModifiedStr}
                 </div>
               </div>
             </div>`
@@ -1439,19 +1457,30 @@ function customizePokemonMarker(marker, item, skipNotification) {
     })
 
     var iconname = item['pokemon_id']
-    if (item['form'] > 0) {
-        if (item['form'] < 37) {
-            iconname += '_' + item['form']
-        } else {
-            if (item['form'] % 2 == 0) {
+    if (item['form'] > 0)
+    {
+        if (item['form'] >= 45 && item['form'] <= 80)
+        {
+            if (item['form'] % 2 == 0)
+            {
                 iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
-            if (item['gender'] == 1) {
+        else
+        {
+            iconname += `_${item['form']}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            if (item['gender'] == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -1490,7 +1519,6 @@ function setupGymMarker(item) {
     if (!marker.rangeCircle && isRangeActive(map)) {
         marker.rangeCircle = addRangeCircle(marker, map, 'gym', item['team_id'])
     }
-
 
     if (Store.get('useGymSidebar')) {
         marker.addListener('click', function () {
@@ -1534,6 +1562,11 @@ function updateGymMarker(item, marker) {
     const showRaidSetting = Store.get('showRaids') && (!Store.get('showActiveRaidsOnly') || !Store.get('showParkRaidsOnly'))
     const gymInBattle = getGymInBattle(item)
     const gymExRaidEligible = getGymExRaidEligible(item)
+
+    marker.addListener('click', function () {
+        this.setAnimation(null)
+//        this.animationDisabled = true
+    })
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible) {
 		let markerImage
 		if (generateImages) {
@@ -1557,6 +1590,21 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
+        
+        if(item.raid.pokemon_id && notifiedPokemon.indexOf(item.raid.pokemon_id) > -1)
+        {
+            playPokemonSound(item.raid.pokemon_id, cryFileTypes)
+            sendNotification("Raid Notification", item.raid.pokemon_name + " at " + item.name + "\nEnds: " + moment(item.raid.end).format('HH:mm'), markerImage, item['latitude'], item['longitude'])
+
+            if(marker.animationDisabled !== true)
+            {
+                marker.setAnimation(google.maps.Animation.BOUNCE)
+            }
+        }
+        else
+        {
+            marker.setAnimation(null)
+        }
     } else if (hasActiveRaid && raidLevelVisible && showRaidSetting) {
 		let markerImage
 		if (generateImages) {
@@ -1580,6 +1628,8 @@ function updateGymMarker(item, marker) {
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
         })
+
+        marker.setAnimation(null)
     } else {
 		let markerImage
 		if (generateImages) {
@@ -1604,6 +1654,8 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(1)
+
+        marker.setAnimation(null)
     }
     marker.infoWindow.setContent(gymLabel(item))
     return marker
@@ -1663,7 +1715,7 @@ function setupPokestopMarker(item) {
 
 function updatePokestopMarker(item, marker) {
     const hasActiveLure = item['lure_expiration']
-    const hasNearby = Boolean(item.pokemon.length)
+    const hasNearby = Boolean(item.pokemon && item.pokemon.length)
     const hasQuest = Boolean(item.quest && item.quest.type)
 
     let markerImage = 'static/images/pokestop/Pokestop.png'
@@ -2258,6 +2310,18 @@ function processPokestop(i, item) {
 
     if (Store.get('showLuredPokestopsOnly') && !item['lure_expiration']) {
         return true
+    }
+
+    if (Store.get('showPokestopsWithQuestStatus') == 1) {
+        if (!item.quest || (item.quest && !item.quest.type)) {
+            return true
+        }
+    }
+
+    if (Store.get('showPokestopsWithQuestStatus') == 2) {
+        if (item.quest && item.quest.type) {
+            return true
+        }
     }
 
     if (!mapData.pokestops[item['pokestop_id']]) { // new pokestop, add marker to map and item to dict
@@ -2909,19 +2973,30 @@ function getSidebarGymMember(pokemon) {
     }
 
     var iconname = `${pokemon.pokemon_id}`
-    if (pokemon.form > 0) {
-        if (pokemon.form < 37) {
-            iconname += `_${pokemon.form}`
-        } else {
-            if (pokemon.form % 2 == 0) {
-                iconname += `_A`
+    if (pokemon.form > 0)
+    {
+        if (pokemon.form >= 45 && pokemon.form <= 80)
+        {
+            if (pokemon.form % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
-            if (pokemon.gender == 1) {
+        else
+        {
+            iconname += `_${pokemon.form}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1)
+        {
+            if (pokemon.gender == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -3091,19 +3166,30 @@ function getSidebarPokestopMember(pokemon) {
     }
 
     var iconname = `${pokemon.pokemon_id}`
-    if (pokemon.form > 0) {
-        if (pokemon.form < 37) {
-            iconname += `_${pokemon.form}`
-        } else {
-            if (pokemon.form % 2 == 0) {
-                iconname += `_A`
+    if (pokemon.form > 0)
+    {
+        if (pokemon.form >= 45 && pokemon.form <= 80)
+        {
+            if (pokemon.form % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1) {
-            if (pokemon.gender == 1) {
+        else
+        {
+            iconname += `_${pokemon.form}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(pokemon.pokemon_id) !== -1)
+        {
+            if (pokemon.gender == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -3375,18 +3461,27 @@ $(function () {
         updateMap()
     })
 
-    $selectLuredPokestopsOnly = $('#lured-pokestops-only-switch')
+    $selectPokestopsWithQuestStatus = $('#pokestops-with-quest-status-select')
 
-    $selectLuredPokestopsOnly.select2({
-        placeholder: 'Only Show Lured Pokestops',
+    $selectPokestopsWithQuestStatus.select2({
+        placeholder: 'All',
         minimumResultsForSearch: Infinity
     })
 
-    $selectLuredPokestopsOnly.on('change', function () {
-        Store.set('showLuredPokestopsOnly', this.value)
+    $selectPokestopsWithQuestStatus.on('change', function () {
+        Store.set('showPokestopsWithQuestStatus', this.value)
         lastpokestops = false
         updateMap()
     })
+
+    $switchLuredPokestopsOnly = $('#lured-pokestops-only-switch')
+
+    $switchLuredPokestopsOnly.on('change', function () {
+        Store.set('showLuredPokestopsOnly', this.checked)
+        lastpokestops = false
+        updateMap()
+    })
+
     $switchGymSidebar = $('#gym-sidebar-switch')
 
     $switchGymSidebar.on('change', function () {
@@ -3782,16 +3877,19 @@ $(function () {
         var options = {
             'duration': 500
         }
-        var wrapper = $('#lured-pokestops-only-wrapper')
+        var wrapperQuests = $('#pokestops-with-quest-status-wrapper')
+        var wrapperLured = $('#lured-pokestops-only-wrapper')
         var wrapperSidebar = $('#pokestop-sidebar-wrapper')
 
         if (this.checked) {
             lastpokestops = false
-            wrapper.show(options)
+            wrapperQuests.show(options)
+            wrapperLured.show(options)
             wrapperSidebar.show(options)
         } else {
             lastpokestops = false
-            wrapper.hide(options)
+            wrapperQuests.hide(options)
+            wrapperLured.hide(options)
             wrapperSidebar.hide(options)
         }
         return buildSwitchChangeListener(mapData, ['pokestops'], 'showPokestops').bind(this)()
