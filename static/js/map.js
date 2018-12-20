@@ -649,8 +649,9 @@ function pokemonLabel(item) {
                 iconname += '_F'
             }
         }
-        if (possibleShinySprites.indexOf(id) !== -1) {
-          iconname += '_P'
+        if (possibleShinySprites.indexOf(id) !== -1)
+        {
+            iconname += '_P'
         }
     }
 
@@ -671,27 +672,27 @@ function pokemonLabel(item) {
                 <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
                 <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
               </div>
-          </div>
-          <div class='pokemon container content-right'>
-            <div>
-              <div class='pokemon disappear'>
-                <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
-              </div>
-              <div class='pokemon'>
-                CP: <span class='pokemon encounter'>${cp}/${iv.toFixed(1)}%</span> (A${atk}/D${def}/S${sta})
-              </div>
-              <div class='pokemon'>
-                Moveset: <span class='pokemon encounter'>${pMove1}/${pMove2}</span>
-              </div>
-              <div class='pokemon'>
-                Weight: ${weight.toFixed(2)}kg | Height: ${height.toFixed(2)}m
-              </div>
+            </div>
+            <div class='pokemon container content-right'>
               <div>
-                <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                <div class='pokemon disappear'>
+                  <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
+                </div>
+                <div class='pokemon'>
+                  CP: <span class='pokemon encounter'>${cp}/${iv.toFixed(1)}%</span> (A${atk}/D${def}/S${sta})
+                </div>
+                <div class='pokemon'>
+                  Moveset: <span class='pokemon encounter'>${pMove1}/${pMove2}</span>
+                </div>
+                <div class='pokemon'>
+                  Weight: ${weight.toFixed(2)}kg | Height: ${height.toFixed(2)}m
+                </div>
+                <div>
+                  <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+                </div>
               </div>
-          </div>
-        </div>
-      </div>`
+            </div>
+          </div>`
     } else {
         contentstring += `
       <div class='pokemon container'>
@@ -703,27 +704,27 @@ function pokemonLabel(item) {
             <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
             <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
           </div>
-      </div>
-      <div class='pokemon container content-right'>
-        <div>
-          <div class='pokemon disappear'>
-            <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
-          </div>
-          <div class='pokemon'>
-            CP: <span class='pokemon no-encounter'>No information</span>
-          </div>
-          <div class='pokemon'>
-            Moveset: <span class='pokemon no-encounter'>No information</span>
-          </div>
-          <div class='pokemon'>
-            Weight: <span class='pokemon no-encounter'>n/a</span> | Height: <span class='pokemon no-encounter'>n/a</span>
-          </div>
+        </div>
+        <div class='pokemon container content-right'>
           <div>
-            <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+            <div class='pokemon disappear'>
+              <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
+            </div>
+            <div class='pokemon'>
+              CP: <span class='pokemon no-encounter'>No information</span>
+            </div>
+            <div class='pokemon'>
+              Moveset: <span class='pokemon no-encounter'>No information</span>
+            </div>
+            <div class='pokemon'>
+              Weight: <span class='pokemon no-encounter'>n/a</span> | Height: <span class='pokemon no-encounter'>n/a</span>
+            </div>
+            <div>
+              <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
+            </div>
           </div>
-      </div>
-    </div>
-  </div>`
+        </div>
+      </div>`
     }
 
     contentstring += `
@@ -797,31 +798,64 @@ function gymLabel(gym, includeMembers = true) {
         </div>`
     }
 
-    if ((isUpcomingRaid || isRaidStarted) && isRaidFilterOn && isGymSatisfiesRaidMinMaxFilter(raid)) {
+    if ((isUpcomingRaid || isRaidStarted) && isRaidFilterOn && isGymSatisfiesRaidMinMaxFilter(raid))
+    {
         const raidColor = ['252,112,176', '255,158,22', '184,165,221']
         const levelStr = '★'.repeat(raid['level'])
         let raidImage = ''
-        if (isRaidStarted) {
-            // set Pokémon-specific image if we have one.
-			if (generateImages) {
-				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&is_unknown=1`
-                if (isExRaidEligible) {
+
+        if (isRaidStarted)
+        {
+            if (generateImages)
+            {
+                let gym_url = `gym_img?team=${teamName}&level=${getGymLevel(gym)}&raidlevel=${raid.level}`
+                if (raid.pokemon_id !== null)
+                {
+                    gym_url += `&pkm=${raid.pokemon_id}&form=${raid.form}`
+                }
+                else
+                {
+                    gym_url += '&is_unknown=1'
+                }
+                if (isExRaidEligible)
+                {
                     gym_url += '&ex_raid=1'
                 }
                 raidImage = `<img class='gym sprite' src='${gym_url}'>`
-			} else {
-				raidImage = `<img class='gym sprite' src='static/images/raid/${gymTypes[gym.team_id]}_${raid.level}_unknown.png'>`
-			}
-            if (generateImages && raid.pokemon_id !== null) {
-				let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}&pkm=${raid.pokemon_id}&form=${raid.form}`
-                if (isExRaidEligible) {
-                    gym_url += '&ex_raid=1'
-                }
-				raidImage = `<img class='gym sprite' src='${gym_url}'>`
-            } else if (raid.pokemon_id !== null && pokemonWithImages.indexOf(raid.pokemon_id) !== -1) {
-                raidImage = `<img class='gym sprite' src='static/icons/${raid.pokemon_id}.png'>`
             }
-            if (raid.pokemon_id === null) {
+            else
+            {
+                // set Pokémon-specific image if we have one.
+                if (raid.pokemon_id !== null && pokemonWithImages.indexOf(raid.pokemon_id) !== -1)
+                {
+                    var iconname = `${raid.pokemon_id}`
+                    if (raid.form > 0)
+                    {
+                        if (raid.form >= 45 && raid.form <= 80)
+                        {
+                            if (raid.form % 2 == 0)
+                            {
+                                iconname += '_A'
+                            }
+                        }
+                        else
+                        {
+                            iconname += `_${raid.form}`
+                        }
+                    }
+                    raidImage = `<img class='gym sprite' src='static/icons/${iconname}.png'>`
+                }
+                else
+                {
+                    raidImage = `<img class='gym sprite' src='static/images/raid/${teamName}_${raid.level}_unknown.png'>`
+                    if (isExRaidEligible)
+                    {
+                        raidImage = raidImage.replace('.png', '_ExRaidEligible.png')
+                    }
+                }
+            }
+            if (raid.pokemon_id === null)
+            {
                 image = `
                     ${raidImage}
                     <div class='raid'>
@@ -831,7 +865,9 @@ function gymLabel(gym, includeMembers = true) {
                         <span class='raid countdown label-countdown' disappears-at='${raid.end}'>00m00s</span> left (${moment(raid.end).format('HH:mm')})
                     </div>
                 `
-            } else {
+            }
+            else
+            {
                 image = `
                     <div class='raid container'>
                         <div class='raid container content-left'>
@@ -856,27 +892,39 @@ function gymLabel(gym, includeMembers = true) {
                     </div>
                 `
             }
-        } else {
-			if (generateImages) {
-			    let gym_url = `gym_img?team=${gymTypes[gym.team_id]}&level=${getGymLevel(gym)}&raidlevel=${raid.level}`
-                if (isInBattle) {
+        }
+        else
+        {
+             if (generateImages)
+             {
+                let gym_url = `gym_img?team=${teamName}&level=${getGymLevel(gym)}&raidlevel=${raid.level}`
+                if (isInBattle)
+                {
                     gym_url += '&in_battle=1'
                 }
-                if (isExRaidEligible) {
+                if (isExRaidEligible)
+                {
                     gym_url += '&ex_raid=1'
                 }
                 image = `<img class='gym sprite' src='${gym_url}'>`
-			} else {
-                image = `<img class='gym sprite' src='static/images/gym/${gymTypes[gym.team_id]}_${getGymLevel(gym)}_${raid.level}.png'>`
-				if (isInBattle) {
-					image = image.replace('.png', '_isInBattle.png')
-				}
-				if (isExRaidEligible) {
-					image = image.replace('.png', '_ExRaidEligible.png')
-				}
-			}
+            }
+            else
+            {
+                image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_${raid.level}.png'>`
+                if (isInBattle)
+                {
+                    image = image.replace('.png', '_isInBattle.png')
+                }
+
+                if (isExRaidEligible)
+                {
+                    image = image.replace('.png', '_ExRaidEligible.png')
+                }
+            }
         }
-        if (isUpcomingRaid) {
+
+        if (isUpcomingRaid)
+        {
             imageLbl = `
                 <div class='raid'>
                   <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
@@ -885,26 +933,35 @@ function gymLabel(gym, includeMembers = true) {
                   Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
                 </div>`
         }
-    } else {
-		if (generateImages) {
-			let gym_url = `gym_img?team=${teamName}&level=${getGymLevel(gym)}`
-			if (isInBattle) {
-				gym_url += '&in_battle=1'
-			}
-			if (isExRaidEligible) {
-				gym_url += '&ex_raid=1'
-			}
-			image = `<img class='gym sprite' src='${gym_url}'>`
-		} else {
-            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
-			if (isInBattle) {
-				image = image.replace('.png', '_isInBattle.png')
-			}
-			if (isExRaidEligible) {
-				image = image.replace('.png', '_ExRaidEligible.png')
-			}
-		}
     }
+    else
+    {
+        if (generateImages)
+        {
+            let gym_url = `gym_img?team=${teamName}&level=${getGymLevel(gym)}`
+            if (isInBattle)
+            {
+                gym_url += '&in_battle=1'
+            }
+            if (isExRaidEligible)
+            {
+                gym_url += '&ex_raid=1'
+            }
+            image = `<img class='gym sprite' src='${gym_url}'>`
+        }
+        else
+        {
+            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
+            if (isInBattle)
+            {
+                image = image.replace('.png', '_isInBattle.png')
+            }
+            if (isExRaidEligible) {
+                image = image.replace('.png', '_ExRaidEligible.png')
+            }
+        }
+    }
+
     navInfo = `
             <div class='gym container'>
                 <div>
@@ -954,8 +1011,9 @@ function gymLabel(gym, includeMembers = true) {
                         iconname += '_F'
                     }
                 }
-                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1) {
-                  iconname += '_P'
+                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
+                {
+                    iconname += '_P'
                 }
             }
             memberStr += `
@@ -1051,21 +1109,8 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
     const lastScannedStr = getDateStr(pokestop.last_updated)
     const lastModifiedStr = getDateStr(pokestop.last_modified)
 
-<<<<<<< HEAD
     var hasNearby = Boolean(pokestop.pokemon && pokestop.pokemon.length)
     var hasQuest = Boolean(pokestop.quest && pokestop.quest.type)
-=======
-    var hasNearby = false
-    var hasQuest = false
-
-    if(pokestop.pokemon.length) {
-        hasNearby = true
-    }
-
-    if(pokestop.quest && pokestop.quest.type) {
-        hasQuest = true
-    }
->>>>>>> upstream/develop
 
     if (includeQuest)
     {
@@ -1500,8 +1545,9 @@ function customizePokemonMarker(marker, item, skipNotification) {
                 iconname += '_F'
             }
         }
-        if (possibleShinySprites.indexOf(item['pokemon_id']) !== -1) {
-          iconname += '_P'
+        if (possibleShinySprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            iconname += '_P'
         }
     }
 
@@ -1573,6 +1619,7 @@ function setupGymMarker(item) {
 
 function updateGymMarker(item, marker) {
     let raidLevel = getRaidLevel(item.raid)
+    let markerImage = ''
     const hasActiveRaid = item.raid && item.raid.end > Date.now()
     const raidLevelVisible = raidLevel >= Store.get('showRaidMinLevel') && raidLevel <= Store.get('showRaidMaxLevel')
     const showRaidSetting = Store.get('showRaids') && (!Store.get('showActiveRaidsOnly') || !Store.get('showParkRaidsOnly'))
@@ -1583,24 +1630,56 @@ function updateGymMarker(item, marker) {
         this.setAnimation(null)
 //        this.animationDisabled = true
     })
-    if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible) {
-		let markerImage
-		if (generateImages) {
-		    markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&is_unknown=1'
-			if (gymExRaidEligible) {
+
+    if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible)
+    {
+        if (generateImages)
+        {
+            markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
+            if (item.raid.pokemon_id)
+            {
+                markerImage += `&pkm=${item.raid.pokemon_id}&form=${item.raid.form}`
+            }
+            else
+            {
+                markerImage += '&is_unknown=1'
+            }
+            if (gymExRaidEligible)
+            {
                 markerImage += '&ex_raid=1'
-			}
-		} else {
-            markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '_' + item.raid.level + '_unknown.png'
-		}
-        if (generateImages && item.raid.pokemon_id) {
-			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level'] + '&pkm=' + item['raid']['pokemon_id'] + '&form=' + item['raid']['form']
-			if (gymExRaidEligible) {
-                markerImage += '&ex_raid=1'
-			}
-		} else if (pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1) {
-            markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '_' + item['raid']['pokemon_id'] + '.png'
+            }
         }
+        else
+        {
+            markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '.png'
+            if (pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1)
+            {
+                markerImage = markerImage.replace('.png', '_' + item.raid.pokemon_id + '.png')
+                if (item.raid.form > 0)
+                {
+                    if (item.raid.form >= 45 && item.raid.form <= 80)
+                    {
+                        if(item.raid.form % 2 == 0)
+                        {
+                            markerImage = markerImage.replace('.png', '_A.png')
+                        }
+                    }
+                    else
+                    {
+                        markerImage = markerImage.replace('.png', '_' + item.raid.form + '.png')
+                    }
+                }
+            }
+            else
+            {
+                markerImage = markerImage.replace('.png', '_' + item.raid.level + '_unknown.png')
+            }
+            if (gymExRaidEligible)
+            {
+                markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+            }
+        }
+
         marker.setIcon({
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
@@ -1621,50 +1700,68 @@ function updateGymMarker(item, marker) {
         {
             marker.setAnimation(null)
         }
-    } else if (hasActiveRaid && raidLevelVisible && showRaidSetting) {
-		let markerImage
-		if (generateImages) {
-			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item) + '&raidlevel=' + item['raid']['level']
-			if (gymInBattle) {
+    }
+    else if (hasActiveRaid && raidLevelVisible && showRaidSetting)
+    {
+        if (generateImages)
+        {
+            markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
+            if (gymInBattle)
+            {
                 markerImage += '&in_battle=1'
-			}
-			if (gymExRaidEligible) {
+            }
+            if (gymExRaidEligible)
+            {
                 markerImage += '&ex_raid=1'
-			}
-		} else {
+            }
+        }
+        else
+        {
             markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png'
-            if (gymInBattle) {
+            if (gymInBattle)
+            {
                 markerImage = markerImage.replace('.png', '_isInBattle.png')
             }
-            if (gymExRaidEligible) {
+            if (gymExRaidEligible)
+            {
                 markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
             }
-		}
+        }
+
         marker.setIcon({
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
         })
 
         marker.setAnimation(null)
-    } else {
-		let markerImage
-		if (generateImages) {
-			markerImage = 'gym_img?team=' + gymTypes[item.team_id] + '&level=' + getGymLevel(item)
-			if (gymInBattle) {
+    }
+    else
+    {
+        if (generateImages)
+        {
+            markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}`
+            if (gymInBattle)
+            {
                 markerImage += '&in_battle=1'
-			}
-			if (gymExRaidEligible) {
+            }
+            if (gymExRaidEligible)
+            {
                 markerImage += '&ex_raid=1'
-			}
-		} else {
+            }
+        }
+        else
+        {
             markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '.png'
-            if (gymInBattle) {
+            if (gymInBattle)
+            {
                 markerImage = markerImage.replace('.png', '_isInBattle.png')
             }
-            if (gymExRaidEligible) {
+            if (gymExRaidEligible)
+            {
                 markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
             }
-		}
+        }
+
         marker.setIcon({
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
@@ -3016,8 +3113,9 @@ function getSidebarGymMember(pokemon) {
                 iconname += '_F'
             }
         }
-        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1) {
-          iconname += '_P'
+        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1)
+        {
+            iconname += '_P'
         }
     }
 
@@ -3209,8 +3307,9 @@ function getSidebarPokestopMember(pokemon) {
                 iconname += '_F'
             }
         }
-        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1) {
-          iconname += '_P'
+        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1)
+        {
+            iconname += '_P'
         }
     }
 
