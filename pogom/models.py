@@ -30,7 +30,8 @@ from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
                     get_move_name, get_move_damage, get_move_energy,
                     get_move_type, calc_pokemon_level, peewee_attr_to_col,
-                    get_quest_icon, get_quest_quest_text, get_quest_reward_text)
+                    get_quest_icon, get_quest_quest_text, get_quest_reward_text,
+                    get_timezone_offset)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
@@ -608,7 +609,9 @@ class Pokestop(LatLongModel):
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
 
-            pokestop_localtime = now_date + timedelta(minutes=args.quest_timezone_offset)
+            pokestop_timezone_offset = get_timezone_offset(pokestops[pokestop_ids[0]]['latitude'], pokestops[pokestop_ids[0]]['longitude'])
+
+            pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
             quests = (Quest
                       .select(
@@ -618,9 +621,9 @@ class Pokestop(LatLongModel):
                           Quest.reward_item,
                           Quest.quest_json)
                       .where(Quest.pokestop_id << pokestop_ids)
-                      .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', args.quest_timezone_offset) >= pokestop_localtime.date())
+                      .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date())
                       .dicts())
-						  
+
             for q in quests:
                 pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
@@ -707,7 +710,9 @@ class Pokestop(LatLongModel):
 
         result['quest'] = {}
 
-        pokestop_localtime = now_date + timedelta(minutes=args.quest_timezone_offset)
+        pokestop_timezone_offset = get_timezone_offset(result['latitude'], result['longitude'])
+
+        pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
         quest = (Quest
                  .select(
@@ -716,7 +721,7 @@ class Pokestop(LatLongModel):
                      Quest.reward_item,
                      Quest.quest_json)
                  .where(Quest.pokestop_id == id)
-                 .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', args.quest_timezone_offset) >= pokestop_localtime.date())
+                 .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date())
                  .dicts())
 
         for q in quest:
