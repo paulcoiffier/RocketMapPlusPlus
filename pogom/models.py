@@ -13,7 +13,7 @@ from peewee import (InsertQuery, Check, CompositeKey, ForeignKeyField,
                     SmallIntegerField, IntegerField, CharField, DoubleField,
                     BooleanField, DateTimeField, fn, DeleteQuery, FloatField,
                     TextField, BigIntegerField, PrimaryKeyField,
-                    JOIN, OperationalError)
+                    JOIN, OperationalError, SQL)
 from playhouse.flask_utils import FlaskDB
 from playhouse.pool import PooledMySQLDatabase
 from playhouse.shortcuts import RetryOperationalError, case
@@ -608,28 +608,19 @@ class Pokestop(LatLongModel):
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
 
-            if args.quest_expiration_days > 0:
-                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
-                quests = (Quest
-                          .select(
-                              Quest.pokestop_id,
-                              Quest.quest_type,
-                              Quest.reward_type,
-                              Quest.reward_item,
-                              Quest.quest_json)
-                          .where((Quest.pokestop_id << pokestop_ids) &
-                                 (Quest.last_scanned >= period))
-                          .dicts())
-            else:
-                quests = (Quest
-                          .select(
-                              Quest.pokestop_id,
-                              Quest.quest_type,
-                              Quest.reward_type,
-                              Quest.reward_item,
-                              Quest.quest_json)
-                          .where(Quest.pokestop_id << pokestop_ids)
-                          .dicts())
+            pokestop_localtime = now_date + timedelta(minutes=args.quest_timezone_offset)
+
+            quests = (Quest
+                      .select(
+                          Quest.pokestop_id,
+                          Quest.quest_type,
+                          Quest.reward_type,
+                          Quest.reward_item,
+                          Quest.quest_json)
+                      .where(Quest.pokestop_id << pokestop_ids)
+                      .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', args.quest_timezone_offset) >= pokestop_localtime.date())
+                      .dicts())
+						  
             for q in quests:
                 pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
@@ -715,26 +706,19 @@ class Pokestop(LatLongModel):
             result['pokemon'].append(p)
 
         result['quest'] = {}
-        if args.quest_expiration_days > 0:
-            period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
-            quest = (Quest
-                     .select(
-                         Quest.quest_type,
-                         Quest.reward_type,
-                         Quest.reward_item,
-                         Quest.quest_json)
-                     .where((Quest.pokestop_id == id) &
-                            (Quest.last_scanned >= period))
-                     .dicts())
-        else:
-            quest = (Quest
-                     .select(
-                         Quest.quest_type,
-                         Quest.reward_type,
-                         Quest.reward_item,
-                         Quest.quest_json)
-                     .where(Quest.pokestop_id == id)
-                     .dicts())
+
+        pokestop_localtime = now_date + timedelta(minutes=args.quest_timezone_offset)
+
+        quest = (Quest
+                 .select(
+                     Quest.quest_type,
+                     Quest.reward_type,
+                     Quest.reward_item,
+                     Quest.quest_json)
+                 .where(Quest.pokestop_id == id)
+                 .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', args.quest_timezone_offset) >= pokestop_localtime.date())
+                 .dicts())
+
         for q in quest:
             result['quest']['text'] = q['quest_type']
             result['quest']['type'] = q['reward_type']
@@ -1079,10 +1063,10 @@ class Gym(LatLongModel):
 
             if dist > 0:
                 query = (query
-                         .where((((Gym.latitude >= minlat) &
+                         .where((Gym.latitude >= minlat) &
                                   (Gym.longitude >= minlng) &
                                   (Gym.latitude <= maxlat) &
-                                  (Gym.longitude <= maxlng))))
+                                  (Gym.longitude <= maxlng))
                          .dicts())
 
             queryDict = query.dicts()

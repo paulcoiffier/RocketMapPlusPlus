@@ -259,6 +259,9 @@ def get_args():
     parser.add_argument('-qed', '--quest-expiration-days',
                         help=('Number of days before quest info expires (use 0 for no expiration)'),
                         type=int, default=1)
+    parser.add_argument('-qto', '--quest-timezone-offset',
+                        help=('Minutes between localtime and UTC of the area being scanned'),
+                        type=int, default=0)
     parser.add_argument('-jit', '--jitter',
                         help=('Apply jitter to coordinates for teleport scheduling'),
                         action='store_true', default=True)

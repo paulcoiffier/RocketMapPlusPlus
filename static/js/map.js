@@ -1572,10 +1572,17 @@ function setupGymMarker(item) {
         },
         map: map
     })
+
     marker.infoWindow = new google.maps.InfoWindow({
         content: '',
         disableAutoPan: true
     })
+
+    marker.addListener('click', function () {
+        this.setAnimation(null)
+        this.animationDisabled = true
+    })
+
     updateGymMarker(item, marker)
 
     if (!marker.rangeCircle && isRangeActive(map)) {
@@ -1625,11 +1632,6 @@ function updateGymMarker(item, marker) {
     const showRaidSetting = Store.get('showRaids') && (!Store.get('showActiveRaidsOnly') || !Store.get('showParkRaidsOnly'))
     const gymInBattle = getGymInBattle(item)
     const gymExRaidEligible = getGymExRaidEligible(item)
-
-    marker.addListener('click', function () {
-        this.setAnimation(null)
-//        this.animationDisabled = true
-    })
 
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible)
     {
@@ -1688,8 +1690,12 @@ function updateGymMarker(item, marker) {
         
         if(item.raid.pokemon_id && notifiedPokemon.indexOf(item.raid.pokemon_id) > -1)
         {
-            playPokemonSound(item.raid.pokemon_id, cryFileTypes)
-            sendNotification("Raid Notification", item.raid.pokemon_name + " at " + item.name + "\nEnds: " + moment(item.raid.end).format('HH:mm'), markerImage, item['latitude'], item['longitude'])
+            if(marker.skipNotification !== true)
+            {
+                playPokemonSound(item.raid.pokemon_id, cryFileTypes)
+                sendNotification("Raid Notification", item.raid.pokemon_name + " at " + item.name + "\nEnds: " + moment(item.raid.end).format('HH:mm'), markerImage, item['latitude'], item['longitude'])
+                marker.skipNotification = true
+            }
 
             if(marker.animationDisabled !== true)
             {
@@ -1699,6 +1705,8 @@ function updateGymMarker(item, marker) {
         else
         {
             marker.setAnimation(null)
+            marker.animationDisabled = false
+            marker.skipNotification = false
         }
     }
     else if (hasActiveRaid && raidLevelVisible && showRaidSetting)
@@ -1734,6 +1742,8 @@ function updateGymMarker(item, marker) {
         })
 
         marker.setAnimation(null)
+        marker.animationDisabled = false
+        marker.skipNotification = false
     }
     else
     {
@@ -1769,6 +1779,8 @@ function updateGymMarker(item, marker) {
         marker.setZIndex(1)
 
         marker.setAnimation(null)
+        marker.animationDisabled = false
+        marker.skipNotification = false
     }
     marker.infoWindow.setContent(gymLabel(item))
     return marker
