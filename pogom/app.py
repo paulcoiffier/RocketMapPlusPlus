@@ -975,22 +975,20 @@ class Pogom(Flask):
                                         for f in query]
                             for fort in mapcell["forts"]:
                                 if fort.get("type") == "CHECKPOINT":
-                                    if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
-                                            in encountered_pokestops):
-                                        # If pokestop has been encountered before and hasn't
-                                        # changed don't process it.
-                                        continue
-
-                                    if float(fort.get('lure_expiration', 0)) > 0:
-                                        lure_expiration = (datetime.utcfromtimestamp(
-                                            float(fort.get('lure_expiration')) / 1000.0) +
-                                            timedelta(minutes=self.args.lure_duration))
-                                    else:
+                                    activeFortModifier = fort.get('activeFortModifier', [])
+                                    if 'ITEM_TROY_DISK' in activeFortModifier:
+                                        lure_expiration = datetime.utcfromtimestamp(long(fort['lastModifiedTimestampMs']) / 1000) + timedelta(minutes=self.args.lure_duration)
+                                        lureInfo = fort.get('lureInfo')
+                                        if lureInfo is not None:
+                                            active_pokemon_id = _POKEMONID.values_by_name[lureInfo.get('activePokemonId', 'MISSINGNO')].number,
+                                            active_pokemon_expiration = datetime.utcfromtimestamp(long(lureInfo.get('lureExpiresTimestampMs')) / 1000)
+                                        else:
+                                            active_pokemon_id = None
+                                            active_pokemon_expiration = None
+                                    else:    
                                         lure_expiration = None
-                                    if fort.get('active_pokemon_id', 0) > 0:
-                                        active_pokemon_id = fort.get('active_pokemon_id')
-                                    else:
                                         active_pokemon_id = None
+                                        active_pokemon_expiration = None
 
                                     pokestops[fort['id']] = {
                                         'pokestop_id': fort['id'],
@@ -1000,7 +998,9 @@ class Pogom(Flask):
                                         'last_modified': datetime.utcfromtimestamp(
                                             float(fort['lastModifiedTimestampMs']) / 1000.0),
                                         'lure_expiration': lure_expiration,
-                                        'active_fort_modifier': active_pokemon_id
+                                        'active_fort_modifier': json.dumps(activeFortModifier),
+                                        'active_pokemon_id': active_pokemon_id,
+                                        'active_pokemon_expiration': active_pokemon_expiration
                                     }
 
                                     pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
@@ -1018,6 +1018,12 @@ class Pogom(Flask):
                                         'description': pokestop_description,
                                         'url': pokestop_url
                                     }
+
+                                    if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
+                                            in encountered_pokestops):
+                                        # If pokestop has been encountered before and hasn't
+                                        # changed don't process it.
+                                        continue
 
                                     if 'pokestop' in self.args.wh_types or (
                                             'lure' in self.args.wh_types and

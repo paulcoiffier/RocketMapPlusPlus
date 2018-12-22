@@ -45,7 +45,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 51
+db_schema_version = 52
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -483,7 +483,9 @@ class Pokestop(LatLongModel):
     longitude = DoubleField()
     last_modified = DateTimeField(index=True)
     lure_expiration = DateTimeField(null=True, index=True)
-    active_fort_modifier = SmallIntegerField(null=True, index=True)
+    active_fort_modifier = TextField(null=True)
+    active_pokemon_id = SmallIntegerField(null=True)
+    active_pokemon_expiration = DateTimeField(null=True, index=True)
     last_updated = DateTimeField(
         null=True, index=True, default=datetime.utcnow)
 
@@ -498,6 +500,7 @@ class Pokestop(LatLongModel):
                                 Pokestop.enabled, Pokestop.latitude,
                                 Pokestop.longitude, Pokestop.last_modified,
                                 Pokestop.lure_expiration, Pokestop.pokestop_id,
+                                Pokestop.active_pokemon_id, Pokestop.active_pokemon_expiration,
                                 Pokestop.last_updated)
 
         if not (swLat and swLng and neLat and neLng):
@@ -571,6 +574,10 @@ class Pokestop(LatLongModel):
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
             p['pokemon'] = []
             p['quest'] = {}
+            if p['active_fort_modifier'] is None:
+                p['active_fort_modifier'] = []
+            else:  
+                p['active_fort_modifier'] = json.loads(p['active_fort_modifier'])
             pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
 
@@ -672,6 +679,8 @@ class Pokestop(LatLongModel):
                               Pokestop.last_modified,
                               Pokestop.lure_expiration,
                               Pokestop.active_fort_modifier,
+                              Pokestop.active_pokemon_id,
+                              Pokestop.active_pokemon_expiration,
                               Pokestop.last_updated)
                       .join(PokestopDetails, JOIN.LEFT_OUTER,
                             on=(Pokestop.pokestop_id == PokestopDetails.pokestop_id))
@@ -680,7 +689,12 @@ class Pokestop(LatLongModel):
                       .get())
         except Pokestop.DoesNotExist:
             return None
-
+        
+        if result['active_fort_modifier'] is None:
+            result['active_fort_modifier'] = []
+        else:  
+            result['active_fort_modifier'] = json.loads(result['active_fort_modifier'])
+            
         result['pokemon'] = []
 
         now_date = datetime.utcnow()
@@ -4113,6 +4127,17 @@ def database_migrate(db, old_ver):
     if old_ver < 51:
         db.execute_sql(
             'ALTER TABLE `quest` ADD COLUMN `quest_json` LONGTEXT NULL AFTER `reward_amount`;'
+        )
+
+    if old_ver < 52:
+        migrate(
+            migrator.add_column('pokestop', 'active_pokemon_id', SmallIntegerField(null=True)),
+            migrator.add_column('pokestop', 'active_pokemon_expiration', DateTimeField(index=True, null=True)),
+            migrator.drop_index('pokestop', 'active_fort_modifier'),
+
+        )
+        db.execute_sql(
+            'ALTER TABLE `pokestop` MODIFY `active_fort_modifier` LONGTEXT NULL'
         )
 
     # Always log that we're done.

@@ -1199,15 +1199,22 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
         imgSrc = iconSrc
     }
 
+    let pokestopIcon = `<img class='pokestop pokestop-icon sprite' src='${iconSrc}'>`
     let expireTimeStr = ''
     let lureClass = 'nolure'
+    
     if (expireTime) {
+        var active_pokemon_id = pokestop.active_pokemon_id
+        var active_pokemon_expiration = pokestop.active_pokemon_expiration
         titleText += ' (Lured)'
         lureClass = 'lure'
         expireTimeStr = `
         <div class='pokestop-expire'>
           <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
         </div>`
+        if (active_pokemon_id > 0) {
+            pokestopIcon = `<div class='pokestop active-pokemon'><div class='pokestop active-pokemon pokemon-background'><img class='pokestop active-pokemon pokemon' src='static/icons/${active_pokemon_id}.png'></div><div class='active-pokemon-expire'><span class='label-countdown' disappears-at='${active_pokemon_expiration}'>00m00s</span></div></div>`
+        }
     }
 
     str = `
@@ -1217,7 +1224,7 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
               </div>
               ${expireTimeStr}
               <div>
-                <img class='pokestop pokestop-icon sprite' src='${iconSrc}'>
+                ${pokestopIcon}
                 <img class='pokestop img sprite' src='${imgSrc}'>
               </div>
               ${questStr}
@@ -1663,7 +1670,7 @@ function updateGymMarker(item, marker) {
                     {
                         if(item.raid.form % 2 == 0)
                         {
-                            markerImage = markerImage.replace('.png', '_A.png')
+                            markerImage = markerImage.replace('.png', 'A.png')
                         }
                     }
                     else
