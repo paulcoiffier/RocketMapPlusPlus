@@ -657,9 +657,10 @@ function pokemonLabel(item) {
 
     if (showStats && cp !== null && cpMultiplier !== null) {
         var pokemonLevel = getPokemonLevel(cpMultiplier)
-
+        var iv = 0.0
+        
         if (atk !== null && def !== null && sta !== null) {
-            var iv = getIv(atk, def, sta)
+            iv = getIv(atk, def, sta)
         }
 
         contentstring += `
@@ -1158,7 +1159,7 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
                 }
                 if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
                 {
-                  iconname += '_P'
+                    iconname += '_P'
                 }
             }
 

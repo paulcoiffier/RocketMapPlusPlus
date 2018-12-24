@@ -620,28 +620,39 @@ class Pokestop(LatLongModel):
 
             pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
-            quests = (Quest
-                      .select(
-                          Quest.pokestop_id,
-                          Quest.quest_type,
-                          Quest.reward_type,
-                          Quest.reward_item,
-                          Quest.quest_json)
-                      .where(Quest.pokestop_id << pokestop_ids)
-                      .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date())
-                      .dicts())
+            if args.quest_expiration_days < 1:
+                quests = (Quest
+                          .select(
+                              Quest.pokestop_id,
+                              Quest.quest_type,
+                              Quest.reward_type,
+                              Quest.reward_item,
+                              Quest.quest_json)
+                          .where(Quest.pokestop_id << pokestop_ids)
+                          .dicts())
+            else:
+                quests = (Quest
+                          .select(
+                              Quest.pokestop_id,
+                              Quest.quest_type,
+                              Quest.reward_type,
+                              Quest.reward_item,
+                              Quest.quest_json)
+                          .where(Quest.pokestop_id << pokestop_ids)
+                          .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
+                          .dicts())
 
             for q in quests:
+                if q['quest_json'] is not None:
+                    q['quest_json'] = json.loads(q['quest_json'])
+
                 pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
                 pokestops[q['pokestop_id']]['quest']['item'] = q['reward_item']
                 pokestops[q['pokestop_id']]['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
-                if q['quest_json'] is None:
-                    quest_json = None
-                else:
-                    quest_json = json.loads(q['quest_json'])
-                pokestops[q['pokestop_id']]['quest']['quest_text'] = get_quest_quest_text(quest_json)
-                pokestops[q['pokestop_id']]['quest']['reward_text'] = get_quest_reward_text(quest_json)
+                pokestops[q['pokestop_id']]['quest']['quest_json'] = q['quest_json']
+                pokestops[q['pokestop_id']]['quest']['quest_text'] = get_quest_quest_text(q['quest_json'])
+                pokestops[q['pokestop_id']]['quest']['reward_text'] = get_quest_reward_text(q['quest_json'])
 
         # Re-enable the GC.
         gc.enable()
@@ -728,27 +739,37 @@ class Pokestop(LatLongModel):
 
         pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
-        quest = (Quest
-                 .select(
-                     Quest.quest_type,
-                     Quest.reward_type,
-                     Quest.reward_item,
-                     Quest.quest_json)
-                 .where(Quest.pokestop_id == id)
-                 .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date())
-                 .dicts())
+        if args.quest_expiration_days < 1:
+            quest = (Quest
+                     .select(
+                         Quest.quest_type,
+                         Quest.reward_type,
+                         Quest.reward_item,
+                         Quest.quest_json)
+                     .where(Quest.pokestop_id == id)
+                     .dicts())
+        else:
+            quest = (Quest
+                     .select(
+                         Quest.quest_type,
+                         Quest.reward_type,
+                         Quest.reward_item,
+                         Quest.quest_json)
+                     .where(Quest.pokestop_id == id)
+                     .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
+                     .dicts())
 
         for q in quest:
+            if q['quest_json'] is not None:
+                q['quest_json'] = json.loads(q['quest_json'])
+
             result['quest']['text'] = q['quest_type']
             result['quest']['type'] = q['reward_type']
             result['quest']['item'] = q['reward_item']
             result['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
-            if q['quest_json'] is None:
-                quest_json = None
-            else:
-                quest_json = json.loads(q['quest_json'])
-            result['quest']['quest_text'] = get_quest_quest_text(quest_json)
-            result['quest']['reward_text'] = get_quest_reward_text(quest_json)
+            result['quest']['quest_json'] = q['quest_json']
+            result['quest']['quest_text'] = get_quest_quest_text(q['quest_json'])
+            result['quest']['reward_text'] = get_quest_reward_text(q['quest_json'])
 
         return result
 
