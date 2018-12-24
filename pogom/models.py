@@ -13,7 +13,7 @@ from peewee import (InsertQuery, Check, CompositeKey, ForeignKeyField,
                     SmallIntegerField, IntegerField, CharField, DoubleField,
                     BooleanField, DateTimeField, fn, DeleteQuery, FloatField,
                     TextField, BigIntegerField, PrimaryKeyField,
-                    JOIN, OperationalError)
+                    JOIN, OperationalError, SQL)
 from playhouse.flask_utils import FlaskDB
 from playhouse.pool import PooledMySQLDatabase
 from playhouse.shortcuts import RetryOperationalError, case
@@ -30,7 +30,8 @@ from .utils import (get_pokemon_name, get_pokemon_types,
                     get_args, cellid, in_radius, date_secs, clock_between,
                     get_move_name, get_move_damage, get_move_energy,
                     get_move_type, calc_pokemon_level, peewee_attr_to_col,
-                    get_quest_icon, get_quest_quest_text, get_quest_reward_text)
+                    get_quest_icon, get_quest_quest_text, get_quest_reward_text,
+                    get_timezone_offset)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
@@ -44,7 +45,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 51
+db_schema_version = 52
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -482,7 +483,9 @@ class Pokestop(LatLongModel):
     longitude = DoubleField()
     last_modified = DateTimeField(index=True)
     lure_expiration = DateTimeField(null=True, index=True)
-    active_fort_modifier = SmallIntegerField(null=True, index=True)
+    active_fort_modifier = TextField(null=True)
+    active_pokemon_id = SmallIntegerField(null=True)
+    active_pokemon_expiration = DateTimeField(null=True, index=True)
     last_updated = DateTimeField(
         null=True, index=True, default=datetime.utcnow)
 
@@ -497,6 +500,7 @@ class Pokestop(LatLongModel):
                                 Pokestop.enabled, Pokestop.latitude,
                                 Pokestop.longitude, Pokestop.last_modified,
                                 Pokestop.lure_expiration, Pokestop.pokestop_id,
+                                Pokestop.active_pokemon_id, Pokestop.active_pokemon_expiration,
                                 Pokestop.last_updated)
 
         if not (swLat and swLng and neLat and neLng):
@@ -570,6 +574,10 @@ class Pokestop(LatLongModel):
                     transform_from_wgs_to_gcj(p['latitude'], p['longitude'])
             p['pokemon'] = []
             p['quest'] = {}
+            if p['active_fort_modifier'] is None:
+                p['active_fort_modifier'] = []
+            else:  
+                p['active_fort_modifier'] = json.loads(p['active_fort_modifier'])
             pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
 
@@ -608,8 +616,11 @@ class Pokestop(LatLongModel):
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
 
-            if args.quest_expiration_days > 0:
-                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+            pokestop_timezone_offset = get_timezone_offset(pokestops[pokestop_ids[0]]['latitude'], pokestops[pokestop_ids[0]]['longitude'])
+
+            pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
+
+            if args.quest_expiration_days < 1:
                 quests = (Quest
                           .select(
                               Quest.pokestop_id,
@@ -617,8 +628,7 @@ class Pokestop(LatLongModel):
                               Quest.reward_type,
                               Quest.reward_item,
                               Quest.quest_json)
-                          .where((Quest.pokestop_id << pokestop_ids) &
-                                 (Quest.last_scanned >= period))
+                          .where(Quest.pokestop_id << pokestop_ids)
                           .dicts())
             else:
                 quests = (Quest
@@ -629,18 +639,20 @@ class Pokestop(LatLongModel):
                               Quest.reward_item,
                               Quest.quest_json)
                           .where(Quest.pokestop_id << pokestop_ids)
+                          .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
                           .dicts())
+
             for q in quests:
+                if q['quest_json'] is not None:
+                    q['quest_json'] = json.loads(q['quest_json'])
+
                 pokestops[q['pokestop_id']]['quest']['text'] = q['quest_type']
                 pokestops[q['pokestop_id']]['quest']['type'] = q['reward_type']
                 pokestops[q['pokestop_id']]['quest']['item'] = q['reward_item']
                 pokestops[q['pokestop_id']]['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
-                if q['quest_json'] is None:
-                    quest_json = None
-                else:
-                    quest_json = json.loads(q['quest_json'])
-                pokestops[q['pokestop_id']]['quest']['quest_text'] = get_quest_quest_text(quest_json)
-                pokestops[q['pokestop_id']]['quest']['reward_text'] = get_quest_reward_text(quest_json)
+                pokestops[q['pokestop_id']]['quest']['quest_json'] = q['quest_json']
+                pokestops[q['pokestop_id']]['quest']['quest_text'] = get_quest_quest_text(q['quest_json'])
+                pokestops[q['pokestop_id']]['quest']['reward_text'] = get_quest_reward_text(q['quest_json'])
 
         # Re-enable the GC.
         gc.enable()
@@ -678,6 +690,8 @@ class Pokestop(LatLongModel):
                               Pokestop.last_modified,
                               Pokestop.lure_expiration,
                               Pokestop.active_fort_modifier,
+                              Pokestop.active_pokemon_id,
+                              Pokestop.active_pokemon_expiration,
                               Pokestop.last_updated)
                       .join(PokestopDetails, JOIN.LEFT_OUTER,
                             on=(Pokestop.pokestop_id == PokestopDetails.pokestop_id))
@@ -686,7 +700,12 @@ class Pokestop(LatLongModel):
                       .get())
         except Pokestop.DoesNotExist:
             return None
-
+        
+        if result['active_fort_modifier'] is None:
+            result['active_fort_modifier'] = []
+        else:  
+            result['active_fort_modifier'] = json.loads(result['active_fort_modifier'])
+            
         result['pokemon'] = []
 
         now_date = datetime.utcnow()
@@ -715,16 +734,19 @@ class Pokestop(LatLongModel):
             result['pokemon'].append(p)
 
         result['quest'] = {}
-        if args.quest_expiration_days > 0:
-            period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
+
+        pokestop_timezone_offset = get_timezone_offset(result['latitude'], result['longitude'])
+
+        pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
+
+        if args.quest_expiration_days < 1:
             quest = (Quest
                      .select(
                          Quest.quest_type,
                          Quest.reward_type,
                          Quest.reward_item,
                          Quest.quest_json)
-                     .where((Quest.pokestop_id == id) &
-                            (Quest.last_scanned >= period))
+                     .where(Quest.pokestop_id == id)
                      .dicts())
         else:
             quest = (Quest
@@ -734,18 +756,20 @@ class Pokestop(LatLongModel):
                          Quest.reward_item,
                          Quest.quest_json)
                      .where(Quest.pokestop_id == id)
+                     .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
                      .dicts())
+
         for q in quest:
+            if q['quest_json'] is not None:
+                q['quest_json'] = json.loads(q['quest_json'])
+
             result['quest']['text'] = q['quest_type']
             result['quest']['type'] = q['reward_type']
             result['quest']['item'] = q['reward_item']
             result['quest']['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
-            if q['quest_json'] is None:
-                quest_json = None
-            else:
-                quest_json = json.loads(q['quest_json'])
-            result['quest']['quest_text'] = get_quest_quest_text(quest_json)
-            result['quest']['reward_text'] = get_quest_reward_text(quest_json)
+            result['quest']['quest_json'] = q['quest_json']
+            result['quest']['quest_text'] = get_quest_quest_text(q['quest_json'])
+            result['quest']['reward_text'] = get_quest_reward_text(q['quest_json'])
 
         return result
 
@@ -1079,10 +1103,10 @@ class Gym(LatLongModel):
 
             if dist > 0:
                 query = (query
-                         .where((((Gym.latitude >= minlat) &
+                         .where((Gym.latitude >= minlat) &
                                   (Gym.longitude >= minlng) &
                                   (Gym.latitude <= maxlat) &
-                                  (Gym.longitude <= maxlng))))
+                                  (Gym.longitude <= maxlng))
                          .dicts())
 
             queryDict = query.dicts()
@@ -4124,6 +4148,17 @@ def database_migrate(db, old_ver):
     if old_ver < 51:
         db.execute_sql(
             'ALTER TABLE `quest` ADD COLUMN `quest_json` LONGTEXT NULL AFTER `reward_amount`;'
+        )
+
+    if old_ver < 52:
+        migrate(
+            migrator.add_column('pokestop', 'active_pokemon_id', SmallIntegerField(null=True)),
+            migrator.add_column('pokestop', 'active_pokemon_expiration', DateTimeField(index=True, null=True)),
+            migrator.drop_index('pokestop', 'active_fort_modifier'),
+
+        )
+        db.execute_sql(
+            'ALTER TABLE `pokestop` MODIFY `active_fort_modifier` LONGTEXT NULL'
         )
 
     # Always log that we're done.

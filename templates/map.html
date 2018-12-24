@@ -164,7 +164,7 @@
                 </select>
               </div>
               <div class="form-control switch-container" id="ex-raid-gyms-only-wrapper">
-                <h3>Ex Raid Gyms</h3>
+                <h3>Ex Raid Gyms only</h3>
                 <div class="onoffswitch">
                   <input id="ex-raid-gyms-only-switch" type="checkbox" name="ex-raid-gyms-only-switch" class="onoffswitch-checkbox" checked>
                   <label class="onoffswitch-label" for="ex-raid-gyms-only-switch">
@@ -186,17 +186,28 @@
                 </label>
               </div>
             </div>
-            <div class="form-control switch-container" id="lured-pokestops-only-wrapper" style="display:none">
-              <select name="lured-pokestops-only-switch" id="lured-pokestops-only-switch">
+            <div class="form-control switch-container" id="pokestops-with-quest-status-wrapper" style="display:none">
+              <select name="pokestops-with-quest-status-select" id="pokestops-with-quest-status-select">
                 <option value="0">All</option>
-                <option value="1">Only Lured</option>
+                <option value="1">With Quest Details</option>
+                <option value="2">Without Quest Details</option>
               </select>
             </div>
             <div class="form-control switch-container" id="pokestop-sidebar-wrapper" style="display:none">
-              <h3>Use Pokestop Sidebar</h3>
+              <h3>Use Pokéstop Sidebar</h3>
               <div class="onoffswitch">
                 <input id="pokestop-sidebar-switch" type="checkbox" name="pokestop-sidebar-switch" class="onoffswitch-checkbox" checked>
                 <label class="onoffswitch-label" for="pokestop-sidebar-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-control switch-container" id="lured-pokestops-only-wrapper" style="display:none">
+              <h3>Lured Pokéstops only</h3>
+              <div class="onoffswitch">
+                <input id="lured-pokestops-only-switch" type="checkbox" name="lured-pokestops-only-switch" class="onoffswitch-checkbox" checked>
+                <label class="onoffswitch-label" for="lured-pokestops-only-switch">
                 <span class="switch-label" data-on="On" data-off="Off"></span>
                 <span class="switch-handle"></span>
                 </label>

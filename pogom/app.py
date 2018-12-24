@@ -553,9 +553,9 @@ class Pogom(Flask):
         pokestop_details = {}
         raids = {}
         quest_result = {}
-        skipped = 0
-        filtered = 0
-        stopsskipped = 0
+        pokemon_skipped = 0
+        pokemon_filtered = 0
+        nearby_skipped = 0
         spawn_points = {}
         scan_spawn_points = {}
         sightings = {}
@@ -658,9 +658,9 @@ class Pogom(Flask):
 
                                 sp['last_scanned'] = datetime.utcnow()
 
-                                if ((long(p['encounterId']), spawn_id) in encountered_pokemon):
+                                if ((long(p['encounterId']), spawn_id) in encountered_pokemon) or (long(p['encounterId']) in pokemon):
                                     # If Pokemon has been encountered before don't process it.
-                                    skipped += 1
+                                    pokemon_skipped += 1
                                     continue
 
                                 start_end = SpawnPoint.start_end(sp, 1)
@@ -805,9 +805,9 @@ class Pogom(Flask):
 
                                 sp['last_scanned'] = datetime.utcnow()
 
-                                if ((long(p['encounterId']), spawn_id) in encountered_pokemon):
+                                if ((long(p['encounterId']), spawn_id) in encountered_pokemon) or (long(p['encounterId']) in pokemon):
                                     # If Pokemon has been encountered before don't process it.
-                                    skipped += 1
+                                    pokemon_skipped += 1
                                     continue
 
                                 start_end = SpawnPoint.start_end(sp, 1)
@@ -897,19 +897,6 @@ class Pogom(Flask):
                                 nearby_encountered_pokemon = [
                                     (long(p['encounter_id']), p['pokestop_id']) for p in query]
 
-                            with Pokemon.database().execution_context():
-                                query = (Pokemon
-                                         .select(Pokemon.encounter_id)
-                                         .where((Pokemon.disappear_time >= now_date) &
-                                                (Pokemon.encounter_id << nearby_encounter_ids))
-                                         .dicts())
-
-                                # Store all encounter_ids and spawnpoint_ids for the Pokemon in
-                                # query.
-                                # All of that is needed to make sure it's unique.
-                                encountered_pokemon = [
-                                    long(p['encounter_id']) for p in query]
-
                             for p in mapcell["nearbyPokemons"]:
                                 pokestop_id = p.get('fortId')
                                 if not pokestop_id:
@@ -917,9 +904,8 @@ class Pogom(Flask):
                                 encounter_id = p.get('encounterId')
                                 if not encounter_id:
                                     continue
-                                if ((long(encounter_id), pokestop_id) in nearby_encountered_pokemon) or (long(encounter_id) in encountered_pokemon):
-                                    # If Pokemon has been encountered before don't process it.
-                                    skipped += 1
+                                if ((encounter_id, pokestop_id) in nearby_encountered_pokemon) or (encounter_id in nearby_pokemons):
+                                    nearby_skipped += 1
                                     continue
 
                                 disappear_time = now_date + timedelta(seconds=600)
@@ -975,22 +961,20 @@ class Pogom(Flask):
                                         for f in query]
                             for fort in mapcell["forts"]:
                                 if fort.get("type") == "CHECKPOINT":
-                                    if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
-                                            in encountered_pokestops):
-                                        # If pokestop has been encountered before and hasn't
-                                        # changed don't process it.
-                                        continue
-
-                                    if float(fort.get('lure_expiration', 0)) > 0:
-                                        lure_expiration = (datetime.utcfromtimestamp(
-                                            float(fort.get('lure_expiration')) / 1000.0) +
-                                            timedelta(minutes=self.args.lure_duration))
-                                    else:
+                                    activeFortModifier = fort.get('activeFortModifier', [])
+                                    if 'ITEM_TROY_DISK' in activeFortModifier:
+                                        lure_expiration = datetime.utcfromtimestamp(long(fort['lastModifiedTimestampMs']) / 1000) + timedelta(minutes=self.args.lure_duration)
+                                        lureInfo = fort.get('lureInfo')
+                                        if lureInfo is not None:
+                                            active_pokemon_id = _POKEMONID.values_by_name[lureInfo.get('activePokemonId', 'MISSINGNO')].number,
+                                            active_pokemon_expiration = datetime.utcfromtimestamp(long(lureInfo.get('lureExpiresTimestampMs')) / 1000)
+                                        else:
+                                            active_pokemon_id = None
+                                            active_pokemon_expiration = None
+                                    else:    
                                         lure_expiration = None
-                                    if fort.get('active_pokemon_id', 0) > 0:
-                                        active_pokemon_id = fort.get('active_pokemon_id')
-                                    else:
                                         active_pokemon_id = None
+                                        active_pokemon_expiration = None
 
                                     pokestops[fort['id']] = {
                                         'pokestop_id': fort['id'],
@@ -1000,7 +984,9 @@ class Pogom(Flask):
                                         'last_modified': datetime.utcfromtimestamp(
                                             float(fort['lastModifiedTimestampMs']) / 1000.0),
                                         'lure_expiration': lure_expiration,
-                                        'active_fort_modifier': active_pokemon_id
+                                        'active_fort_modifier': json.dumps(activeFortModifier),
+                                        'active_pokemon_id': active_pokemon_id,
+                                        'active_pokemon_expiration': active_pokemon_expiration
                                     }
 
                                     pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
@@ -1018,6 +1004,12 @@ class Pogom(Flask):
                                         'description': pokestop_description,
                                         'url': pokestop_url
                                     }
+
+                                    if ((fort['id'], int(float(fort['lastModifiedTimestampMs']) / 1000.0))
+                                            in encountered_pokestops):
+                                        # If pokestop has been encountered before and hasn't
+                                        # changed don't process it.
+                                        continue
 
                                     if 'pokestop' in self.args.wh_types or (
                                             'lure' in self.args.wh_types and
@@ -1439,6 +1431,29 @@ class Pogom(Flask):
                     # Keep a list of sp_ids to return.
                     sp_id_list.append(spawn_id)
 
+                    # time_till_hidden_ms was overflowing causing a negative integer.
+                    # It was also returning a value above 3.6M ms.
+                    if 0 < long(wildpokemon.get('timeTillHiddenMs', -1)) < 3600000:
+                        d_t_secs = date_secs(datetime.utcfromtimestamp(
+                            now() + long(wildpokemon['timeTillHiddenMs']) / 1000.0))
+
+                        # Cover all bases, make sure we're using values < 3600.
+                        # Warning: python uses modulo as the least residue, not as
+                        # remainder, so we don't apply it to the result.
+                        residue_unseen = sp['earliest_unseen'] % 3600
+                        residue_seen = sp['latest_seen'] % 3600
+
+                        if (residue_seen != residue_unseen or not sp['last_scanned']):
+                            log.info('TTH found for spawnpoint %s.', sp['id'])
+                            sighting['tth_secs'] = d_t_secs
+
+                            # Only update when TTH is seen for the first time.
+                            # Just before Pokemon migrations, Niantic sets all TTH
+                            # to the exact time of the migration, not the normal
+                            # despawn time.
+                            sp['latest_seen'] = d_t_secs
+                            sp['earliest_unseen'] = d_t_secs
+
                     scan_spawn_points[len(scan_spawn_points) + 1] = {
                         'spawnpoint': sp['id'],
                         'scannedlocation': scan_location['cellid']}
@@ -1474,9 +1489,9 @@ class Pogom(Flask):
                         'latitude': wildpokemon['latitude'],
                         'longitude': wildpokemon['longitude'],
                         'disappear_time': disappear_time,
-                        'individual_attack': wildpokemon['pokemonData'].get('individualAttack', None),
-                        'individual_defense': wildpokemon['pokemonData'].get('individualDefense', None),
-                        'individual_stamina': wildpokemon['pokemonData'].get('individualStamina', None),
+                        'individual_attack': wildpokemon['pokemonData'].get('individualAttack', 0),
+                        'individual_defense': wildpokemon['pokemonData'].get('individualDefense', 0),
+                        'individual_stamina': wildpokemon['pokemonData'].get('individualStamina', 0),
                         'move_1': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move1', 'MOVE_UNSET')].number,
                         'move_2': _POKEMONMOVE.values_by_name[wildpokemon['pokemonData'].get('move2', 'MOVE_UNSET')].number,
                         'cp': wildpokemon['pokemonData'].get('cp', None),
@@ -1524,12 +1539,13 @@ class Pogom(Flask):
 
                             self.wh_update_queue.put(('pokemon', wh_poke))
 
-        log.info('Parsing found Pokemon: %d (%d filtered), nearby: %d, ' +
+        log.info('Parsing found Pokemon: %d (%d skipped), nearby: %d (%d skipped), ' +
                  'pokestops: %d, gyms: %d, raids: %d, quests: %d.',
-                 len(pokemon) + skipped,
-                 filtered,
-                 len(nearby_pokemons),
-                 len(pokestops) + stopsskipped,
+                 len(pokemon) + pokemon_skipped,
+                 pokemon_skipped,
+                 len(nearby_pokemons) + nearby_skipped,
+                 nearby_skipped,
+                 len(pokestops),
                  len(gyms),
                  len(raids),
                  len(quest_result))

@@ -25,11 +25,12 @@ from cHaversine import haversine
 from pprint import pformat
 from time import strftime
 from timeit import default_timer
+from timezonefinder import TimezoneFinder
 
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
 
 log = logging.getLogger(__name__)
-
+tf = TimezoneFinder()
 
 def parse_unicode(bytestring):
     decoded_string = bytestring.decode(sys.getfilesystemencoding())
@@ -259,6 +260,9 @@ def get_args():
     parser.add_argument('-qed', '--quest-expiration-days',
                         help=('Number of days before quest info expires (use 0 for no expiration)'),
                         type=int, default=1)
+    parser.add_argument('-qto', '--quest-timezone-offset',
+                        help=('Minutes between localtime and UTC of the area being scanned'),
+                        type=int, default=0)
     parser.add_argument('-jit', '--jitter',
                         help=('Apply jitter to coordinates for teleport scheduling'),
                         action='store_true', default=True)
@@ -578,6 +582,63 @@ def distance(pos1, pos2):
 def in_radius(loc1, loc2, radius):
     return distance(loc1, loc2) < radius
 
+def get_timezone_offset(lat, lng):
+    args = get_args()
+
+    (timezone_offset, status) = get_timezonefinder_timezone_offset(lat, lng)
+    if status != "OK":
+        (timezone_offset, status) = get_gmaps_timezone_offset(lat, lng, args.gmaps_key)
+        if status != "OK":
+            timezone_offset = args.quest_timezone_offset
+        
+    return timezone_offset
+
+def get_timezonefinder_timezone_offset(lat, lng):
+    from pytz import timezone
+    import pytz
+
+    utc = pytz.utc
+
+    try:
+        today = datetime.now()
+
+        tz_target = timezone(tf.certain_timezone_at(lat=lat, lng=lng))
+        if tz_target is None:
+            tz_target = timezone(tf.timezone_at(lat=lat, lng=lng))
+            if tz_target is None:
+                tz_target = timezone(tf.closest_timezone_at(lat=lat, lng=lng))
+        if tz_target is None:
+            return (0, "UNKNOWNN_TIMEZONE")
+
+        today_target = tz_target.localize(today)
+        today_utc = utc.localize(today)
+
+        status = "OK"
+        timezone_offset = int((today_utc - today_target).total_seconds() / 60)
+    except Exception as e:
+        log.exception('Unable to retrieve timezone from timezonefinder: %s.', e)
+        status = 'UNKNOWN_ERROR'
+        timezone_offset = None
+
+    return (timezone_offset, status)
+
+def get_gmaps_timezone_offset(lat, lng, gmaps_key):
+    try:
+        r_session = requests.Session()
+        response = r_session.get((
+            'https://maps.googleapis.com/maps/api/timezone/json?' +
+            'location={},{}&timestamp={}&key={}').format(lat, lng, time.time(), gmaps_key),
+            timeout=5)
+        response = response.json()
+        log.info(response)
+        status = response['status']
+        timezone_offset = response.get('rawOffset', 0) + response.get('dstOffset', 0)
+    except Exception as e:
+        log.exception('Unable to retrieve timezone from Google APIs: %s.', e)
+        status = 'UNKNOWN_ERROR'
+        timezone_offset = None
+
+    return (timezone_offset, status)
 
 def i8ln(word):
     if not hasattr(i8ln, 'dictionary'):
