@@ -132,7 +132,9 @@ class DiscordAPI():
 
         guild_member = self.get_guild_member(self.guild_required, user_id)
         if not guild_member:
-            log.error('Unable to retrieve user roles from Discord API.')
+            log.error('Unable to retrieve user roles from Discord API for user %s.',
+                response['username'])
+            result['url'] = self.guild_invite_link
             return result
 
         role_ids = guild_member.get('roles', [])
@@ -145,7 +147,7 @@ class DiscordAPI():
                 role_names.append(role_name)
 
         response['roles'] = role_names
-        log.debug('User %s has Discord guild roles: %s',
+        log.info('User %s has Discord guild roles: %s',
                   response['username'], response['roles'])
 
         # Check requirements.
@@ -154,7 +156,7 @@ class DiscordAPI():
             return result
 
         if self.guild_required not in response['guilds']:
-            log.debug('User %s has not joined the required Discord guild.',
+            log.warning('User %s has not joined the required Discord guild.',
                       response['username'])
             result['url'] = self.guild_invite_link
             return result
@@ -166,7 +168,7 @@ class DiscordAPI():
                     roles_found.append(role_required)
 
             if not roles_found:
-                log.debug('User %s lacks all of the %d required role(s).',
+                log.warning('User %s lacks all of the %d required role(s).',
                           response['username'], len(self.role_required))
                 result['url'] = self.role_invite_link
                 return result
@@ -316,6 +318,6 @@ class DiscordAPI():
             role_name = ''.join(stripped)
             roles[role['id']] = role_name
 
-        log.debug('Retrieved Discord guild roles: %s', roles)
+        log.info('Retrieved Discord guild roles: %s', roles)
 
         return roles
