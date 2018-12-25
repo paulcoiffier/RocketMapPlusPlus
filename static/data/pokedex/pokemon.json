@@ -4483,6 +4483,19 @@
         ],
         "name": "Burmy"
     },
+    "413": {
+        "types": [
+            {
+                "type": "Bug",
+                "color": "#a8b820"
+            },
+            {
+                "type": "Grass",
+                "color": "#78c850"
+            }
+        ],
+        "name": "Wormadam"
+    },
     "414": {
         "types": [
             {
@@ -5344,6 +5357,15 @@
             }
         ],
         "name": "Darkrai"
+    },
+    "492": {
+        "types": [
+            {
+                "type": "Grass",
+                "color": "#78c850"
+            }
+        ],
+        "name": "Shaymin"
     },
     "493": {
         "types": [
@@ -6941,6 +6963,28 @@
         ],
         "name": "Virizion"
     },
+    "641": {
+        "types": [
+            {
+                "type": "Flying",
+                "color": "#a890f0"
+            }
+        ],
+        "name": "Tornadus"
+    },
+    "642": {
+        "types": [
+            {
+                "type": "Electric",
+                "color": "#f8d030"
+            },
+            {
+                "type": "Flying",
+                "color": "#a890f0"
+            }
+        ],
+        "name": "Thundurus"
+    },
     "643": {
         "types": [
             {
@@ -6967,6 +7011,19 @@
         ],
         "name": "Zekrom"
     },
+    "645": {
+        "types": [
+            {
+                "type": "Ground",
+                "color": "#e0c068"
+            },
+            {
+                "type": "Flying",
+                "color": "#a890f0"
+            }
+        ],
+        "name": "Landorus"
+    },
     "646": {
         "types": [
             {
@@ -6992,6 +7049,19 @@
             }
         ],
         "name": "Keldeo"
+    },
+    "648": {
+        "types": [
+            {
+                "type": "Normal",
+                "color": "#8a8a59"
+            },
+            {
+                "type": "Psychic",
+                "color": "#f85888"
+            }
+        ],
+        "name": "Meloetta"
     },
     "649": {
         "types": [
@@ -7336,6 +7406,19 @@
             }
         ],
         "name": "Doublade"
+    },
+    "681": {
+        "types": [
+            {
+                "type": "Steel",
+                "color": "#b8b8d0"
+            },
+            {
+                "type": "Ghost",
+                "color": "#705898"
+            }
+        ],
+        "name": "Aegislash"
     },
     "682": {
         "types": [
@@ -7778,6 +7861,19 @@
             }
         ],
         "name": "Diancie"
+    },
+    "720": {
+        "types": [
+            {
+                "type": "Psychic",
+                "color": "#f85888"
+            },
+            {
+                "type": "Ghost",
+                "color": "#705898"
+            }
+        ],
+        "name": "Hoopa"
     },
     "721": {
         "types": [
@@ -8729,6 +8825,63 @@
         ],
         "name": "Marshadow"
     },
+    "803": {
+        "types": [
+            {
+                "type": "Poison",
+                "color": "#a040a0"
+            }
+        ],
+        "name": "Poipole"
+    },
+    "804": {
+        "types": [
+            {
+                "type": "Poison",
+                "color": "#a040a0"
+            },
+            {
+                "type": "Dragon",
+                "color": "#7038f8"
+            }
+        ],
+        "name": "Naganadel"
+    },
+    "805": {
+        "types": [
+            {
+                "type": "Rock",
+                "color": "#b8a038"
+            },
+            {
+                "type": "Steel",
+                "color": "#b8b8d0"
+            }
+        ],
+        "name": "Stakataka"
+    },
+    "806": {
+        "types": [
+            {
+                "type": "Fire",
+                "color": "#f08030"
+            },
+            {
+                "type": "Ghost",
+                "color": "#705898"
+            }
+        ],
+        "name": "Blacephalon"
+    },
+    "807": {
+        "types": [
+            {
+                "type": "Electric",
+                "color": "#f8d030"
+            }
+        ],
+        "name": "Zeraora"
+    },
     "808": {
         "types": [
             {
@@ -8745,6 +8898,5 @@
                 "color": "#b8b8d0"
             }
         ],
-        "name": "Melmetal"
-    }
+        "name": "Melmetal"}
 }
