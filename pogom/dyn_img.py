@@ -23,7 +23,7 @@ egg_images = {
 }
 
 
-def get_gym_icon(team, level, raidlevel, pkm, pkm_form, is_in_battle, is_ex_raid_eligible, is_unknown):
+def get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown, form):
     init_image_dir()
     level = int(level)
 
@@ -35,21 +35,17 @@ def get_gym_icon(team, level, raidlevel, pkm, pkm_form, is_in_battle, is_ex_raid
     badge_lines = []
     if pkm and pkm != 'null':
         # Gym with ongoing raid
-        out_filename = os.path.join(path_generated, "{}_L{}_R{}_P{}_F{}.png".format(team, level, raidlevel, pkm, pkm_form))
-        iconname = str(pkm)
-        if pkm_form > 0:
-            if pkm_form >= 45 and pkm_form <= 80:
-                if pkm_form % 2 == 0:
-                    iconname += '_A'
-            else:
-                iconname += '_' + str(pkm_form)
-        iconname += '.png'
-        subject_lines = draw_subject(os.path.join(path_icons, iconname), 64)
+        out_filename = os.path.join(path_generated, "{}_L{}_R{}_P{}_F{}.png".format(team, level, raidlevel, pkm, form))
+        if form > 0:
+            subject_lines = draw_subject(os.path.join(path_icons, '{}_{}.png'.format(pkm, form)), 64)
+        else:
+            subject_lines = draw_subject(os.path.join(path_icons, '{}.png'.format(pkm)), 64)
         badge_lines.extend(draw_badge(80, 15, 15, "white", "black", raidlevel))
         if level > 0:
             badge_lines.extend(draw_badge(80, 80, 15, "black", "white", level))
     elif raidlevel:
         # Gym with upcoming raid (egg)
+        raidlevel = int(raidlevel)
         out_filename = os.path.join(path_generated, "{}_L{}_R{}.png".format(team, level, raidlevel))
         subject_lines = draw_subject(os.path.join(path_raid, egg_images[raidlevel]), 36)
         badge_lines.extend(draw_badge(80, 15, 15, "white", "black", raidlevel))
