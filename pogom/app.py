@@ -205,11 +205,21 @@ class Pogom(Flask):
         level = request.args.get('level')
         raidlevel = request.args.get('raidlevel')
         pkm = request.args.get('pkm')
+        pkm_form = request.args.get('form')
         is_in_battle = 'in_battle' in request.args
         is_ex_raid_eligible = 'ex_raid' in request.args
         is_unknown = 'is_unknown' in request.args
-        form = request.args.get('form')
-        return send_file(get_gym_icon(team, level, raidlevel, pkm, is_in_battle, is_ex_raid_eligible, is_unknown, form), mimetype='image/png')
+        
+        if level is not None:
+            level = int(level)
+        if raidlevel is not None:
+            raidlevel = int(raidlevel)
+        if pkm is not None:
+            pkm = int(pkm)
+        if pkm_form is not None:
+            pkm_form = int(pkm_form)
+        
+        return send_file(get_gym_icon(team, level, raidlevel, pkm, pkm_form, is_in_battle, is_ex_raid_eligible, is_unknown), mimetype='image/png')
 
     def get_pokemon_rarity_code(self, pokemonid):
         rarity = self.get_pokemon_rarity(pokemonid)
