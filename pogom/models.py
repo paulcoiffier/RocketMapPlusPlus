@@ -576,7 +576,7 @@ class Pokestop(LatLongModel):
             p['quest'] = {}
             if p['active_fort_modifier'] is None:
                 p['active_fort_modifier'] = []
-            else:  
+            else:
                 p['active_fort_modifier'] = json.loads(p['active_fort_modifier'])
             pokestops[p['pokestop_id']] = p
             pokestop_ids.append(p['pokestop_id'])
@@ -700,12 +700,12 @@ class Pokestop(LatLongModel):
                       .get())
         except Pokestop.DoesNotExist:
             return None
-        
+
         if result['active_fort_modifier'] is None:
             result['active_fort_modifier'] = []
-        else:  
+        else:
             result['active_fort_modifier'] = json.loads(result['active_fort_modifier'])
-            
+
         result['pokemon'] = []
 
         now_date = datetime.utcnow()
@@ -2030,6 +2030,13 @@ class SpawnPoint(LatLongModel):
         # remainder, so we don't apply it to the result.
         latest_seen = (sp['latest_seen'] % 3600)
         earliest_unseen = (sp['earliest_unseen'] % 3600)
+
+        # If earliest_unseen and latest_seen are both 0 we cannot assume tth has been
+        # found since that is what they are defaulted to on a new sp, we may want to
+        # default them to -1 when creating a new sp.
+        if latest_seen == 0 and earliest_unseen == 0:
+            return False
+
         return latest_seen - earliest_unseen == 0
 
     # Return [start, end] in seconds after the hour for the spawn, despawn
