@@ -2032,8 +2032,7 @@ class SpawnPoint(LatLongModel):
         earliest_unseen = (sp['earliest_unseen'] % 3600)
 
         # If earliest_unseen and latest_seen are both 0 we cannot assume tth has been
-        # found since that is what they are defaulted to on a new sp, we may want to
-        # default them to -1 when creating a new sp.
+        # found since that is what they are defaulted to upon creation of a new sp
         if latest_seen == 0 and earliest_unseen == 0:
             return False
 
