@@ -891,14 +891,40 @@ def get_quest_quest_text(quest_json):
     elif quest_type == "QUEST_AUTOCOMPLETE":
         return "Quest Not Supported! - {}".format(quest_type)
     elif quest_type == "QUEST_USE_BERRY_IN_ENCOUNTER":
+        berry_text = ""
+        catch_text = "to help catch"
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
-            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+            if quest_goal_condition_type == "WITH_ITEM":
+                withItem = quest_goal_condition.get('withItem', {})
+                item = withItem.get('item', "")
+                if item == "ITEM_RAZZ_BERRY":
+                    berry_text = " Razz"
+                elif item == "ITEM_BLUK_BERRY":
+                    berry_text = " Bluk"
+                elif item == "ITEM_NANAB_BERRY":
+                    berry_text = " Nanab"
+                elif item == "ITEM_WEPAR_BERRY":
+                    berry_text = " Wepar"
+                elif item == "ITEM_PINAP_BERRY":
+                    berry_text = " Pinap"
+                    catch_text = "while catching"
+                elif item == "ITEM_GOLDEN_RAZZ_BERRY":
+                    berry_text = " Golden Razz"
+                elif item == "ITEM_GOLDEN_NANAB_BERRY":
+                    berry_text = " Golden Nanab"
+                elif item == "ITEM_GOLDEN_PINAP_BERRY":
+                    berry_text = " Silver Pinap"
+                else:
+                    return "Item Not Supported! - {} -> {} -> {}".format(quest_type, quest_goal_condition_type, item)
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
 
         if quest_goal_target == 1:
-            quest_text = u"Use a Berry to help catch Pok\u00E9mon"
+            quest_text = u"Use a{} Berry {} Pok\u00E9mon".format(berry_text, catch_text)
         else:
-            quest_text = u"Use {} Berries to help catch Pok\u00E9mon".format(quest_goal_target)
+            quest_text = u"Use {}{} Berries {} Pok\u00E9mon".format(quest_goal_target, berry_text, catch_text)
     elif quest_type == "QUEST_UPGRADE_POKEMON":
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
