@@ -935,6 +935,7 @@ def get_quest_quest_text(quest_json):
         else:
             quest_text = u"Power up Pok\u00E9mon {} times".format(quest_goal_target)
     elif quest_type == "QUEST_EVOLVE_POKEMON":
+        evolve_text = "Evolve"
         pokemon_type_text = ""
         pokemon_category_text = ""
 
@@ -968,6 +969,8 @@ def get_quest_quest_text(quest_json):
                     else:
                         pokemon_category_text += ", "
                     pokemon_category_text += pokemon_id.title()
+            elif quest_goal_condition_type == "WITH_ITEM":
+                evolve_text = "Use an item to evolve"
             else:
                 return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
 
@@ -975,9 +978,9 @@ def get_quest_quest_text(quest_json):
             pokemon_category_text = u" Pok\u00E9mon"
 
         if quest_goal_target == 1:
-            quest_text = u"Evolve a{}{}".format(pokemon_type_text, pokemon_category_text)
+            quest_text = u"{} a{}{}".format(evolve_text, pokemon_type_text, pokemon_category_text)
         else:
-            quest_text = u"Evolve {}{}{}".format(quest_goal_target, pokemon_type_text, pokemon_category_text)
+            quest_text = u"{} {}{}{}".format(evolve_text, quest_goal_target, pokemon_type_text, pokemon_category_text)
     elif quest_type == "QUEST_LAND_THROW":
         NiceThrow = False
         GreatThrow = False
