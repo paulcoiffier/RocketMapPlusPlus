@@ -2441,40 +2441,46 @@ function processPokestop(i, item) {
         return false
     }
 
-    if (Store.get('showLuredPokestopsOnly') && !item['lure_expiration']) {
-        return true
+    var removePokestopFromMap = function (pokestopid) {
+        if (mapData.pokestops[pokestopid] && mapData.pokestops[pokestopid].marker) {
+            if (mapData.pokestops[pokestopid].marker.rangeCircle) {
+                mapData.pokestops[pokestopid].marker.rangeCircle.setMap(null)
+                delete mapData.pokestops[pokestopid].marker.rangeCircle
+            }
+            mapData.pokestops[pokestopid].marker.setMap(null)
+            delete mapData.pokestops[pokestopid]
+        }
+    }
+
+    if (Store.get('showLuredPokestopsOnly')) {
+        if (!item['lure_expiration']) {
+            removePokestopFromMap(item['pokestop_id'])  
+            return true
+        }
     }
 
     if (Store.get('showPokestopsWithQuestStatus') == 1) {
         if (!item.quest || (item.quest && !item.quest.type)) {
+            removePokestopFromMap(item['pokestop_id'])  
             return true
         }
     }
 
     if (Store.get('showPokestopsWithQuestStatus') == 2) {
         if (item.quest && item.quest.type) {
+            removePokestopFromMap(item['pokestop_id'])  
             return true
         }
     }
-
-    if (!mapData.pokestops[item['pokestop_id']]) { // new pokestop, add marker to map and item to dict
-        if (item.marker && item.marker.rangeCircle) {
-            item.marker.rangeCircle.setMap(null)
-        }
-        if (item.marker) {
-            item.marker.setMap(null)
-        }
-        item.marker = setupPokestopMarker(item)
-        mapData.pokestops[item['pokestop_id']] = item
-    } else { // change existing pokestop marker to unlured/lured
-        var item2 = mapData.pokestops[item['pokestop_id']]
-        if (item2.marker && item2.marker.rangeCircle) {
-            item2.marker.rangeCircle.setMap(null)
-        }
-        item2.marker.setMap(null)
-        item.marker = setupPokestopMarker(item)
-        mapData.pokestops[item['pokestop_id']] = item
+    
+    if (item['pokestop_id'] in mapData.pokestops) {
+        item.marker = updatePokestopMarker(item, mapData.pokestops[item['pokestop_id']].marker)
     }
+    else {
+        // add marker to map and item to dict
+        item.marker = setupPokestopMarker(item)
+    }
+    mapData.pokestops[item['pokestop_id']] = item
 }
 
 function updatePokestops() {
@@ -2489,11 +2495,7 @@ function updatePokestops() {
     $.each(mapData.pokestops, function (key, value) {
         if (value['lure_expiration'] && value['lure_expiration'] < currentTime) {
             value['lure_expiration'] = null
-            if (value.marker && value.marker.rangeCircle) {
-                value.marker.rangeCircle.setMap(null)
-            }
-            value.marker.setMap(null)
-            value.marker = setupPokestopMarker(value)
+            value.marker = updatePokestopMarker(value, value.marker)
         }
     })
 
@@ -2504,16 +2506,36 @@ function updatePokestops() {
                 removeStops.push(key)
             }
         })
-        $.each(removeStops, function (key, value) {
-            if (mapData.pokestops[value] && mapData.pokestops[value].marker) {
-                if (mapData.pokestops[value].marker.rangeCircle) {
-                    mapData.pokestops[value].marker.rangeCircle.setMap(null)
-                }
-                mapData.pokestops[value].marker.setMap(null)
-                delete mapData.pokestops[value]
+    }
+
+    // remove stops without quests if show stops with quests is selected
+    if (Store.get('showPokestopsWithQuestStatus') == 1) {
+        $.each(mapData.pokestops, function (key, value) {
+            if (!value.quest || (value.quest && !value.quest.type)) {
+                removeStops.push(key)
             }
         })
     }
+
+    // remove stops with quests if show stops without quests is selected
+    if (Store.get('showPokestopsWithQuestStatus') == 2) {
+        $.each(mapData.pokestops, function (key, value) {
+            if (value.quest && value.quest.type) {
+                removeStops.push(key)
+            }
+        })
+    }
+
+    $.each(removeStops, function (key, value) {
+        if (mapData.pokestops[value] && mapData.pokestops[value].marker) {
+            if (mapData.pokestops[value].marker.rangeCircle) {
+                mapData.pokestops[value].marker.rangeCircle.setMap(null)
+                delete mapData.pokestops[value].marker.rangeCircle
+            }
+            mapData.pokestops[value].marker.setMap(null)
+            delete mapData.pokestops[value]
+        }
+    })
 }
 
 function processGym(i, item) {
@@ -2528,6 +2550,7 @@ function processGym(i, item) {
         if (mapData.gyms[gymid] && mapData.gyms[gymid].marker) {
             if (mapData.gyms[gymid].marker.rangeCircle) {
                 mapData.gyms[gymid].marker.rangeCircle.setMap(null)
+                delete mapData.gyms[gymid].marker.rangeCircle
             }
             mapData.gyms[gymid].marker.setMap(null)
             delete mapData.gyms[gymid]
