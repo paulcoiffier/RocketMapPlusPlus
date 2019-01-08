@@ -45,7 +45,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 52
+db_schema_version = 53
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -483,7 +483,7 @@ class Pokestop(LatLongModel):
     longitude = DoubleField()
     last_modified = DateTimeField(index=True)
     lure_expiration = DateTimeField(null=True, index=True)
-    active_fort_modifier = TextField(null=True)
+    active_fort_modifier = Utf8mb4CharField(max_length=50)
     active_pokemon_id = SmallIntegerField(null=True)
     active_pokemon_expiration = DateTimeField(null=True, index=True)
     last_updated = DateTimeField(
@@ -1258,7 +1258,7 @@ class DeviceWorker(LatLongModel):
     last_updated = DateTimeField(index=True, default=datetime.utcnow)
     scans = UBigIntegerField(default=0)
     direction = Utf8mb4CharField(max_length=1, default="U")
-    fetch = Utf8mb4CharField(max_length=50, default='IDLE')
+    fetching = Utf8mb4CharField(max_length=50, default='IDLE')
     scanning = SmallIntegerField(default=0)
 
     @staticmethod
@@ -4156,15 +4156,16 @@ def database_migrate(db, old_ver):
             'ALTER TABLE `quest` ADD COLUMN `quest_json` LONGTEXT NULL AFTER `reward_amount`;'
         )
 
-    if old_ver < 52:
+    if old_ver < 53:
         migrate(
             migrator.add_column('pokestop', 'active_pokemon_id', SmallIntegerField(null=True)),
             migrator.add_column('pokestop', 'active_pokemon_expiration', DateTimeField(index=True, null=True)),
-            migrator.drop_index('pokestop', 'active_fort_modifier'),
-
+            migrator.drop_index('pokestop', 'pokestop_active_fort_modifier'),
+            migrator.drop_column('deviceworker', 'fetch'),
+            migrator.add_column('deviceworker', 'fetching', Utf8mb4CharField(max_length=50, default='IDLE')),
         )
         db.execute_sql(
-            'ALTER TABLE `pokestop` MODIFY `active_fort_modifier` LONGTEXT NULL'
+            'ALTER TABLE `pokestop` MODIFY active_fort_modifier VARCHAR(100) NOT NULL;'
         )
 
     # Always log that we're done.
