@@ -4156,10 +4156,14 @@ def database_migrate(db, old_ver):
             'ALTER TABLE `quest` ADD COLUMN `quest_json` LONGTEXT NULL AFTER `reward_amount`;'
         )
 
-    if old_ver < 53:
+    if old_ver < 52:
         migrate(
             migrator.add_column('pokestop', 'active_pokemon_id', SmallIntegerField(null=True)),
             migrator.add_column('pokestop', 'active_pokemon_expiration', DateTimeField(index=True, null=True)),
+        )
+
+    if old_ver < 53:
+        migrate(
             migrator.drop_index('pokestop', 'pokestop_active_fort_modifier'),
             migrator.drop_column('deviceworker', 'fetch'),
             migrator.add_column('deviceworker', 'fetching', Utf8mb4CharField(max_length=50, default='IDLE')),
