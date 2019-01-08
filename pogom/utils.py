@@ -590,7 +590,7 @@ def get_timezone_offset(lat, lng):
         (timezone_offset, status) = get_gmaps_timezone_offset(lat, lng, args.gmaps_key)
         if status != "OK":
             timezone_offset = args.quest_timezone_offset
-        
+
     return timezone_offset
 
 def get_timezonefinder_timezone_offset(lat, lng):
@@ -1643,8 +1643,8 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
             else:
                 last_updated = worker['last_updated']
                 difference = (datetime.utcnow() - last_updated).total_seconds()
-                if difference > 300 and worker['fetch'] != 'IDLE':
-                    worker['fetch'] = 'IDLE'
+                if difference > 300 and worker['fetching'] != 'IDLE':
+                    worker['fetching'] = 'IDLE'
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
                     log.info("Device stopped fetching: " + worker['deviceid'])
@@ -1666,7 +1666,7 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                         updateworkers[worker['deviceid']] = worker
                         needtosend = True
                         log.info("Device went idle " + worker['deviceid'])
-                    if worker['fetch'] != workers[worker['deviceid']]['fetch']:
+                    if worker['fetching'] != workers[worker['deviceid']]['fetching']:
                         needtosend = True
                         log.info("Device changed fetching endpoint: " + worker['deviceid'])
                     if worker['scanning'] != workers[worker['deviceid']]['scanning']:
@@ -1678,7 +1678,7 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                 wh_worker = {
                     'uuid': worker['deviceid'],
                     'name': worker['name'],
-                    'fetch': worker['fetch'],
+                    'fetch': worker['fetching'],
                     'scanning': worker['scanning']
                 }
                 wh_update_queue.put(('devices', wh_worker))

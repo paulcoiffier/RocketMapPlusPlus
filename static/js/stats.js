@@ -151,7 +151,7 @@ function countMarkers(map) { // eslint-disable-line no-unused-vars
         for (i = 0; i < mapData.deviceworkers.length; i++) {
             let deviceworker = mapData.deviceworkers[i]
             const lastScannedStr = getDateStr(deviceworker.last_scanned)
-            deviceworkerListString += '<tr><td><img class="deviceworkerListString" src="static/images/markers/mobile.png" /></td><td>' + deviceworker.fetch + '</td><td>' + lastScannedStr + '</td><td>' + deviceworker.scans + '</td></tr>'
+            deviceworkerListString += '<tr><td><img class="deviceworkerListString" src="static/images/markers/mobile.png" /></td><td>' + deviceworker.fetching + '</td><td>' + lastScannedStr + '</td><td>' + deviceworker.scans + '</td></tr>'
         }
         deviceworkerListString += '</table>'
         document.getElementById('deviceworkerList').innerHTML = deviceworkerListString

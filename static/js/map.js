@@ -658,7 +658,7 @@ function pokemonLabel(item) {
     if (showStats && cp !== null && cpMultiplier !== null) {
         var pokemonLevel = getPokemonLevel(cpMultiplier)
         var iv = 0.0
-        
+
         if (atk !== null && def !== null && sta !== null) {
             iv = getIv(atk, def, sta)
         }
@@ -1074,7 +1074,7 @@ function deviceworkerLabel(deviceworker) {
                     Device: <span>${title}</span>
                 </div>
                 <div class='deviceworker info'>
-                    fetch: <span>${deviceworker.fetch}</span>
+                    fetch: <span>${deviceworker.fetching}</span>
                 </div>
                 <div class='deviceworker info'>
                     scanning: <span>${deviceworker.scanning}</span>
@@ -1203,7 +1203,7 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
     let pokestopIcon = `<img class='pokestop pokestop-icon sprite' src='${iconSrc}'>`
     let expireTimeStr = ''
     let lureClass = 'nolure'
-    
+
     if (expireTime) {
         var active_pokemon_id = pokestop.active_pokemon_id
         var active_pokemon_expiration = pokestop.active_pokemon_expiration
@@ -1695,7 +1695,7 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
-        
+
         if(item.raid.pokemon_id && notifiedPokemon.indexOf(item.raid.pokemon_id) > -1)
         {
             if(marker.skipNotification !== true)
@@ -2454,25 +2454,25 @@ function processPokestop(i, item) {
 
     if (Store.get('showLuredPokestopsOnly')) {
         if (!item['lure_expiration']) {
-            removePokestopFromMap(item['pokestop_id'])  
+            removePokestopFromMap(item['pokestop_id'])
             return true
         }
     }
 
     if (Store.get('showPokestopsWithQuestStatus') == 1) {
         if (!item.quest || (item.quest && !item.quest.type)) {
-            removePokestopFromMap(item['pokestop_id'])  
+            removePokestopFromMap(item['pokestop_id'])
             return true
         }
     }
 
     if (Store.get('showPokestopsWithQuestStatus') == 2) {
         if (item.quest && item.quest.type) {
-            removePokestopFromMap(item['pokestop_id'])  
+            removePokestopFromMap(item['pokestop_id'])
             return true
         }
     }
-    
+
     if (item['pokestop_id'] in mapData.pokestops) {
         item.marker = updatePokestopMarker(item, mapData.pokestops[item['pokestop_id']].marker)
     }

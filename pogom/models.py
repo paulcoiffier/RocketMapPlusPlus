@@ -1283,7 +1283,7 @@ class DeviceWorker(LatLongModel):
                 'step': 0,
                 'scans': 0,
                 'direction': 'U',
-                'fetch': 'IDLE',
+                'fetching': 'IDLE',
                 'scanning': 0
             }
         return result
@@ -1323,10 +1323,10 @@ class DeviceWorker(LatLongModel):
                              DeviceWorker.last_scanned,
                              DeviceWorker.last_updated,
                              DeviceWorker.scans,
-                             DeviceWorker.fetch,
+                             DeviceWorker.fetching,
                              DeviceWorker.scanning)
                      .where((DeviceWorker.scanning == 1) |
-                            (DeviceWorker.fetch != 'IDLE'))
+                            (DeviceWorker.fetching != 'IDLE'))
                      .dicts())
         if args.china:
             for result in query:
@@ -1347,7 +1347,7 @@ class DeviceWorker(LatLongModel):
                              DeviceWorker.last_scanned,
                              DeviceWorker.last_updated,
                              DeviceWorker.scans,
-                             DeviceWorker.fetch,
+                             DeviceWorker.fetching,
                              DeviceWorker.scanning)
                      .where(DeviceWorker.id == id)
                      .dicts())
