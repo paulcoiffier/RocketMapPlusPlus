@@ -45,7 +45,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 53
+db_schema_version = 54
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -4165,12 +4165,14 @@ def database_migrate(db, old_ver):
     if old_ver < 53:
         migrate(
             migrator.drop_index('pokestop', 'pokestop_active_fort_modifier'),
-            migrator.drop_column('deviceworker', 'fetch'),
-            migrator.add_column('deviceworker', 'fetching', Utf8mb4CharField(max_length=50, default='IDLE')),
         )
         db.execute_sql(
             'ALTER TABLE `pokestop` MODIFY active_fort_modifier VARCHAR(100) NOT NULL;'
         )
+
+    if old_ver < 54:
+        db.execute_sql('DROP TABLE `deviceworker`;')
+        create_tables(db)
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')
