@@ -2071,13 +2071,13 @@ class Pogom(Flask):
         maxradius = args.maxradius
         stepsize = args.stepsize
         if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', type=int)
-            maxradius = request.args.get('maxradius', type=int)
-            stepsize = request.args.get('stepsize', type=int)
+            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
+            maxradius = request.args.get('maxradius', maxradius)
+            stepsize = request.args.get('stepsize', stepsize)
         if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', type=int)
-            maxradius = request.form.get('maxradius', type=int)
-            stepsize = request.form.get('stepsize', type=int)
+            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
+            maxradius = request.form.get('maxradius', maxradius)
+            stepsize = request.form.get('stepsize', stepsize)
 
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
@@ -2199,11 +2199,11 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         stepsize = args.stepsize
         if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', type=int)
-            stepsize = request.args.get('stepsize', type=int)
+            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
+            stepsize = request.args.get('stepsize', stepsize)
         if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', type=int)
-            stepsize = request.form.get('stepsize', type=int)
+            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
+            stepsize = request.form.get('stepsize', stepsize)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2342,13 +2342,13 @@ class Pogom(Flask):
         maxradius = args.maxradius
         stepsize = args.stepsize
         if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', type=int)
-            maxradius = request.args.get('maxradius', type=int)
-            stepsize = request.args.get('stepsize', type=int)
+            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
+            maxradius = request.args.get('maxradius', maxradius)
+            stepsize = request.args.get('stepsize', stepsize)
         if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', type=int)
-            maxradius = request.form.get('maxradius', type=int)
-            stepsize = request.form.get('stepsize', type=int)
+            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
+            maxradius = request.form.get('maxradius', maxradius)
+            stepsize = request.form.get('stepsize', stepsize)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2475,15 +2475,15 @@ class Pogom(Flask):
         teleport_interval = args.teleport_interval
         teleport_ignore = args.teleport_ignore
         if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', type=int)
-            maxradius = request.args.get('maxradius', type=int)
-            teleport_interval = request.args.get('teleport_interval', type=int)
-            teleport_ignore = request.args.get('teleport_ignore', type=int)
+            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
+            maxradius = request.args.get('maxradius', maxradius)
+            teleport_interval = request.args.get('teleport_interval', teleport_interval)
+            teleport_ignore = request.args.get('teleport_ignore', teleport_ignore)
         if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', type=int)
-            maxradius = request.form.get('maxradius', type=int)
-            teleport_interval = request.form.get('teleport_interval', type=int)
-            teleport_ignore = request.form.get('teleport_ignore', type=int)
+            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
+            maxradius = request.form.get('maxradius', maxradius)
+            teleport_interval = request.form.get('teleport_interval', teleport_interval)
+            teleport_ignore = request.form.get('teleport_ignore', teleport_ignore)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2585,11 +2585,11 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         teleport_interval = args.teleport_interval
         if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', type=int)
-            teleport_interval = request.args.get('teleport_interval', type=int)
+            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
+            teleport_interval = request.args.get('teleport_interval', teleport_interval)
         if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', type=int)
-            teleport_interval = request.form.get('teleport_interval', type=int)
+            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
+            teleport_interval = request.form.get('teleport_interval', teleport_interval)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2703,13 +2703,13 @@ class Pogom(Flask):
         stepsize = args.stepsize
         teleport_factor = args.teleport_factor
         if request.args:
-            maxradius = request.args.get('maxradius', type=int)
-            stepsize = request.args.get('stepsize', type=int)
-            teleport_factor = request.args.get('teleport_factor', type=int)
+            maxradius = request.args.get('maxradius', maxradius)
+            stepsize = request.args.get('stepsize', stepsize)
+            teleport_factor = request.args.get('teleport_factor', teleport_factor)
         if request.form:
-            maxradius = request.form.get('maxradius', type=int)
-            stepsize = request.form.get('stepsize', type=int)
-            teleport_factor = request.form.get('teleport_factor', type=int)
+            maxradius = request.form.get('maxradius', maxradius)
+            stepsize = request.form.get('stepsize', stepsize)
+            teleport_factor = request.form.get('teleport_factor', teleport_factor)
 
         if latitude != 0 and longitude != 0 and (abs(latitude - currentlatitude) > (radius + teleport_factor) * stepsize or abs(longitude - currentlongitude) > (radius + teleport_factor) * stepsize):
             centerlatitude = latitude
