@@ -28,6 +28,3 @@ The resulting format needs to match the content of ``geofences/geofence.txt.exam
 
 ### Optional
 You can define geofences to form interesting areas like Pikachu faces or scanning along long paths with defining just a small corridor as geofence and rise ``-st`` accordingly.
-
-### Beehive
-This feature explicitly works with beehive ``-bh`` scan function just as good. Please make sure that the very center of your scan area - meaning ``-l`` is right inside a valid geofence area.

@@ -1086,7 +1086,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1152,7 +1152,7 @@ class Gym(LatLongModel):
             while len(orderedgyms) > 0:
                 value = orderedgyms.items()[0][1]
                 orderedgyms.popitem(last=False)
-                if len(result) == 0 or geopy.distance.vincenty((newlat, newlong), (value['latitude'], value['longitude'])).km * 1000 > args.teleport_ignore:
+                if len(result) == 0 or geopy.distance.vincenty((newlat, newlong), (value['latitude'], value['longitude'])).km * 1000 > teleport_ignore:
                     result.append((value['latitude'], value['longitude']))
                     newlat = value['latitude']
                     newlong = value['longitude']

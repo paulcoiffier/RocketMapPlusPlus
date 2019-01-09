@@ -2474,14 +2474,17 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         maxradius = args.maxradius
         teleport_interval = args.teleport_interval
+        teleport_ignore = args.teleport_ignore
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', type=int)
             maxradius = request.args.get('maxradius', type=int)
             teleport_interval = request.args.get('teleport_interval', type=int)
+            teleport_ignore = request.args.get('teleport_ignore', type=int)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', type=int)
             maxradius = request.form.get('maxradius', type=int)
             teleport_interval = request.form.get('teleport_interval', type=int)
+            teleport_ignore = request.form.get('teleport_ignore', type=int)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2498,7 +2501,7 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius)
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename

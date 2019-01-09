@@ -1,20 +1,20 @@
 # Nginx
 
-If you do not want to expose RocketMap to the web directly or you want to place it under a prefix, follow this guide:
+If you do not want to expose RocketMapPlusPlus to the web directly or you want to place it under a prefix, follow this guide:
 
 Assuming the following:
 
-* You are running RocketMap on the default port 5000
+* You are running RocketMapPlusPlus on the default port 5000
 * You've already made your machine available externally (for example, [port forwarding](http://rocketmap.readthedocs.io/en/develop/extras/external.html)
 
 1. Install nginx (I'm not walking you through that, google will assist) - http://nginx.org/en/linux_packages.html
 2. In /etc/nginx/nginx.conf add the following before the last `}`
 
    ```
-   include conf.d/rocketmap.conf;
+   include conf.d/rocketmapplusplus.conf;
    ```
 
-3. Create a file /etc/nginx/conf.d/rocketmap.conf and place the following in it:
+3. Create a file /etc/nginx/conf.d/rocketmapplusplus.conf and place the following in it:
 
    ```
    server {
@@ -31,7 +31,7 @@ You can now access it by http://yourip/go
 
 1. https://certbot.eff.org/#debianjessie-nginx
 2. For webroot configuration, simplest for this use, do the following:
-   - Edit your `/etc/nginx/conf.d/rocketmap.conf`
+   - Edit your `/etc/nginx/conf.d/rocketmapplusplus.conf`
    - Add the following location block:
    ```
    location /.well-known/acme-challenge {
@@ -86,12 +86,12 @@ Please be sure to change the ssl_certificate and ssl_certificate_key paths to po
 
 ## Adding simple httpd Authentication.
 
-This will guide you through setting up simple HTTP Authentication using nginx and reverse proxy protocols. These instructions are written for someone using a Debian/Ubuntu VPS. Your enviroment may have slightly different requirements, however the concepts as a whole should still stand. This guide assumes you have nginx installed and running, and a `conf.d/*.conf` file created, such as `/etc/nginx/conf.d/rocketmap.conf`, as the example above provides, and that you're running your service on port 5000, and want it to be accessable at http://your_ip/go/, although it supports other ports and locations.  
+This will guide you through setting up simple HTTP Authentication using nginx and reverse proxy protocols. These instructions are written for someone using a Debian/Ubuntu VPS. Your enviroment may have slightly different requirements, however the concepts as a whole should still stand. This guide assumes you have nginx installed and running, and a `conf.d/*.conf` file created, such as `/etc/nginx/conf.d/rocketmapplusplus.conf`, as the example above provides, and that you're running your service on port 5000, and want it to be accessable at http://your_ip/go/, although it supports other ports and locations.
 
 `*` denotes a wildcard, and will be used to stand for your site's `*.conf` file, please __do not__ literally type `sudo nano /etc/nginx/conf.d/*.conf`.
 
 1. Create a .htpasswd file inside `/etc/nginx/`. Some suggested methods to create a .htpasswd file are below.
-   - Linux users can use the apache2-tools package to create the files.  
+   - Linux users can use the apache2-tools package to create the files.
       -First, get the apache2-utils package
       ```
       sudo apt-get install apache2-utils
@@ -104,7 +104,7 @@ This will guide you through setting up simple HTTP Authentication using nginx an
       This will prompt you for a new password for user exampleuser. Remove the `-c` tag for additional entries to the file. Opening the file with a text exitor such as nano should show one line for each user, with an encrypted password following, in the format of user:pass.
 
    - Manual generation of the file can be done using tools such as: http://www.htaccesstools.com/htpasswd-generator/. After manually generating the file, please place it in `/etc/nginx/`, or wherever your distro installs `nginx.conf` and the rest of your config files.
-2. Open your `*.conf` file with a text editor, with a command such as `sudo nano /etc/nginx/conf.d/rocketmap.conf`. Add the following two lines underneath the domain path.
+2. Open your `*.conf` file with a text editor, with a command such as `sudo nano /etc/nginx/conf.d/rocketmapplusplus.conf`. Add the following two lines underneath the domain path.
 
    ```
    auth_basic "Restricted";
