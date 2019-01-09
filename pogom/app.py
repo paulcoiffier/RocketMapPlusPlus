@@ -86,7 +86,6 @@ class Pogom(Flask):
         kwargs.pop('db_update_queue')
         self.wh_update_queue = kwargs.get('wh_update_queue')
         kwargs.pop('wh_update_queue')
-        kwargs.pop('args')
         super(Pogom, self).__init__(import_name, **kwargs)
         compress.init_app(self)
 
