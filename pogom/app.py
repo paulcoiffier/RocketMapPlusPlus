@@ -29,8 +29,7 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
                      Quest, PokestopDetails, Geofence, GymMember, GymPokemon)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, clock_between,
-                    calc_pokemon_level)
+                    now, dottedQuadToNum, date_secs, calc_pokemon_level)
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
@@ -52,10 +51,6 @@ from protos.pogoprotos.enums.gender_pb2 import _GENDER
 from protos.pogoprotos.enums.form_pb2 import _FORM
 from protos.pogoprotos.enums.costume_pb2 import _COSTUME
 from protos.pogoprotos.enums.weather_condition_pb2 import _WEATHERCONDITION
-
-#from protobuf_to_dict import protobuf_to_dict
-#from . import protos
-# from POGOProtos.Networking.Responses.FortSearchResponse_pb2 import FortSearchResponse
 
 log = logging.getLogger(__name__)
 compress = Compress()
@@ -91,7 +86,6 @@ class Pogom(Flask):
         kwargs.pop('db_update_queue')
         self.wh_update_queue = kwargs.get('wh_update_queue')
         kwargs.pop('wh_update_queue')
-        self.args = kwargs.get('args')
         kwargs.pop('args')
         super(Pogom, self).__init__(import_name, **kwargs)
         compress.init_app(self)
@@ -131,7 +125,6 @@ class Pogom(Flask):
         self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
         self.route("/teleport_gpx", methods=['POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
-        self.route("/teleport_loc", methods=['POST'])(self.teleport_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
@@ -234,8 +227,9 @@ class Pogom(Flask):
         return rarities.get(rarity, 0)
 
     def get_pokemon_rarity(self, pokemonid):
+        args = get_args()
         rarity = "New Spawn"
-        root_path = self.args.root_path
+        root_path = args.root_path
         rarities_path = os.path.join(root_path, 'static/dist/data/rarity.json')
         with open(rarities_path) as f:
             data = json.load(f)
@@ -258,7 +252,6 @@ class Pogom(Flask):
 
         result = ""
         for quest in d:
-#            log.info(quest)
             if result != "":
                 result += "\n"
             result += str(round(quest['latitude'], 5)) + "," + str(round(quest['longitude'], 5)) + ","
@@ -481,10 +474,12 @@ class Pogom(Flask):
         canusedevice = True
         devicename = ""
 
+        args = get_args()
+
         if self.deviceschecked is None or (datetime.utcnow() - self.deviceschecked).total_seconds() > 300:
             self.trusteddevices = {}
-            if self.args.devices_file:
-                with open(self.args.devices_file) as f:
+            if args.devices_file:
+                with open(args.devices_file) as f:
                     for line in f:
                         line = line.strip()
                         if len(line) == 0:  # Empty line.
@@ -516,6 +511,8 @@ class Pogom(Flask):
         if not canusedevice:
             return ""
 
+        args = get_args()
+
         if protos:
             lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
             lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -530,7 +527,7 @@ class Pogom(Flask):
                     log.info('The post from %s is coming from outside your geofences. Aborting post.' % uuid)
                     return ""
 
-            if not self.args.dont_move_map:
+            if not args.dont_move_map:
                 self.location_queue.put((lat, lng, 0))
                 self.set_current_location((lat, lng, 0))
                 log.info('Changing next location: %s,%s', lat, lng)
@@ -564,7 +561,6 @@ class Pogom(Flask):
         raids = {}
         quest_result = {}
         pokemon_skipped = 0
-        pokemon_filtered = 0
         nearby_skipped = 0
         spawn_points = {}
         scan_spawn_points = {}
@@ -576,6 +572,8 @@ class Pogom(Flask):
         gym_encountered = {}
 
         now_date = datetime.utcnow()
+
+        args = get_args()
 
         now_secs = date_secs(now_date)
 
@@ -709,10 +707,10 @@ class Pogom(Flask):
                                     'weather_boosted_condition': weather
                                 }
 
-                                if 'pokemon' in self.args.wh_types:
-                                    if (pokemon_id in self.args.webhook_whitelist or
-                                        (not self.args.webhook_whitelist and pokemon_id
-                                         not in self.args.webhook_blacklist)):
+                                if 'pokemon' in args.wh_types:
+                                    if (pokemon_id in args.webhook_whitelist or
+                                        (not args.webhook_whitelist and pokemon_id
+                                         not in args.webhook_blacklist)):
                                         wh_poke = pokemon[long(p['encounterId'])].copy()
                                         wh_poke.update({
                                             'disappear_time': calendar.timegm(
@@ -856,10 +854,10 @@ class Pogom(Flask):
                                     'weather_boosted_condition': weather
                                 }
 
-                                if 'pokemon' in self.args.wh_types:
-                                    if (pokemon_id in self.args.webhook_whitelist or
-                                        (not self.args.webhook_whitelist and pokemon_id
-                                         not in self.args.webhook_blacklist)):
+                                if 'pokemon' in args.wh_types:
+                                    if (pokemon_id in args.webhook_whitelist or
+                                        (not args.webhook_whitelist and pokemon_id
+                                         not in args.webhook_blacklist)):
                                         wh_poke = pokemon[long(p['encounterId'])].copy()
                                         wh_poke.update({
                                             'disappear_time': calendar.timegm(
@@ -973,7 +971,7 @@ class Pogom(Flask):
                                 if fort.get("type") == "CHECKPOINT":
                                     activeFortModifier = fort.get('activeFortModifier', [])
                                     if 'ITEM_TROY_DISK' in activeFortModifier:
-                                        lure_expiration = datetime.utcfromtimestamp(long(fort['lastModifiedTimestampMs']) / 1000) + timedelta(minutes=self.args.lure_duration)
+                                        lure_expiration = datetime.utcfromtimestamp(long(fort['lastModifiedTimestampMs']) / 1000) + timedelta(minutes=args.lure_duration)
                                         lureInfo = fort.get('lureInfo')
                                         if lureInfo is not None:
                                             active_pokemon_id = _POKEMONID.values_by_name[lureInfo.get('activePokemonId', 'MISSINGNO')].number,
@@ -1021,8 +1019,8 @@ class Pogom(Flask):
                                         # changed don't process it.
                                         continue
 
-                                    if 'pokestop' in self.args.wh_types or (
-                                            'lure' in self.args.wh_types and
+                                    if 'pokestop' in args.wh_types or (
+                                            'lure' in args.wh_types and
                                             lure_expiration is not None):
                                         l_e = None
                                         if lure_expiration is not None:
@@ -1084,7 +1082,7 @@ class Pogom(Flask):
                                         'url': gym_url
                                     }
 
-                                    if 'gym' in self.args.wh_types:
+                                    if 'gym' in args.wh_types:
                                         raid_active_until = 0
                                         if 'raidInfo' in fort and not fort["raidInfo"].get('complete', False):
                                             raid_battle_ms = float(fort['raidInfo']['raidBattleMs'])
@@ -1115,7 +1113,7 @@ class Pogom(Flask):
 
                                         self.wh_update_queue.put(('gym', wh_gym))
 
-                                    if 'gym-info' in self.args.wh_types:
+                                    if 'gym-info' in args.wh_types:
                                         webhook_data = {
                                             'id': str(gym_id),
                                             'latitude': fort['latitude'],
@@ -1159,9 +1157,9 @@ class Pogom(Flask):
                                             'form': raidpokemonform
                                         }
 
-                                        if ('egg' in self.args.wh_types and
+                                        if ('egg' in args.wh_types and
                                                 ('raidPokemon' not in raidinfo or 'pokemonId' not in raidinfo['raidPokemon'])) or (
-                                                    'raid' in self.args.wh_types and
+                                                    'raid' in args.wh_types and
                                                     'raidPokemon' in raidinfo and 'pokemonId' in raidinfo['raidPokemon']):
                                             wh_raid = raids[fort['id']].copy()
                                             wh_raid.update({
@@ -1252,7 +1250,7 @@ class Pogom(Flask):
                     'url': gym_url
                 }
 
-                if 'gym' in self.args.wh_types:
+                if 'gym' in args.wh_types:
                     wh_gym = gyms[fort['id']].copy()
 
                     wh_gym.update({
@@ -1320,7 +1318,7 @@ class Pogom(Flask):
                         'last_seen': datetime.utcnow(),
                     }
 
-                    if 'gym-info' in self.args.wh_types:
+                    if 'gym-info' in args.wh_types:
                         wh_pokemon = gym_pokemon[i].copy()
                         del wh_pokemon['last_seen']
                         wh_pokemon.update({
@@ -1333,7 +1331,7 @@ class Pogom(Flask):
 
                     i += 1
 
-                if 'gym-info' in self.args.wh_types:
+                if 'gym-info' in args.wh_types:
                     self.wh_update_queue.put(('gym_details', webhook_data))
 
             if "FortDetailsResponse" in proto:
@@ -1397,7 +1395,7 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
-                    if 'quest' in self.args.wh_types:
+                    if 'quest' in args.wh_types:
                         wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
@@ -1514,10 +1512,10 @@ class Pogom(Flask):
                         'weather_boosted_condition': weather
                     }
 
-                    if 'pokemon-iv' in self.args.wh_types:
-                        if (pokemon_id in self.args.webhook_whitelist or
-                            (not self.args.webhook_whitelist and pokemon_id
-                             not in self.args.webhook_blacklist)):
+                    if 'pokemon-iv' in args.wh_types:
+                        if (pokemon_id in args.webhook_whitelist or
+                            (not args.webhook_whitelist and pokemon_id
+                             not in args.webhook_blacklist)):
                             wh_poke = pokemon[long(wildpokemon['encounterId'])].copy()
                             wh_poke.update({
                                 'disappear_time': calendar.timegm(
@@ -1713,7 +1711,7 @@ class Pogom(Flask):
                                lang=args.locale,
                                show=visibility_flags,
                                mapname=args.mapname,
-							   generateImages=str(args.generate_images).lower(),
+                               generateImages=str(args.generate_images).lower(),
                                )
 
     def raw_data(self):
@@ -2018,34 +2016,6 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def teleport_loc(self):
-        request_json = request.get_json()
-
-        uuid = request_json.get('uuid')
-        if uuid == "":
-            return ""
-
-        canusedevice, devicename = self.trusted_device(uuid)
-        if not canusedevice:
-            return ""
-
-        latitude = round(request_json.get('latitude', 0), 5)
-        longitude = round(request_json.get('longitude', 0), 5)
-
-        deviceworker = self.get_device(uuid, latitude, longitude)
-        if not deviceworker['last_scanned']:
-            return "Device need to have posted data first"
-
-        needtojump = False
-
-        last_updated = deviceworker['last_updated']
-        last_scanned = deviceworker['last_scanned']
-        difference = (last_scanned - last_updated).total_seconds()
-        if difference >= 0:
-            needtojump = True
-
-        return self.scan_loc(needtojump)
-
     def walk_spawnpoint(self):
         request_json = request.get_json()
 
@@ -2056,6 +2026,8 @@ class Pogom(Flask):
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
             return ""
+
+        args = get_args()
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -2095,12 +2067,25 @@ class Pogom(Flask):
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if (deviceworker['fetching'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
+
+        scheduletimeout = args.scheduletimeout
+        maxradius = args.maxradius
+        stepsize = args.stepsize
+        if request.args:
+            scheduletimeout = request.args.get('scheduletimeout', type=int)
+            maxradius = request.args.get('maxradius', type=int)
+            stepsize = request.args.get('stepsize', type=int)
+        if request.form:
+            scheduletimeout = request.form.get('scheduletimeout', type=int)
+            maxradius = request.form.get('maxradius', type=int)
+            stepsize = request.form.get('stepsize', type=int)
+
+        if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, self.args.maxradius)
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
@@ -2119,20 +2104,20 @@ class Pogom(Flask):
         dlong = abs(nexttarget[1] - nextlongitude)
         dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > self.args.stepsize:
+        if dll > stepsize:
             adjusted_dlat = 0.0
             adjusted_dlong = 0.0
 
             if dlat == 0.0:
                 adjusted_dlat = 0.0
-                adjusted_dlong = self.args.stepsize
+                adjusted_dlong = stepsize
             elif dlong == 0.0:
-                adjusted_dlat = self.args.stepsize
+                adjusted_dlat = stepsize
                 adjusted_dlong = 0.0
             else:
                 angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
-                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+                adjusted_dlat = stepsize * math.sin(angle_radians)
+                adjusted_dlong = stepsize * math.cos(angle_radians)
 
             if nextlatitude < nexttarget[0]:
                 nextlatitude += adjusted_dlat
@@ -2174,6 +2159,8 @@ class Pogom(Flask):
         if not canusedevice:
             return ""
 
+        args = get_args()
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -2210,9 +2197,18 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
+        scheduletimeout = args.scheduletimeout
+        stepsize = args.stepsize
+        if request.args:
+            scheduletimeout = request.args.get('scheduletimeout', type=int)
+            stepsize = request.args.get('stepsize', type=int)
+        if request.form:
+            scheduletimeout = request.form.get('scheduletimeout', type=int)
+            stepsize = request.form.get('stepsize', type=int)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if (deviceworker['fetching'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
+        if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -2225,7 +2221,7 @@ class Pogom(Flask):
                 routename = uuid
             if routename != "":
                 routename = os.path.join(
-                    self.args.root_path,
+                    args.root_path,
                     'gpx',
                     routename + ".gpx")
             if routename == "" or not os.path.isfile(routename):
@@ -2250,20 +2246,20 @@ class Pogom(Flask):
         dlong = abs(nexttarget[1] - nextlongitude)
         dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > self.args.stepsize:
+        if dll > stepsize:
             adjusted_dlat = 0.0
             adjusted_dlong = 0.0
 
             if dlat == 0.0:
                 adjusted_dlat = 0.0
-                adjusted_dlong = self.args.stepsize
+                adjusted_dlong = stepsize
             elif dlong == 0.0:
-                adjusted_dlat = self.args.stepsize
+                adjusted_dlat = stepsize
                 adjusted_dlong = 0.0
             else:
                 angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
-                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+                adjusted_dlat = stepsize * math.sin(angle_radians)
+                adjusted_dlong = stepsize * math.cos(angle_radians)
 
             if nextlatitude < nexttarget[0]:
                 nextlatitude += adjusted_dlat
@@ -2305,6 +2301,8 @@ class Pogom(Flask):
         if not canusedevice:
             return ""
 
+        args = get_args()
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -2341,14 +2339,26 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
+        scheduletimeout = args.scheduletimeout
+        maxradius = args.maxradius
+        stepsize = args.stepsize
+        if request.args:
+            scheduletimeout = request.args.get('scheduletimeout', type=int)
+            maxradius = request.args.get('maxradius', type=int)
+            stepsize = request.args.get('stepsize', type=int)
+        if request.form:
+            scheduletimeout = request.form.get('scheduletimeout', type=int)
+            maxradius = request.form.get('maxradius', type=int)
+            stepsize = request.form.get('stepsize', type=int)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if (deviceworker['fetching'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
+        if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, self.args.maxradius)
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius)
             nextlatitude = latitude
             nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
@@ -2367,20 +2377,20 @@ class Pogom(Flask):
         dlong = abs(nexttarget[1] - nextlongitude)
         dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > self.args.stepsize:
+        if dll > stepsize:
             adjusted_dlat = 0.0
             adjusted_dlong = 0.0
 
             if dlat == 0.0:
                 adjusted_dlat = 0.0
-                adjusted_dlong = self.args.stepsize
+                adjusted_dlong = stepsize
             elif dlong == 0.0:
-                adjusted_dlat = self.args.stepsize
+                adjusted_dlat = stepsize
                 adjusted_dlong = 0.0
             else:
                 angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = self.args.stepsize * math.sin(angle_radians)
-                adjusted_dlong = self.args.stepsize * math.cos(angle_radians)
+                adjusted_dlat = stepsize * math.sin(angle_radians)
+                adjusted_dlong = stepsize * math.cos(angle_radians)
 
             if nextlatitude < nexttarget[0]:
                 nextlatitude += adjusted_dlat
@@ -2423,6 +2433,8 @@ class Pogom(Flask):
         if not canusedevice:
             return ""
 
+        args = get_args()
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
@@ -2459,12 +2471,24 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
+        scheduletimeout = args.scheduletimeout
+        maxradius = args.maxradius
+        teleport_interval = args.teleport_interval
+        if request.args:
+            scheduletimeout = request.args.get('scheduletimeout', type=int)
+            maxradius = request.args.get('maxradius', type=int)
+            teleport_interval = request.args.get('teleport_interval', type=int)
+        if request.form:
+            scheduletimeout = request.form.get('scheduletimeout', type=int)
+            maxradius = request.form.get('maxradius', type=int)
+            teleport_interval = request.form.get('teleport_interval', type=int)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if (deviceworker['fetching'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gym"):
+        if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gym"):
             self.deviceschedules[uuid] = []
 
-        if difference >= self.args.teleport_interval:
+        if difference >= teleport_interval:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
             deviceworker['last_updated'] = datetime.utcnow()
@@ -2474,7 +2498,7 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, self.args.maxradius)
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
@@ -2556,12 +2580,21 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
+        scheduletimeout = args.scheduletimeout
+        teleport_interval = args.teleport_interval
+        if request.args:
+            scheduletimeout = request.args.get('scheduletimeout', type=int)
+            teleport_interval = request.args.get('teleport_interval', type=int)
+        if request.form:
+            scheduletimeout = request.form.get('scheduletimeout', type=int)
+            teleport_interval = request.form.get('teleport_interval', type=int)
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
-        if (deviceworker['fetching'] == 'IDLE' and difference > self.args.scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
+        if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
             self.deviceschedules[uuid] = []
 
-        if difference >= self.args.teleport_interval:
+        if difference >= teleport_interval:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
             deviceworker['last_updated'] = datetime.utcnow()
@@ -2579,7 +2612,7 @@ class Pogom(Flask):
                 routename = uuid
             if routename != "":
                 routename = os.path.join(
-                    self.args.root_path,
+                    args.root_path,
                     'gpx',
                     routename + ".gpx")
             if routename == "" or not os.path.isfile(routename):
@@ -2619,7 +2652,7 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def scan_loc(self, needtojump=False):
+    def scan_loc(self):
         request_json = request.get_json()
 
         uuid = request_json.get('uuid')
@@ -2630,15 +2663,13 @@ class Pogom(Flask):
         if not canusedevice:
             return ""
 
+        args = get_args()
+
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
 
         latitude = round(lat, 5)
         longitude = round(lng, 5)
-
-        #if latitude == 0 and longitude == 0:
-        #    latitude = round(self.current_location[0], 5)
-        #    longitude = round(self.current_location[1], 5)
 
         deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
@@ -2646,7 +2677,7 @@ class Pogom(Flask):
 
         if deviceworker['fetching'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
-            deviceworker['fetching'] = "teleport_loc" if needtojump else "scan_loc"
+            deviceworker['fetching'] = "scan_loc"
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
 
@@ -2665,36 +2696,27 @@ class Pogom(Flask):
         radius = deviceworker['radius']
         step = deviceworker['step']
         direction = deviceworker['direction']
-        last_updated = deviceworker['last_updated']
-        last_scanned = deviceworker['last_scanned']
 
-        if needtojump:
-            if direction == "U":
-                currentlatitude += self.args.teleport_factor * self.args.stepsize
-            elif direction == "R":
-                currentlongitude += self.args.teleport_factor * self.args.stepsize
-                if abs(currentlongitude - centerlongitude) <  abs(currentlongitude - (centerlongitude + radius * self.args.stepsize)):
-                    direction = "U"
-                    currentlatitude += self.args.teleport_factor * self.args.stepsize
-                    currentlongitude = centerlongitude
-                    radius += self.args.teleport_factor
-                    step = 0
-            elif direction == "D":
-                currentlatitude -= self.args.teleport_factor * self.args.stepsize
-            elif direction == "L":
-                currentlongitude -= self.args.teleport_factor * self.args.stepsize
-#        if last_updated < last_scanned:
-#        if round(datetime.now().timestamp()) % 3 != 0:
-#            return "No need for a new update"
+        maxradius = args.maxradius
+        stepsize = args.stepsize
+        teleport_factor = args.teleport_factor
+        if request.args:
+            maxradius = request.args.get('maxradius', type=int)
+            stepsize = request.args.get('stepsize', type=int)
+            teleport_factor = request.args.get('teleport_factor', type=int)
+        if request.form:
+            maxradius = request.form.get('maxradius', type=int)
+            stepsize = request.form.get('stepsize', type=int)
+            teleport_factor = request.form.get('teleport_factor', type=int)
 
-        if latitude != 0 and longitude != 0 and (abs(latitude - currentlatitude) > (radius + self.args.teleport_factor) * self.args.stepsize or abs(longitude - currentlongitude) > (radius + self.args.teleport_factor) * self.args.stepsize):
+        if latitude != 0 and longitude != 0 and (abs(latitude - currentlatitude) > (radius + teleport_factor) * stepsize or abs(longitude - currentlongitude) > (radius + teleport_factor) * stepsize):
             centerlatitude = latitude
             centerlongitude = longitude
             radius = 0
             step = 0
             direction = "U"
 
-        if (abs(centerlatitude - currentlatitude) > (radius + self.args.teleport_factor) * self.args.stepsize or abs(centerlongitude - currentlongitude) > (radius + self.args.teleport_factor) * self.args.stepsize):
+        if (abs(centerlatitude - currentlatitude) > (radius + teleport_factor) * stepsize or abs(centerlongitude - currentlongitude) > (radius + teleport_factor) * stepsize):
             centerlatitude = latitude
             centerlongitude = longitude
             radius = 0
@@ -2706,41 +2728,41 @@ class Pogom(Flask):
         if radius == 0:
             radius += 1
         elif direction == "U":
-            currentlatitude += self.args.stepsize
-            if currentlatitude > centerlatitude + radius * self.args.stepsize:
-                currentlatitude -= self.args.stepsize
+            currentlatitude += stepsize
+            if currentlatitude > centerlatitude + radius * stepsize:
+                currentlatitude -= stepsize
                 direction = "R"
-                currentlongitude += self.args.stepsize
-                if abs(currentlongitude - centerlongitude) < self.args.stepsize:
+                currentlongitude += stepsize
+                if abs(currentlongitude - centerlongitude) < stepsize:
                     direction = "U"
-                    currentlatitude += self.args.stepsize
+                    currentlatitude += stepsize
                     radius += 1
                     step = 0
         elif direction == "R":
-            currentlongitude += self.args.stepsize
-            if currentlongitude > centerlongitude + radius * self.args.stepsize:
-                currentlongitude -= self.args.stepsize
+            currentlongitude += stepsize
+            if currentlongitude > centerlongitude + radius * stepsize:
+                currentlongitude -= stepsize
                 direction = "D"
-                currentlatitude -= self.args.stepsize
-            elif abs(currentlongitude - centerlongitude) < self.args.stepsize:
+                currentlatitude -= stepsize
+            elif abs(currentlongitude - centerlongitude) < stepsize:
                 direction = "U"
-                currentlatitude += self.args.stepsize
+                currentlatitude += stepsize
                 radius += 1
                 step = 0
         elif direction == "D":
-            currentlatitude -= self.args.stepsize
-            if currentlatitude < centerlatitude - radius * self.args.stepsize:
-                currentlatitude += self.args.stepsize
+            currentlatitude -= stepsize
+            if currentlatitude < centerlatitude - radius * stepsize:
+                currentlatitude += stepsize
                 direction = "L"
-                currentlongitude -= self.args.stepsize
+                currentlongitude -= stepsize
         elif direction == "L":
-            currentlongitude -= self.args.stepsize
-            if currentlongitude < centerlongitude - radius * self.args.stepsize:
-                currentlongitude += self.args.stepsize
+            currentlongitude -= stepsize
+            if currentlongitude < centerlongitude - radius * stepsize:
+                currentlongitude += stepsize
                 direction = "U"
-                currentlatitude += self.args.stepsize
+                currentlatitude += stepsize
 
-        if self.args.maxradius > 0 and geopy.distance.vincenty((currentlatitude, currentlongitude), (centerlatitude, centerlongitude)).km > self.args.maxradius:
+        if maxradius > 0 and geopy.distance.vincenty((currentlatitude, currentlongitude), (centerlatitude, centerlongitude)).km > maxradius:
             currentlatitude = centerlatitude
             currentlongitude = centerlongitude
             radius = 0
@@ -2755,7 +2777,7 @@ class Pogom(Flask):
         deviceworker['step'] = step
         deviceworker['direction'] = direction
         deviceworker['last_updated'] = datetime.utcnow()
-        deviceworker['fetching'] = "teleport_loc" if needtojump else "scan_loc"
+        deviceworker['fetching'] = "scan_loc"
 
         if devicename != "" and devicename != deviceworker['name']:
             deviceworker['name'] = devicename
