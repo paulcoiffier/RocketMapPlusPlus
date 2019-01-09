@@ -1,6 +1,6 @@
 # Webhooks
 
-RocketMap can send map information such as Pokémon spawns, gym details, raid appearances and pokestop lures to other applications through webhooks.
+RocketMapPlusPlus can send map information such as Pokémon spawns, gym details, raid appearances, quests, pokestop lures and devices to other applications through webhooks.
 
 Every time a webhook-enabled event occurs (for example a new Pokémon appearing) a web request will be sent to a provided URL containing information about that event.
 
@@ -28,11 +28,10 @@ Every time a webhook-enabled event occurs (for example a new Pokémon appearing)
   - [`tth`](#tth)
   - [`captcha`](#captcha)
 - [PokeAlarm](#pokealarm)
-- [RocketMap Public Webhook](#rocketmap-public-webhook)
 
 ## What Do Webhooks Do?
 
-Webhooks allow developers to send data from RocketMap to other applications.
+Webhooks allow developers to send data from RocketMapPlusPlus to other applications.
 
 A simple example would be an application that receives Pokémon spawn events, checks if the Pokémon that's appeared is a Dragonite, and if so plays an alarm sound.
 
@@ -200,15 +199,15 @@ For example:
 ]
 ```
 
-RocketMap currently provides the following webhook types: [`pokemon`](#pokemon), [`pokestop`](#pokestop), [`lure`](#lure), [`gym`](#gym), [`gym-info`](#gym-info), [`egg`](#egg), [`raid`](#raid), [`tth`](#tth), [`captcha`](#captcha). Please note that as RocketMap evolves more webhook types may be added.
+RocketMapPlusPlus currently provides the following webhook types: [`pokemon`](#pokemon), [`pokestop`](#pokestop), [`lure`](#lure), [`gym`](#gym), [`gym-info`](#gym-info), [`egg`](#egg), [`raid`](#raid), [`tth`](#tth), [`captcha`](#captcha). Please note that as RocketMapPlusPlus evolves more webhook types may be added.
 
-If you are a developer please feel free to contribute new webhook types through the usual [RocketMap development process](https://github.com/RocketMap/RocketMap/blob/develop/CONTRIBUTING.md#contributing-code).
+If you are a developer please feel free to contribute new webhook types through the usual [RocketMapPlusPlus development process](https://github.com/GlobalPlusPlus/RocketMapPlusPlus/blob/develop/CONTRIBUTING.md#contributing-code).
 
 The sections below outline the different webhook types and the data that gets sent for each event.
 
 ### `pokemon`
 
-A `pokemon` event is sent every time RocketMap detects that a Pokémon has spawned.
+A `pokemon` event is sent every time RocketMapPlusPlus detects that a Pokémon has spawned.
 
 | Field                   | Details                                                               | Example   |
 | ----------------------- | --------------------------------------------------------------------- | --------- |
@@ -251,7 +250,7 @@ A `pokemon` event is sent every time RocketMap detects that a Pokémon has spawn
 
 ### `pokestop`
 
-A `pokestop` event is sent whenever RocketMap scans a pokestop.
+A `pokestop` event is sent whenever RocketMapPlusPlus scans a pokestop.
 
 | Field                  | Details                                                             | Example         |
 | ---------------------- | ------------------------------------------------------------------- | --------------- |
@@ -265,7 +264,7 @@ A `pokestop` event is sent whenever RocketMap scans a pokestop.
 
 ### `lure`
 
-A `lure` event is sent whenever RocketMap scans a pokestop **if that pokestop has been lured**.
+A `lure` event is sent whenever RocketMapPlusPlus scans a pokestop **if that pokestop has been lured**.
 
 **Important: while the webhook type name for `lure` events is `lure`, when this data is sent to a webhook the `type` field will be `pokestop`.**
 
@@ -275,7 +274,7 @@ Lure events contain the same fields as `pokestop` events (described above).
 
 ### `gym`
 
-A `gym` event is sent whenever RocketMap scans a gym.
+A `gym` event is sent whenever RocketMapPlusPlus scans a gym.
 
 | Field                       | Details                                                    | Example             |
 | --------------------------- | ---------------------------------------------------------- | ------------------- |
@@ -307,7 +306,7 @@ A `gym` event is sent whenever RocketMap scans a gym.
 
 ### `gym-info`
 
-A `gym-info` event is sent whenever RocketMap fetches a gym's details.
+A `gym-info` event is sent whenever RocketMapPlusPlus fetches a gym's details.
 
 **Important: while the webhook type name for `gym-info` events is `gym-info`, when this data is sent to a webhook the `type` field will be `gym_details`.**
 
@@ -349,7 +348,7 @@ A `gym-info` event is sent whenever RocketMap fetches a gym's details.
 
 ### `egg`
 
-An `egg` event is sent whenever RocketMap detects that an egg has appeared at a gym.
+An `egg` event is sent whenever RocketMapPlusPlus detects that an egg has appeared at a gym.
 
 **Important: while the webhook type name for `egg` events is `egg`, when this data is sent to a webhook the `type` field will be `raid`.**
 
@@ -371,7 +370,7 @@ Note: `egg` events use the same event type and fields as `raid` events, but the 
 
 ### `raid`
 
-A `raid` event is sent whenever RocketMap detects that a raid has started at a gym.
+A `raid` event is sent whenever RocketMapPlusPlus detects that a raid has started at a gym.
 
 Note: `raid` events use the same event type and fields as `egg` events, but the Pokémon-specific fields such as `pokemon_id` will be populated.
 
@@ -440,10 +439,6 @@ A `captcha` event is sent whenever a scan worker encounters a captcha.
 
 [PokeAlarm](https://github.com/RocketMap/PokeAlarm) is an application which can be used to send alerts for various events.
 
-PokeAlarm receives data from RocketMap through webhooks, processes and filters the data, and can then send event-specific alerts through messaging services such as Twitter and Discord.
+PokeAlarm receives data from RocketMapPlusPlus through webhooks, processes and filters the data, and can then send event-specific alerts through messaging services such as Twitter and Discord.
 
 A full list of the events PokeAlarm can provide alerts for, as well as the messaging services that can be used, can be found in the [PokeAlarm wiki](https://github.com/RocketMap/PokeAlarm/wiki).
-
-## RocketMap Public Webhook
-
-RocketMap is collecting data for an upcoming project. If you would like to help our efforts please fill out [this form](https://goo.gl/forms/ZCx6mQNngr0bAvRY2). You will then receive an email with a webhook url which you can add to your list of webhooks.

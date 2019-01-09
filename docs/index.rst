@@ -1,14 +1,14 @@
-Welcome to RocketMap's Documentation!
+Welcome to RocketMapPlusPlus's Documentation!
 =========================================
 
-RocketMap gives you a live visualization map of nearby Pokémon, Pokéstops, and gyms in a form of a web-app as well as native phone application
+RocketMapPlusPlus gives you a live visualization map of nearby Pokémon, Pokéstops, Gyms, Raids and Quests in a form of a web-app as well as native phone application
 
 .. image:: _static/img/RocketMap.png
     :align: center
 
-[ Wanting to install and run RocketMap for the first time? `Start here! <https://rocketmap.readthedocs.io/en/develop/basic-install/index.html>`_ ]
+[ Wanting to install and run RocketMapPlusPlus for the first time? `Start here! <https://rocketmap.readthedocs.io/en/develop/basic-install/index.html>`_ ]
 
-[ `Official GitHub <https://github.com/RocketMap/RocketMap>`_ ] [ `Discord Support <https://discord.gg/rocketmap>`_ ] [ `GitHub Issues <https://github.com/RocketMap/RocketMap/issues>`_ ]
+[ `Official GitHub <https://github.com/GlobalPlusPlus/RocketMapPlusPlus>`_ ] [ `Discord Support <https://discord.gg/ZZwzc4h>`_ ] [ `GitHub Issues <https://github.com/GlobalPlusPlus/RocketMapPlusPlus/issues>`_ ]
 
 .. toctree::
     :titlesonly:
@@ -37,7 +37,7 @@ RocketMap gives you a live visualization map of nearby Pokémon, Pokéstops, and
     :caption: First Run
     :glob:
 
-    first-run/*	
+    first-run/*
 
 .. toctree::
     :titlesonly:
@@ -46,15 +46,7 @@ RocketMap gives you a live visualization map of nearby Pokémon, Pokéstops, and
     :glob:
 
     common-issues/*
-	
-.. toctree::
-    :titlesonly:
-    :maxdepth: 1
-    :caption: Scanning Methods
-    :glob:
 
-    scanning-method/*
-	
 .. toctree::
     :titlesonly:
     :maxdepth: 1
@@ -62,7 +54,7 @@ RocketMap gives you a live visualization map of nearby Pokémon, Pokéstops, and
     :glob:
 
     extras/*
-	
+
 .. toctree::
     :titlesonly:
     :maxdepth: 1
@@ -70,4 +62,12 @@ RocketMap gives you a live visualization map of nearby Pokémon, Pokéstops, and
     :glob:
 
     advanced-install/*
+
+.. toctree::
+    :titlesonly:
+    :maxdepth: 1
+    :caption: Pokemon GO++
+    :glob:
+
+    plusplus/*
 

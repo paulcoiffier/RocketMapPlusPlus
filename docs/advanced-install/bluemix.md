@@ -6,7 +6,7 @@ to have 24 up time! Oh boy!
 
 ## Prerequisites
 
-  1. Clone the git repo with `git clone --recursive https://github.com/RocketMap/RocketMap.git`
+  1. Clone the git repo with `git clone --recursive https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git`
   1. Create a [Bluemix](http://bluemix.net) account
   1. Install the [Cloud Foundry CLI](https://console.ng.bluemix.net/docs/cli/reference/cfcommands/index.html) - [Download here](https://github.com/cloudfoundry/cli/releases).
 
@@ -22,14 +22,10 @@ To do the same thing via command line, you simply run that last command. It'll
 create the app and push the code for you.
 
 Note that this first deploy will fail! We need to configure the environment
-variables for authentication to Pokemon Go and your Google API Key. To do that
+variables for your Google API Key. To do that
 via the CLI:
 
-    cf set-env <nameofapp> AUTH_SERVICE <ptc|google>
-    cf set-env <nameofapp> USERNAME <username>
-    cf set-env <nameofapp> PASSWORD <password>
     cf set-env <nameofapp> GMAPS_KEY <your google api key>
-    cf set-env <nameofapp> STEP_COUNT <step count>
     cf set-env <nameofapp> LOCATION <the location you're spying on>
 
 To set the environment variables via the GUI, you navigate to the "environment

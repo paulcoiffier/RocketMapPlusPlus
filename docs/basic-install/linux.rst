@@ -43,8 +43,8 @@ If your output looks as above, you can proceed with installation:
 
 	cd ~/
 	sudo apt-get install git
-	git clone --recursive https://github.com/RocketMap/RocketMap.git
-	cd RocketMap
+	git clone --recursive https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git
+	cd RocketMapPlusPlus
 	sudo -H pip install -r requirements.txt
 	npm install
 	sudo npm install -g grunt-cli
@@ -78,7 +78,7 @@ If you're getting the following error:
 
 .. code-block:: bash
 
-	root:~/RocketMap# ./runserver.py
+	root:~/RocketMapPlusPlus# ./runserver.py
 	Traceback (most recent call last):
   		File "./runserver.py", line 10, in <module>
   		import requests

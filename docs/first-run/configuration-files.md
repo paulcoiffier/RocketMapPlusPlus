@@ -17,27 +17,20 @@ The default configuration file is *config/config.ini* underneath the project hom
 
     keyname: [ value1, value2, ...]
     e.g.   username: [ randomjoe, bonnieclyde ]
-	
+
 	*for usernames and passwords, the first username must correspond to the first password, and so on *
 
   For command line arguments that take no parameters:
 
     keyname: True
     e.g.   fixed-location: True
-	
+
 
 ## Example config file
 
 ```
-  auth-service: ptc
-  username: [ username1, username2 ]
-  password: [ password1, password2 ]
   location: seattle, wa
-  step-limit: 5
   gmaps-key: MyGmapsKeyGoesHereSomeLongString
-  hash-kay: MyHashingKeyGoesHere
-  print-status: "status"
-  speed-scan: True
 ```
 
   Running this config file as:
@@ -46,11 +39,11 @@ The default configuration file is *config/config.ini* underneath the project hom
 
   would be the same as running with the following command line:
 
-     python runserver.py -u randomjoe -p password1 -u bob -p password2 -l "seattle, wa" -st 5 -k MyGmapsKeyGoesHereSomeLongString -ps
+     python runserver.py -l "seattle, wa" -k MyGmapsKeyGoesHereSomeLongString
 
 ## Shared config
 
-If you run multiple instances, you can add settings to a shared configuration file rather than adding it to each unique instance configuration file individually. This is useful for settings that are always the same such as Google Maps API key, hashing key, etc. It makes managing multiple instances easier: instead of having to change the hashing key in every configuration file every month, you only need to change it in the shared config file. Add the shared settings to your shared-config.ini and call the shared config from the command line using the `-scf` flag when you start your instance.
+If you run multiple instances, you can add settings to a shared configuration file rather than adding it to each unique instance configuration file individually. This is useful for settings that are always the same such as Google Maps API key, etc. It makes managing multiple instances easier: instead of having to change the hashing key in every configuration file every month, you only need to change it in the shared config file. Add the shared settings to your shared-config.ini and call the shared config from the command line using the `-scf` flag when you start your instance.
 
 ` python runserver.py -cf myconfig.ini -scf shared-config.ini`
 
@@ -60,12 +53,5 @@ Remember to remove old keys and any other settings from your normal configs that
 
 ## Running multiple configs
 
-   One common way of running multiple locations is to use two configuration files each with common or default database values, but with different location specs. The first configuration running as both a scanner and a server, and in the second configuration file, use the *no-server* flag to not start the web interface for the second configuration.   In the config file, this would mean including a line like:
-
-   no-server: True
-   
-### Using `-ns` and `-os`
-
-If RocketMap is not scanning enough areas, you can add additional areas by starting a 2nd RocketMap instance with the flag `-ns`. This starts the searchers without starting another webserver. You can run as many instances with `-ns` as your server can keep up with. ***HOWEVER:*** If all your instances are running `-ns` you will also want to start an instance with `-os`. This will start only the webserver. This becomes useful if you begin to seperate your RM instances across several computers all linked to the same database. 
-
+   One common way of running multiple locations is to use two configuration files each with common or default database values, but with different location specs.
 
