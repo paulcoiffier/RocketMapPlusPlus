@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='pogoprotos.networking.envelopes',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n6pogoprotos/networking/envelopes/request_envelope.proto\x12\x1fpogoprotos.networking.envelopes\x1a,pogoprotos/networking/requests/request.proto\x1a\x31pogoprotos/networking/envelopes/auth_ticket.proto\x1a:pogoprotos/networking/platform/platform_request_type.proto\"\xc3\x05\n\x0fRequestEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\x04\x12\x39\n\x08requests\x18\x04 \x03(\x0b\x32\'.pogoprotos.networking.requests.Request\x12[\n\x11platform_requests\x18\x06 \x03(\x0b\x32@.pogoprotos.networking.envelopes.RequestEnvelope.PlatformRequest\x12\x10\n\x08latitude\x18\x07 \x01(\x01\x12\x11\n\tlongitude\x18\x08 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\t \x01(\x01\x12L\n\tauth_info\x18\n \x01(\x0b\x32\x39.pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo\x12@\n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32+.pogoprotos.networking.envelopes.AuthTicket\x12!\n\x19ms_since_last_locationfix\x18\x0c \x01(\x03\x1a\x95\x01\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x01(\t\x12L\n\x05token\x18\x02 \x01(\x0b\x32=.pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.JWT\x1a)\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\x1am\n\x0fPlatformRequest\x12\x41\n\x04type\x18\x01 \x01(\x0e\x32\x33.pogoprotos.networking.platform.PlatformRequestType\x12\x17\n\x0frequest_message\x18\x02 \x01(\x0c\x62\x06proto3')
+  serialized_pb=_b('\n6pogoprotos/networking/envelopes/request_envelope.proto\x12\x1fpogoprotos.networking.envelopes\x1a,pogoprotos/networking/requests/request.proto\x1a\x31pogoprotos/networking/envelopes/auth_ticket.proto\x1a:pogoprotos/networking/platform/platform_request_type.proto\"\xcc\x06\n\x0fRequestEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\x04\x12\x39\n\x08requests\x18\x04 \x03(\x0b\x32\'.pogoprotos.networking.requests.Request\x12[\n\x11platform_requests\x18\x06 \x03(\x0b\x32@.pogoprotos.networking.envelopes.RequestEnvelope.PlatformRequest\x12\x10\n\x08latitude\x18\x07 \x01(\x01\x12\x11\n\tlongitude\x18\x08 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\t \x01(\x01\x12L\n\tauth_info\x18\n \x01(\x0b\x32\x39.pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo\x12@\n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32+.pogoprotos.networking.envelopes.AuthTicket\x12!\n\x19ms_since_last_locationfix\x18\x0c \x01(\x03\x1a\x9e\x02\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x01(\t\x12L\n\x05token\x18\x02 \x01(\x0b\x32=.pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.JWT\x12V\n\x07options\x18\x03 \x01(\x0b\x32\x45.pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.AuthOptions\x1a)\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\x1a/\n\x0b\x41uthOptions\x12 \n\x18prevent_account_creation\x18\x01 \x01(\x08\x1am\n\x0fPlatformRequest\x12\x41\n\x04type\x18\x01 \x01(\x0e\x32\x33.pogoprotos.networking.platform.PlatformRequestType\x12\x17\n\x0frequest_message\x18\x02 \x01(\x0c\x62\x06proto3')
   ,
   dependencies=[pogoprotos_dot_networking_dot_requests_dot_request__pb2.DESCRIPTOR,pogoprotos_dot_networking_dot_envelopes_dot_auth__ticket__pb2.DESCRIPTOR,pogoprotos_dot_networking_dot_platform_dot_platform__request__type__pb2.DESCRIPTOR,])
 
@@ -62,8 +62,38 @@ _REQUESTENVELOPE_AUTHINFO_JWT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=804,
-  serialized_end=845,
+  serialized_start=892,
+  serialized_end=933,
+)
+
+_REQUESTENVELOPE_AUTHINFO_AUTHOPTIONS = _descriptor.Descriptor(
+  name='AuthOptions',
+  full_name='pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.AuthOptions',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='prevent_account_creation', full_name='pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.AuthOptions.prevent_account_creation', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=935,
+  serialized_end=982,
 )
 
 _REQUESTENVELOPE_AUTHINFO = _descriptor.Descriptor(
@@ -87,10 +117,17 @@ _REQUESTENVELOPE_AUTHINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='options', full_name='pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.options', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_REQUESTENVELOPE_AUTHINFO_JWT, ],
+  nested_types=[_REQUESTENVELOPE_AUTHINFO_JWT, _REQUESTENVELOPE_AUTHINFO_AUTHOPTIONS, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -100,7 +137,7 @@ _REQUESTENVELOPE_AUTHINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=696,
-  serialized_end=845,
+  serialized_end=982,
 )
 
 _REQUESTENVELOPE_PLATFORMREQUEST = _descriptor.Descriptor(
@@ -136,8 +173,8 @@ _REQUESTENVELOPE_PLATFORMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=847,
-  serialized_end=956,
+  serialized_start=984,
+  serialized_end=1093,
 )
 
 _REQUESTENVELOPE = _descriptor.Descriptor(
@@ -230,11 +267,13 @@ _REQUESTENVELOPE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=249,
-  serialized_end=956,
+  serialized_end=1093,
 )
 
 _REQUESTENVELOPE_AUTHINFO_JWT.containing_type = _REQUESTENVELOPE_AUTHINFO
+_REQUESTENVELOPE_AUTHINFO_AUTHOPTIONS.containing_type = _REQUESTENVELOPE_AUTHINFO
 _REQUESTENVELOPE_AUTHINFO.fields_by_name['token'].message_type = _REQUESTENVELOPE_AUTHINFO_JWT
+_REQUESTENVELOPE_AUTHINFO.fields_by_name['options'].message_type = _REQUESTENVELOPE_AUTHINFO_AUTHOPTIONS
 _REQUESTENVELOPE_AUTHINFO.containing_type = _REQUESTENVELOPE
 _REQUESTENVELOPE_PLATFORMREQUEST.fields_by_name['type'].enum_type = pogoprotos_dot_networking_dot_platform_dot_platform__request__type__pb2._PLATFORMREQUESTTYPE
 _REQUESTENVELOPE_PLATFORMREQUEST.containing_type = _REQUESTENVELOPE
@@ -253,6 +292,13 @@ RequestEnvelope = _reflection.GeneratedProtocolMessageType('RequestEnvelope', (_
       DESCRIPTOR = _REQUESTENVELOPE_AUTHINFO_JWT,
       __module__ = 'pogoprotos.networking.envelopes.request_envelope_pb2'
       # @@protoc_insertion_point(class_scope:pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.JWT)
+      ))
+    ,
+
+    AuthOptions = _reflection.GeneratedProtocolMessageType('AuthOptions', (_message.Message,), dict(
+      DESCRIPTOR = _REQUESTENVELOPE_AUTHINFO_AUTHOPTIONS,
+      __module__ = 'pogoprotos.networking.envelopes.request_envelope_pb2'
+      # @@protoc_insertion_point(class_scope:pogoprotos.networking.envelopes.RequestEnvelope.AuthInfo.AuthOptions)
       ))
     ,
     DESCRIPTOR = _REQUESTENVELOPE_AUTHINFO,
@@ -274,6 +320,7 @@ RequestEnvelope = _reflection.GeneratedProtocolMessageType('RequestEnvelope', (_
 _sym_db.RegisterMessage(RequestEnvelope)
 _sym_db.RegisterMessage(RequestEnvelope.AuthInfo)
 _sym_db.RegisterMessage(RequestEnvelope.AuthInfo.JWT)
+_sym_db.RegisterMessage(RequestEnvelope.AuthInfo.AuthOptions)
 _sym_db.RegisterMessage(RequestEnvelope.PlatformRequest)
 
 
