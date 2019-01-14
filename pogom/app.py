@@ -1401,7 +1401,8 @@ class Pogom(Flask):
                             wh_quest.update(
                                 {
                                     "latitude": quest_pokestop["latitude"],
-                                    "longitude": quest_pokestop["longitude"]
+                                    "longitude": quest_pokestop["longitude"],
+                                    "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
                                 }
                             )
                         self.wh_update_queue.put(('quest', wh_quest))
