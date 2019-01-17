@@ -286,6 +286,8 @@ function initMap() { // eslint-disable-line no-unused-vars
     map.addListener('idle', updateMap)
 
     map.addListener('zoom_changed', function () {
+        var showRaidTimers = Store.get('showRaidTimers')
+
         if (storeZoom === true) {
             Store.set('zoomLevel', this.getZoom())
         } else {
@@ -303,6 +305,10 @@ function initMap() { // eslint-disable-line no-unused-vars
         redrawTimeout = setTimeout(function () {
             redrawPokemon(mapData.pokemons)
             redrawPokemon(mapData.lurePokemons)
+            
+            if (showRaidTimers) {
+                redrawGyms(mapData.gyms)
+            }
 
             // We're done processing the list. Repaint.
             markerCluster.repaint()
@@ -1573,13 +1579,29 @@ function customizePokemonMarker(marker, item, skipNotification) {
 }
 
 function setupGymMarker(item) {
-    var marker = new google.maps.Marker({
-        position: {
-            lat: item['latitude'],
-            lng: item['longitude']
-        },
-        map: map
-    })
+    var showRaidTimers = Store.get('showRaidTimers')
+    var marker
+
+    if (showRaidTimers) {
+        marker = new MarkerWithLabel({ // eslint-disable-line no-undef
+            position: {
+                lat: item['latitude'],
+                lng: item['longitude']
+            },
+            labelAnchor: new google.maps.Point(24, 65),
+            labelVisible: false,
+            map: map
+        })
+    }
+    else {
+        marker = new google.maps.Marker({
+            position: {
+                lat: item['latitude'],
+                lng: item['longitude']
+            },
+            map: map
+        })
+    }
 
     marker.infoWindow = new google.maps.InfoWindow({
         content: '',
@@ -1640,9 +1662,13 @@ function updateGymMarker(item, marker) {
     const showRaidSetting = Store.get('showRaids') && (!Store.get('showActiveRaidsOnly') || !Store.get('showParkRaidsOnly'))
     const gymInBattle = getGymInBattle(item)
     const gymExRaidEligible = getGymExRaidEligible(item)
+    var showRaidTimersAtZoomLevel = Store.get('showRaidTimersAtZoomLevel')
+    var showRaidTimers = Store.get('showRaidTimers')
 
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible)
     {
+        marker.raidStarted = true
+        
         if (generateImages)
         {
             markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
@@ -1695,6 +1721,20 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
+        
+        if (showRaidTimers)
+        {
+            if (map.getZoom() >= showRaidTimersAtZoomLevel)
+            {
+                marker.labelContent = `<span class='label-countdown' disappears-at='${item.raid.end}'>00:00:00</span>`
+                marker.labelClass = 'gym raidtimerlabel'
+                marker.labelVisible = true
+            }
+            else
+            {
+                marker.labelVisible = false
+            }
+        }
 
         if(item.raid.pokemon_id && notifiedPokemon.indexOf(item.raid.pokemon_id) > -1)
         {
@@ -1719,6 +1759,8 @@ function updateGymMarker(item, marker) {
     }
     else if (hasActiveRaid && raidLevelVisible && showRaidSetting)
     {
+        marker.raidStarted = false
+
         if (generateImages)
         {
             markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
@@ -1748,6 +1790,20 @@ function updateGymMarker(item, marker) {
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
         })
+
+        if (showRaidTimers)
+        {
+            if (map.getZoom() >= showRaidTimersAtZoomLevel)
+            {
+                marker.labelContent = `<span class='label-countdown' disappears-at='${item.raid.start}'>00:00:00</span>`
+                marker.labelClass = 'gym eggtimerlabel'
+                marker.labelVisible = true
+            }
+            else
+            {
+                marker.labelVisible = false
+            }
+        }
 
         marker.setAnimation(null)
         marker.animationDisabled = false
@@ -1785,6 +1841,13 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(1)
+
+        if (showRaidTimers)
+        {
+            marker.labelContent = ''
+            marker.labelClass = ''
+            marker.labelVisible = false
+        }
 
         marker.setAnimation(null)
         marker.animationDisabled = false
@@ -2538,6 +2601,50 @@ function updatePokestops() {
     })
 }
 
+function updateGyms() {
+    if (!Store.get('showGyms') && !Store.get('showRaids')) {
+        return false
+    }
+
+    var removeGyms = []
+    var currentTime = new Date().getTime()
+
+    // change raid gym markers to normal gym markers when expired
+    $.each(mapData.gyms, function (key, value) {
+        if (value['raid'] && value['raid']['end'] < currentTime) {
+            value['raid'] = null
+            value.marker = updateGymMarker(value, value.marker)
+        }
+    })
+    
+    // change raid gym markers to from egg to boss if they've started
+    $.each(mapData.gyms, function (key, value) {
+        if (value['raid'] && value['raid']['start'] < currentTime && !value.marker.raidStarted) {
+            value.marker = updateGymMarker(value, value.marker)
+        }
+    })
+
+    // remove gyms without a raid
+    if (!Store.get('showGyms')) {
+        $.each(mapData.gyms, function (key, value) {
+            if (!value['raid']) {
+                removeGyms.push(key)
+            }
+        })
+    }
+
+    $.each(removeGyms, function (key, value) {
+        if (mapData.gyms[value] && mapData.gyms[value].marker) {
+            if (mapData.gyms[value].marker.rangeCircle) {
+                mapData.gyms[value].marker.rangeCircle.setMap(null)
+                delete mapData.gyms[value].marker.rangeCircle
+            }
+            mapData.gyms[value].marker.setMap(null)
+            delete mapData.gyms[value]
+        }
+    })
+}
+
 function processGym(i, item) {
     var gymLevel = getGymLevel(item)
     var raidLevel = getRaidLevel(item.raid)
@@ -2741,6 +2848,7 @@ function updateMap() {
         updateScanned()
         updateSpawnPoints()
         updatePokestops()
+        updateGyms()
         updateGeofences(result.geofences)
 
         if ($('#stats').hasClass('visible')) {
@@ -2779,6 +2887,14 @@ function redrawPokemon(pokemonList) {
 
             updatePokemonMarker(item, map, scaleByRarity, isNotifyPkmn)
         }
+    })
+}
+
+function redrawGyms(gymList) {
+    $.each(gymList, function (key, value) {
+        var item = gymList[key]
+
+        updateGymMarker(item, item.marker)
     })
 }
 

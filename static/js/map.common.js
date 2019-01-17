@@ -909,6 +909,14 @@ var StoreOptions = {
         default: 5,
         type: StoreTypes.Number
     },
+    'showRaidTimers': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showRaidTimersAtZoomLevel': {
+        default: 12,
+        type: StoreTypes.Number
+    },
     'showGyms': {
         default: false,
         type: StoreTypes.Boolean
