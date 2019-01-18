@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RocketMap/RocketMap.git"
+    "url": "git+https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git"
   },
   "keywords": [
     "Pokemon",
@@ -51,9 +51,9 @@
   "author": "Carl Taylor",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RocketMap/RocketMap/issues"
+    "url": "https://github.com/GlobalPlusPlus/RocketMapPlusPlus/issues"
   },
-  "homepage": "https://github.com/RocketMap/RocketMap#readme",
+  "homepage": "https://github.com/GlobalPlusPlus/RocketMapPlusPlus#readme",
   "devDependencies": {
     "grunt": "^1.0.3"
   }
