@@ -630,7 +630,6 @@ def get_gmaps_timezone_offset(lat, lng, gmaps_key):
             'location={},{}&timestamp={}&key={}').format(lat, lng, time.time(), gmaps_key),
             timeout=5)
         response = response.json()
-        log.info(response)
         status = response['status']
         timezone_offset = response.get('rawOffset', 0) + response.get('dstOffset', 0)
     except Exception as e:
