@@ -107,11 +107,12 @@ const genderSpecificSprites = [
     449, 450
 ]
 const possibleShinySprites = [
-    1, 4, 7, 10, 25, 29, 30, 31, 77, 81, 90, 92, 96, 98,
-    104, 127, 129, 133, 138, 140, 142, 147, 152, 155,
-    177, 179, 191, 198, 204, 209, 228, 246, 261, 278,
-    296, 302, 304, 307, 311, 312, 315, 320, 333, 353,
-    355, 361, 370, 374, 425
+    1, 4, 7, 10, 25, 27, 29, 30, 31, 58,
+    74, 77, 81, 88, 90, 92, 96, 98, 104, 127,
+    129, 133, 138, 140, 142, 147, 152, 155, 158, 177,
+    179, 191, 198, 200, 204, 209, 225, 228, 246, 261,
+    263, 276, 278, 296, 302, 304, 307, 311, 312, 315,
+    320, 333, 349, 353, 355, 361, 370, 374, 425
 ]
 
 const excludedRaritiesList = [
@@ -305,7 +306,7 @@ function initMap() { // eslint-disable-line no-unused-vars
         redrawTimeout = setTimeout(function () {
             redrawPokemon(mapData.pokemons)
             redrawPokemon(mapData.lurePokemons)
-            
+
             if (showRaidTimers) {
                 redrawGyms(mapData.gyms)
             }
@@ -1668,7 +1669,7 @@ function updateGymMarker(item, marker) {
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible)
     {
         marker.raidStarted = true
-        
+
         if (generateImages)
         {
             markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
@@ -1721,7 +1722,7 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
-        
+
         if (showRaidTimers)
         {
             if (map.getZoom() >= showRaidTimersAtZoomLevel)
@@ -2616,7 +2617,7 @@ function updateGyms() {
             value.marker = updateGymMarker(value, value.marker)
         }
     })
-    
+
     // change raid gym markers to from egg to boss if they've started
     $.each(mapData.gyms, function (key, value) {
         if (value['raid'] && value['raid']['start'] < currentTime && !value.marker.raidStarted) {
