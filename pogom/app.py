@@ -1963,7 +1963,7 @@ class Pogom(Flask):
                             'name': uuid,
                             'coordinates': []
                         }
-                        for point in route.iteritems():
+                        for point in route:
                             coordinate = {
                                 'lat': point[0],
                                 'lng': point[1]
