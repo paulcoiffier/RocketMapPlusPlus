@@ -2137,23 +2137,22 @@ function setupRoutePolygon(item) {
     // Total random '#'+Math.floor(Math.random()*16777215).toString(16);
     randomcolor = randomColor({hue: 'blue'})
 
-    var polygon = new google.maps.Polygon({
+    var polygon = new google.maps.Polyline({
         map: map,
         paths: item['coordinates'],
+        geodesic: true,
         strokeColor: randomcolor,
         strokeOpacity: 0.8,
         strokeWeight: 2,
-        fillColor: randomcolor,
-        fillOpacity: 0.5
     })
 
-    var markerPosition = polygonCenter(polygon)
+    // var markerPosition = polygonCenter(polygon)
 
-    polygon.infoWindow = new google.maps.InfoWindow({
-        content: routeLabel(item),
-        disableAutoPan: true,
-        position: markerPosition
-    })
+    // polygon.infoWindow = new google.maps.InfoWindow({
+    //     content: routeLabel(item),
+    //     disableAutoPan: true,
+    //     position: markerPosition
+    // })
 
     addListeners(polygon)
 
