@@ -1952,7 +1952,25 @@ class Pogom(Flask):
 
             d['geofences'] = geofences
 
-        d['deviceworkers'] = DeviceWorker.get_active()
+        if request.args.get('devices', 'true') == 'true':
+            d['deviceworkers'] = DeviceWorker.get_active()
+
+            if request.args.get('routes', 'true') == 'true':
+                routes = {}
+                for uuid, route in self.deviceschedules:
+                    if len(route) > 0:
+                        routes[uuid] = {
+                            'name': uuid,
+                            'coordinates': []
+                        }
+                        for point in route:
+                            coordinate = {
+                                'lat': point[0],
+                                'lng': point[1]
+                            }
+                            routes[uuid]['coordinates'].append(coordinate)
+
+                d['routes'] = routes
 
         return jsonify(d)
 
