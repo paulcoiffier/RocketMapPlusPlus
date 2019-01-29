@@ -1957,13 +1957,13 @@ class Pogom(Flask):
 
             if request.args.get('routes', 'true') == 'true':
                 routes = {}
-                for uuid, route in self.deviceschedules:
+                for uuid, route in self.deviceschedules.iteritems():
                     if len(route) > 0:
                         routes[uuid] = {
                             'name': uuid,
                             'coordinates': []
                         }
-                        for point in route:
+                        for point in route.iteritems():
                             coordinate = {
                                 'lat': point[0],
                                 'lng': point[1]
