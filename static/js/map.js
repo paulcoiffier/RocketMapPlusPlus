@@ -2882,21 +2882,19 @@ function updateGeofences(geofences) {
 
 function updateRoutes(routes) {
     var i
-    if (!Store.get('showRoutes') && routesSet === true) {
+    if (!Store.get('showRoutes')) {
         for (i = 0; i < polygons_routes.length; i++) {
             polygons_routes[i].setMap(null)
         }
         polygons_routes = []
-        routesSet = false
         return false
-    } else if (Store.get('showRoutes') && routesSet === false) {
+    } else if (Store.get('showRoutes')) {
         var key
         i = 0
         for (key in routes) {
             polygons_routes[i] = setupRoutePolygon(routes[key])
             i++
         }
-        routesSet = true
     }
 }
 
