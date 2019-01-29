@@ -1954,7 +1954,8 @@ class SpawnPoint(LatLongModel):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
-                SpawnPoint.latitude, SpawnPoint.longitude, SpawnPoint.id)
+                SpawnPoint.latitude, SpawnPoint.longitude, SpawnPoint.id,
+                SpawnPoint.latest_seen, SpawnPoint.earliest_unseen)
                 .dicts())
 
             lat1 = lat - 0.1
