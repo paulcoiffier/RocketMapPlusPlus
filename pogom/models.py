@@ -1950,7 +1950,7 @@ class SpawnPoint(LatLongModel):
         return list(spawnpoints.values())
 
     @staticmethod
-    def get_nearby_spawnpoints(lat, lng, dist):
+    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
@@ -1981,7 +1981,8 @@ class SpawnPoint(LatLongModel):
             if geofences.is_enabled():
                 results = []
                 for sp in queryDict:
-                    results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
+                    if not unknown_tth or SpawnPoint.tth_found(sp):
+                        results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
@@ -2002,7 +2003,7 @@ class SpawnPoint(LatLongModel):
                     latitude = round(sp['latitude'], 5)
                     longitude = round(sp['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                    if dist == 0 or distance <= dist:
+                    if (not unknown_tth or SpawnPoint.tth_found(sp)) and (dist == 0 or distance <= dist):
                         spawnpoints[key] = {
                             'latitude': latitude,
                             'longitude': longitude,

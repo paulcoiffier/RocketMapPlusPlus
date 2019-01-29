@@ -2071,21 +2071,24 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         maxradius = args.maxradius
         stepsize = args.stepsize
+        unknown_tth = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
+            unknown_tth = request.args.get('unknown_tth', unknown_tth)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
+            unknown_tth = request.form.get('unknown_tth', unknown_tth)
 
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius)
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth)
             nextlatitude = latitude
             nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
