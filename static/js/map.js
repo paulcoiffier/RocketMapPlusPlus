@@ -526,6 +526,7 @@ function initSidebar() {
     $('#scanned-switch').prop('checked', Store.get('showScanned'))
     $('#devices-switch').prop('checked', Store.get('showDevices'))
     $('#routes-switch').prop('checked', Store.get('showRoutes'))
+    $('#devices-filter-wrapper').toggle(Store.get('showDevices'))
     $('#spawnpoints-switch').prop('checked', Store.get('showSpawnpoints'))
     $('#ranges-switch').prop('checked', Store.get('showRanges'))
     $('#notify-perfection-wrapper').toggle(Store.get('showPokemonStats'))
@@ -2138,13 +2139,14 @@ function setupRoutePolygon(item) {
     randomcolor = randomColor({hue: 'blue'})
 
     var polygon = new google.maps.Polyline({
-        map: map,
         paths: item['coordinates'],
         geodesic: true,
         strokeColor: randomcolor,
         strokeOpacity: 0.8,
         strokeWeight: 2,
     })
+
+    polygon.setMap(map);
 
     // var markerPosition = polygonCenter(polygon)
 
