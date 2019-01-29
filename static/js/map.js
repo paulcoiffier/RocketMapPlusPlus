@@ -2154,7 +2154,7 @@ function setupRoutePolygon(item) {
     //     position: markerPosition
     // })
 
-    addListeners(polygon)
+    // addListeners(polygon)
 
     return polygon
 }
