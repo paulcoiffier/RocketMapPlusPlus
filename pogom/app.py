@@ -2019,13 +2019,24 @@ class Pogom(Flask):
     def walk_spawnpoint(self):
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         args = get_args()
 
@@ -2154,13 +2165,24 @@ class Pogom(Flask):
     def walk_gpx(self):
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         args = get_args()
 
@@ -2296,13 +2318,24 @@ class Pogom(Flask):
     def walk_pokestop(self):
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         args = get_args()
 
@@ -2345,14 +2378,17 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         maxradius = args.maxradius
         stepsize = args.stepsize
+        questless = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
+            questless = request.args.get('questless', questless)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
+            questless = request.form.get('questless', questless)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2361,7 +2397,7 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius)
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless)
             nextlatitude = latitude
             nextlongitude = longitude
             if len(self.deviceschedules[uuid]) == 0:
@@ -2428,13 +2464,24 @@ class Pogom(Flask):
         args = get_args()
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         args = get_args()
 
@@ -2542,13 +2589,24 @@ class Pogom(Flask):
         args = get_args()
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -2661,13 +2719,24 @@ class Pogom(Flask):
     def scan_loc(self):
         request_json = request.get_json()
 
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
         uuid = request_json.get('uuid')
         if uuid == "":
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         canusedevice, devicename = self.trusted_device(uuid)
         if not canusedevice:
-            return ""
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         args = get_args()
 

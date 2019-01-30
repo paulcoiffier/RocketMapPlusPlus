@@ -774,7 +774,7 @@ class Pokestop(LatLongModel):
         return result
 
     @staticmethod
-    def get_nearby_pokestops(lat, lng, dist):
+    def get_nearby_pokestops(lat, lng, dist, questless):
         pokestops = {}
         with Pokestop.database().execution_context():
             query = (Pokestop.select(
@@ -804,7 +804,8 @@ class Pokestop(LatLongModel):
             if geofences.is_enabled():
                 results = []
                 for p in queryDict:
-                    results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
+                    if not questless or len(Pokestop.get_stop(p['pokestop_id'])['quest']) == 0:
+                        results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
@@ -825,7 +826,7 @@ class Pokestop(LatLongModel):
                     latitude = round(p['latitude'], 5)
                     longitude = round(p['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                    if dist == 0 or distance <= dist:
+                    if (not questless or len(Pokestop.get_stop(p['pokestop_id'])['quest']) == 0) and (dist == 0 or distance <= dist):
                         pokestops[key] = {
                             'latitude': latitude,
                             'longitude': longitude,
