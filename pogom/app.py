@@ -1968,10 +1968,7 @@ class Pogom(Flask):
                                 'lat': point[0],
                                 'lng': point[1]
                             }
-                            if len(routes[uuid]['coordinates']) < 50:
-                                routes[uuid]['coordinates'].append(coordinate)
-                            else:
-                                break
+                            routes[uuid]['coordinates'].append(coordinate)
 
                 d['routes'] = routes
 
