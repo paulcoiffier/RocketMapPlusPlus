@@ -51,6 +51,10 @@ from protos.pogoprotos.enums.gender_pb2 import _GENDER
 from protos.pogoprotos.enums.form_pb2 import _FORM
 from protos.pogoprotos.enums.costume_pb2 import _COSTUME
 from protos.pogoprotos.enums.weather_condition_pb2 import _WEATHERCONDITION
+from protos.pogoprotos.enums.quest_type_pb2 import _QUESTTYPE
+from protos.pogoprotos.data.quests.quest_reward_pb2 import _QUESTREWARD_TYPE
+from protos.pogoprotos.inventory.item.item_id_pb2 import _ITEMID
+from protos.pogoprotos.data.quests.quest_condition_pb2 import _QUESTCONDITION_CONDITIONTYPE
 
 log = logging.getLogger(__name__)
 compress = Compress()
@@ -1398,6 +1402,8 @@ class Pogom(Flask):
                         wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
+                            pokestopdetails = pokestop_details.get(quest_json["fortId"], Pokestop.get_pokestop_details(quest_json["fortId"]))
+
                             wh_quest.update(
                                 {
                                     "latitude": quest_pokestop["latitude"],
@@ -1405,7 +1411,133 @@ class Pogom(Flask):
                                     "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
                                 }
                             )
-                        self.wh_update_queue.put(('quest', wh_quest))
+
+                            wh_quest.update(
+                                {
+                                    "type": _QUESTTYPE.values_by_name[quest_json['questType']].number,
+                                    "target": quest_json['goal']['target'],
+                                    "pokestop_name": pokestopdetails["name"],
+                                    "pokestop_url": pokestopdetails["url"],
+                                    "updated": calendar.timegm(datetime.utcnow().timetuple()),
+                                    "conditions": [],
+                                    "rewards": [],
+                                }
+                            )
+
+                            for reward in quest_json["questRewards"]:
+                                rewardtype = _QUESTREWARD_TYPE.values_by_name[reward["type"]].number
+                                info = {}
+                                if rewardtype == 2:
+                                    info = {
+                                        "item_id": _ITEMID.values_by_name[reward["item"]["item"]].number,
+                                        "amount": reward["item"]["amount"],
+                                    }
+                                elif rewardtype == 3:
+                                    info = {
+                                        "amount": reward["stardust"],
+                                    }
+                                elif rewardtype == 7:
+                                    info = {
+                                        "pokemon_id": reward["pokemonEncounter"]["pokemonId"],
+                                        "costume_id": _COSTUME.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
+                                        "form_id": _FORM.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
+                                        "gender_id": _GENDER.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get('gender', 'GENDER_UNSET')].number,
+                                        "shiny": reward["pokemonEncounter"].get("pokemonDisplay", {}).get("shiny", False),
+                                    }
+
+                                wh_quest.update(
+                                    {
+                                        "rewards": wh_quest["rewards"].append({
+                                            "type": rewardtype,
+                                            "info": info,
+                                        })
+                                    }
+                                )
+
+                            for condition in quest_json.get('goal', {}).get('condition', []):
+                                conditiontype = _QUESTCONDITION_CONDITIONTYPE.values_by_name[condition.get('type', "UNSET")].number
+                                condition_dict = {
+                                    "type": conditiontype,
+                                }
+
+                                if conditiontype == 1:
+                                    conditionname = 'WITH_POKEMON_TYPE'
+                                    # pokemon_type
+                                elif conditiontype == 2:
+                                    conditionname = 'WITH_POKEMON_CATEGORY'
+                                    # WithPokemonCategory
+                                    #  category_name
+                                    #  pokemon_ids
+                                elif conditiontype == 3:
+                                    conditionname = 'WITH_WEATHER_BOOST'
+                                    # WithWeatherBoost
+                                elif conditiontype == 4:
+                                    conditionname = 'WITH_DAILY_CAPTURE_BONUS'
+                                    # WithDailyCaptureBonus
+                                elif conditiontype == 5:
+                                    conditionname = 'WITH_DAILY_SPIN_BONUS'
+                                    # WithDailySpinBonus
+                                elif conditiontype == 6:
+                                    conditionname = 'WITH_WIN_RAID_STATUS'
+                                    # WithWinRaidStatus
+                                elif conditiontype == 7:
+                                    conditionname = 'WITH_RAID_LEVEL'
+                                    # WithRaidLevel
+                                    #  raid_level
+                                elif conditiontype == 8:
+                                    conditionname = 'WITH_THROW_TYPE'
+                                    # WithThrowType
+                                    #  throw_type
+                                    #  hit
+                                elif conditiontype == 9:
+                                    conditionname = 'WITH_WIN_GYM_BATTLE_STATUS'
+                                    # WithWinGymBattleStatus
+                                elif conditiontype == 10:
+                                    conditionname = 'WITH_SUPER_EFFECTIVE_CHARGE'
+                                    # WithSuperEffectiveChargeMove
+                                elif conditiontype == 11:
+                                    conditionname = 'WITH_ITEM'
+                                    # WithItem
+                                elif conditiontype == 12:
+                                    conditionname = 'WITH_UNIQUE_POKESTOP'
+                                    # WithUniquePokestop
+                                elif conditiontype == 13:
+                                    conditionname = 'WITH_QUEST_CONTEXT'
+                                    # WithQuestContext
+                                elif conditiontype == 14:
+                                    conditionname = 'WITH_THROW_TYPE_IN_A_ROW'
+                                elif conditiontype == 15:
+                                    conditionname = 'WITH_CURVE_BALL'
+                                    # WithCurveBall
+                                elif conditiontype == 16:
+                                    conditionname = 'WITH_BADGE_TYPE'
+                                    # WithBadgeType
+                                    #  badge_type
+                                    #  badge_rank
+                                    #  amount
+                                elif conditiontype == 17:
+                                    conditionname = 'WITH_PLAYER_LEVEL'
+                                    # WithPlayerLevel
+                                    #  level
+                                elif conditiontype == 18:
+                                    conditionname = 'WITH_WIN_BATTLE_STATUS'
+                                    # WithWinBattleStatus
+                                elif conditiontype == 19:
+                                    conditionname = 'WITH_NEW_FRIEND'
+                                elif conditiontype == 20:
+                                    conditionname = 'WITH_DAYS_IN_A_ROW'
+
+                                wh_quest.update(
+                                    {
+                                        "conditions": wh_quest["conditions"].append(condition_dict)
+                                    }
+                                )
+
+
+#      "conditions": [{"type":11, "info":{ "item_id": 1} }],
+#      "conditions": [{"type":7,"info":{"raid_levels":[1,2,3,4,5]} },{"type":6}],
+
+                            self.wh_update_queue.put(('quest', wh_quest))
 
             if "EncounterResponse" in proto and int(trainerlvl) >= 30:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
