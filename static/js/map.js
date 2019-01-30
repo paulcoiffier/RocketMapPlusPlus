@@ -2140,7 +2140,6 @@ function setupRoutePolygon(item) {
 
     var polygon = new google.maps.Polyline({
         path: item['coordinates'],
-        geodesic: true,
         strokeColor: randomcolor,
         strokeOpacity: 0.8,
         strokeWeight: 2,
