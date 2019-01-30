@@ -2139,7 +2139,7 @@ function setupRoutePolygon(item) {
     randomcolor = randomColor({hue: 'blue'})
 
     var polygon = new google.maps.Polyline({
-        paths: item['coordinates'],
+        path: item['coordinates'],
         geodesic: true,
         strokeColor: randomcolor,
         strokeOpacity: 0.8,
