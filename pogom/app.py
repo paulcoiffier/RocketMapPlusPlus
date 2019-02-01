@@ -1373,15 +1373,12 @@ class Pogom(Flask):
                 frs = FortSearchResponse()
 
                 try:
-                    log.info("------POKESTOP SPUN")
                     frs.ParseFromString(fort_search_response_string)
                     fort_search_response_json = json.loads(MessageToJson(frs))
                 except:
-                    log.info("------POKESTOP SPUN -> FAILED TO PARSE")
                     continue
 
                 if 'challengeQuest' in fort_search_response_json:
-                    log.info("------QUEST FOUND")
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
                     quest_result[quest_json['fortId']] = {
                         'pokestop_id': quest_json['fortId'],
@@ -1400,14 +1397,11 @@ class Pogom(Flask):
                     elif quest_json["questRewards"][0]["type"] == "ITEM":
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
-                    log.info("------QUEST RESULT SET UP")
 
                     if 'quest' in args.wh_types:
-                        log.info("------QUEST NEED TO SEND TO WEBHOOK")
                         wh_quest = quest_result[quest_json["fortId"]].copy()
                         quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                         if quest_pokestop:
-                            log.info("------QUEST Pokestop found")
                             pokestopdetails = pokestop_details.get(quest_json["fortId"], Pokestop.get_pokestop_details(quest_json["fortId"]))
 
                             wh_quest.update(
@@ -1429,7 +1423,6 @@ class Pogom(Flask):
                                     "rewards": [],
                                 }
                             )
-                            log.info("------QUEST Updated with fixed values")
 
                             for reward in quest_json["questRewards"]:
                                 rewardtype = _QUESTREWARD_TYPE.values_by_name[reward["type"]].number
@@ -1460,8 +1453,6 @@ class Pogom(Flask):
                                         })
                                     }
                                 )
-
-                            log.info("------QUEST Updated with rewards")
 
                             for condition in quest_json.get('goal', {}).get('condition', []):
                                 conditiontype = _QUESTCONDITION_CONDITIONTYPE.values_by_name[condition.get('type', "UNSET")].number
@@ -1542,13 +1533,10 @@ class Pogom(Flask):
                                     }
                                 )
 
-                            log.info("------QUEST Updated with condition values")
-
 #      "conditions": [{"type":11, "info":{ "item_id": 1} }],
 #      "conditions": [{"type":7,"info":{"raid_levels":[1,2,3,4,5]} },{"type":6}],
 
                             self.wh_update_queue.put(('quest', wh_quest))
-                            log.info("------QUEST Put in webhook queue")
 
             if "EncounterResponse" in proto and int(trainerlvl) >= 30:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
