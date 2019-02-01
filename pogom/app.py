@@ -1419,10 +1419,11 @@ class Pogom(Flask):
                                     "pokestop_name": pokestopdetails["name"],
                                     "pokestop_url": pokestopdetails["url"],
                                     "updated": calendar.timegm(datetime.utcnow().timetuple()),
-                                    "conditions": [],
-                                    "rewards": [],
                                 }
                             )
+
+                            rewards = []
+                            conditions = []
 
                             for reward in quest_json["questRewards"]:
                                 rewardtype = _QUESTREWARD_TYPE.values_by_name[reward["type"]].number
@@ -1445,14 +1446,14 @@ class Pogom(Flask):
                                         "shiny": reward["pokemonEncounter"].get("pokemonDisplay", {}).get("shiny", False),
                                     }
 
-                                wh_quest.update(
-                                    {
-                                        "rewards": wh_quest.get("rewards", []).append({
-                                            "type": rewardtype,
-                                            "info": info,
-                                        })
-                                    }
-                                )
+                                rewards.append({
+                                    "type": rewardtype,
+                                    "info": info,
+                                })
+
+                            wh_quest.update({
+                                "rewards": rewards
+                            })
 
                             for condition in quest_json.get('goal', {}).get('condition', []):
                                 conditiontype = _QUESTCONDITION_CONDITIONTYPE.values_by_name[condition.get('type', "UNSET")].number
@@ -1527,11 +1528,11 @@ class Pogom(Flask):
                                 elif conditiontype == 20:
                                     conditionname = 'WITH_DAYS_IN_A_ROW'
 
-                                wh_quest.update(
-                                    {
-                                        "conditions": wh_quest.get("conditions", []).append(condition_dict)
-                                    }
-                                )
+                                conditions.append(condition_dict)
+
+                            wh_quest.update({
+                                "conditions": conditions
+                            })
 
 #      "conditions": [{"type":11, "info":{ "item_id": 1} }],
 #      "conditions": [{"type":7,"info":{"raid_levels":[1,2,3,4,5]} },{"type":6}],
