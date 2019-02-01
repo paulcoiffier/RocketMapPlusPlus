@@ -1447,7 +1447,7 @@ class Pogom(Flask):
 
                                 wh_quest.update(
                                     {
-                                        "rewards": wh_quest["rewards"].append({
+                                        "rewards": wh_quest.get("rewards", []).append({
                                             "type": rewardtype,
                                             "info": info,
                                         })
@@ -1529,7 +1529,7 @@ class Pogom(Flask):
 
                                 wh_quest.update(
                                     {
-                                        "conditions": wh_quest["conditions"].append(condition_dict)
+                                        "conditions": wh_quest.get("conditions", []).append(condition_dict)
                                     }
                                 )
 
