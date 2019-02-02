@@ -2071,18 +2071,21 @@ class Pogom(Flask):
 
             if request.args.get('routes', 'true') == 'true':
                 routes = {}
-                for uuid, route in self.deviceschedules.iteritems():
-                    if len(route) > 0:
-                        routes[uuid] = {
-                            'name': uuid,
-                            'coordinates': []
-                        }
-                        for point in route:
-                            coordinate = {
-                                'lat': point[0],
-                                'lng': point[1]
+                for deviceworker in d['deviceworkers']:
+                    uuid = deviceworker['deviceid']
+                    if deviceworker['fetching'] != 'IDLE':
+                        route = self.deviceschedules[uuid]
+                        if len(route) > 0:
+                            routes[uuid] = {
+                                'name': uuid,
+                                'coordinates': []
                             }
-                            routes[uuid]['coordinates'].append(coordinate)
+                            for point in route:
+                                coordinate = {
+                                    'lat': point[0],
+                                    'lng': point[1]
+                                }
+                                routes[uuid]['coordinates'].append(coordinate)
 
                 d['routes'] = routes
 
