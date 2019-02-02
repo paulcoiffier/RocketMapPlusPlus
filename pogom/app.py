@@ -1811,7 +1811,8 @@ class Pogom(Flask):
             'search_display': search_display,
             'fixed_display': True,
             'custom_css': args.custom_css,
-            'custom_js': args.custom_js
+            'custom_js': args.custom_js,
+            'devices': not args.no_devices
         }
 
         map_lat = self.current_location[0]

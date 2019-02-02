@@ -2889,6 +2889,9 @@ function updateRoutes(routes) {
         return false
     } else if (Store.get('showRoutes')) {
         var key
+        for (i = 0; i < polygons_routes.length; i++) {
+            polygons_routes[i].setMap(null)
+        }
         i = 0
         for (key in routes) {
             polygons_routes[i] = setupRoutePolygon(routes[key])
