@@ -224,6 +224,30 @@
                 </label>
               </div>
             </div>
+              {% if show.devices %}
+            <div class="form-control switch-container">
+              <h3>Show Devices</h3>
+              <div class="onoffswitch">
+                <input id="devices-switch" type="checkbox" name="devices-switch" class="onoffswitch-checkbox">
+                <label class="onoffswitch-label" for="devices-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+            <div id="devices-filter-wrapper" style="display:none">
+              <div class="form-control switch-container">
+                <h3>Show Device Routes</h3>
+                <div class="onoffswitch">
+                  <input id="routes-switch" type="checkbox" name="routes-switch" class="onoffswitch-checkbox">
+                  <label class="onoffswitch-label" for="routes-switch">
+                  <span class="switch-label" data-on="On" data-off="Off"></span>
+                  <span class="switch-handle"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+              {% endif %}
             <div class="form-control switch-container">
               <h3>Spawn Points</h3>
               <div class="onoffswitch">

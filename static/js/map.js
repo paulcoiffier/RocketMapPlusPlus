@@ -72,6 +72,9 @@ var lastspawns
 var polygons = []
 var geofencesSet = false
 
+var polygons_routes = []
+var routesSet = false
+
 var selectedStyle = 'light'
 
 var updateWorker
@@ -98,20 +101,21 @@ const pokemonWithImages = [
     245, 248, 249, 250, 253, 256, 259, 275, 278, 281,
     286, 296, 299, 302, 303, 306, 307, 310, 311, 312,
     315, 319, 320, 333, 337, 338, 342, 344, 345, 347,
-    353, 355, 359, 361, 365, 377, 378, 379, 380, 381,
-    382, 383, 384, 385, 386, 389, 392, 395, 399, 401,
-    403, 418, 425, 427, 480, 481, 482, 483, 484, 485,
-    486, 487, 488, 489, 490, 491, 493
+    349, 353, 355, 359, 361, 365, 377, 378, 379, 380,
+    381, 382, 383, 384, 385, 386, 389, 392, 395, 399,
+    401, 403, 418, 425, 427, 480, 481, 482, 483, 484,
+    485, 486, 487, 488, 489, 490, 491, 493
 ]
 const genderSpecificSprites = [
     449, 450
 ]
 const possibleShinySprites = [
-    1, 4, 7, 10, 25, 29, 30, 31, 77, 81, 90, 92, 96, 98,
-    104, 127, 129, 133, 138, 140, 142, 147, 152, 155,
-    177, 179, 191, 198, 204, 209, 228, 246, 261, 278,
-    296, 302, 304, 307, 311, 312, 315, 320, 333, 353,
-    355, 361, 370, 374, 425
+    1, 4, 7, 10, 25, 27, 29, 30, 31, 54,
+    58, 74, 77, 81, 88, 90, 92, 96, 98, 104,
+    127, 129, 133, 138, 140, 142, 147, 152, 155, 158,
+    177, 179, 191, 198, 200, 204, 209, 225, 228, 246,
+    261, 263, 276, 278, 296, 302, 304, 307, 311, 312,
+    315, 320, 333, 349, 353, 355, 361, 370, 374, 425
 ]
 
 const excludedRaritiesList = [
@@ -305,7 +309,7 @@ function initMap() { // eslint-disable-line no-unused-vars
         redrawTimeout = setTimeout(function () {
             redrawPokemon(mapData.pokemons)
             redrawPokemon(mapData.lurePokemons)
-            
+
             if (showRaidTimers) {
                 redrawGyms(mapData.gyms)
             }
@@ -520,6 +524,9 @@ function initSidebar() {
     $('#scan-here-switch').prop('checked', Store.get('scanHere'))
     $('#scan-here').toggle(Store.get('scanHere'))
     $('#scanned-switch').prop('checked', Store.get('showScanned'))
+    $('#devices-switch').prop('checked', Store.get('showDevices'))
+    $('#routes-switch').prop('checked', Store.get('showRoutes'))
+    $('#devices-filter-wrapper').toggle(Store.get('showDevices'))
     $('#spawnpoints-switch').prop('checked', Store.get('showSpawnpoints'))
     $('#ranges-switch').prop('checked', Store.get('showRanges'))
     $('#notify-perfection-wrapper').toggle(Store.get('showPokemonStats'))
@@ -1300,6 +1307,20 @@ function geofenceLabel(item) {
     return str
 }
 
+function routeLabel(item) {
+    var str
+    str = `
+        <div>
+            <b>Route</b>
+        </div>`
+    str += `
+        <div>
+            ${item.name}
+        </div>`
+
+    return str
+}
+
 function addRangeCircle(marker, map, type, teamId) {
     var targetmap = null
     var circleCenter = new google.maps.LatLng(marker.position.lat(), marker.position.lng())
@@ -1668,7 +1689,7 @@ function updateGymMarker(item, marker) {
     if (item.raid && isOngoingRaid(item.raid) && Store.get('showRaids') && raidLevelVisible)
     {
         marker.raidStarted = true
-        
+
         if (generateImages)
         {
             markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
@@ -1721,7 +1742,7 @@ function updateGymMarker(item, marker) {
             scaledSize: new google.maps.Size(48, 48)
         })
         marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
-        
+
         if (showRaidTimers)
         {
             if (map.getZoom() >= showRaidTimersAtZoomLevel)
@@ -2111,6 +2132,34 @@ function setupGeofencePolygon(item) {
     return polygon
 }
 
+function setupRoutePolygon(item) {
+    var randomcolor = randomColor()
+    // Random with color seed randomColor({hue: 'pink'})
+    // Total random '#'+Math.floor(Math.random()*16777215).toString(16);
+    randomcolor = randomColor({hue: 'blue'})
+
+    var polygon = new google.maps.Polyline({
+        path: item['coordinates'],
+        strokeColor: randomcolor,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+    })
+
+    polygon.setMap(map);
+
+    // var markerPosition = polygonCenter(polygon)
+
+    // polygon.infoWindow = new google.maps.InfoWindow({
+    //     content: routeLabel(item),
+    //     disableAutoPan: true,
+    //     position: markerPosition
+    // })
+
+    // addListeners(polygon)
+
+    return polygon
+}
+
 function polygonCenter(polygon) {
     var hyp, Lat, Lng
 
@@ -2293,6 +2342,8 @@ function loadRawData() {
     var loadGyms = (Store.get('showGyms') || Store.get('showRaids'))
     var loadPokestops = Store.get('showPokestops')
     var loadScanned = Store.get('showScanned')
+    var loadDevices = Store.get('showDevices')
+    var loadRoutes = Store.get('showRoutes')
     var loadSpawnpoints = Store.get('showSpawnpoints')
     var loadLuredOnly = Boolean(Store.get('showLuredPokestopsOnly'))
     var loadGeofences = Store.get('showGeofences')
@@ -2319,6 +2370,8 @@ function loadRawData() {
             'gyms': loadGyms,
             'lastgyms': lastgyms,
             'scanned': loadScanned,
+            'devices': loadDevices,
+            'routes': loadRoutes,
             'lastslocs': lastslocs,
             'spawnpoints': loadSpawnpoints,
             'geofences': loadGeofences,
@@ -2616,7 +2669,7 @@ function updateGyms() {
             value.marker = updateGymMarker(value, value.marker)
         }
     })
-    
+
     // change raid gym markers to from egg to boss if they've started
     $.each(mapData.gyms, function (key, value) {
         if (value['raid'] && value['raid']['start'] < currentTime && !value.marker.raidStarted) {
@@ -2826,6 +2879,27 @@ function updateGeofences(geofences) {
     }
 }
 
+function updateRoutes(routes) {
+    var i
+    if (!Store.get('showRoutes')) {
+        for (i = 0; i < polygons_routes.length; i++) {
+            polygons_routes[i].setMap(null)
+        }
+        polygons_routes = []
+        return false
+    } else if (Store.get('showRoutes')) {
+        var key
+        for (i = 0; i < polygons_routes.length; i++) {
+            polygons_routes[i].setMap(null)
+        }
+        i = 0
+        for (key in routes) {
+            polygons_routes[i] = setupRoutePolygon(routes[key])
+            i++
+        }
+    }
+}
+
 function updateMap() {
     loadRawData().done(function (result) {
         processPokemons(result.pokemons)
@@ -2850,6 +2924,7 @@ function updateMap() {
         updatePokestops()
         updateGyms()
         updateGeofences(result.geofences)
+        updateRoutes(result.routes)
 
         if ($('#stats').hasClass('visible')) {
             countMarkers(map)
@@ -4141,6 +4216,22 @@ $(function () {
     })
     $('#scanned-switch').change(function () {
         buildSwitchChangeListener(mapData, ['scanned'], 'showScanned').bind(this)()
+    })
+    $('#devices-switch').change(function () {
+        var options = {
+            'duration': 500
+        }
+        var wrapperDevices = $('#devices-filter-wrapper')
+        if (this.checked) {
+            wrapperDevices.show(options)
+        } else {
+            wrapperDevices.hide(options)
+        }
+        buildSwitchChangeListener(mapData, ['devices'], 'showDevices').bind(this)()
+    })
+    $('#routes-switch').change(function () {
+        Store.set('showRoutes', this.checked)
+        updateMap()
     })
     $('#spawnpoints-switch').change(function () {
         buildSwitchChangeListener(mapData, ['spawnpoints'], 'showSpawnpoints').bind(this)()
