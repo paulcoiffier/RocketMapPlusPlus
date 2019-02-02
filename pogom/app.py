@@ -2066,7 +2066,7 @@ class Pogom(Flask):
 
             d['geofences'] = geofences
 
-        if request.args.get('devices', 'true') == 'true':
+        if not args.no_devices and request.args.get('devices', 'true') == 'true':
             d['deviceworkers'] = DeviceWorker.get_active()
 
             if request.args.get('routes', 'true') == 'true':
