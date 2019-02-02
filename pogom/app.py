@@ -51,6 +51,12 @@ from protos.pogoprotos.enums.gender_pb2 import _GENDER
 from protos.pogoprotos.enums.form_pb2 import _FORM
 from protos.pogoprotos.enums.costume_pb2 import _COSTUME
 from protos.pogoprotos.enums.weather_condition_pb2 import _WEATHERCONDITION
+from protos.pogoprotos.enums.quest_type_pb2 import _QUESTTYPE
+from protos.pogoprotos.data.quests.quest_reward_pb2 import _QUESTREWARD_TYPE
+from protos.pogoprotos.inventory.item.item_id_pb2 import _ITEMID
+from protos.pogoprotos.data.quests.quest_condition_pb2 import _QUESTCONDITION_CONDITIONTYPE
+from protos.pogoprotos.enums.pokemon_type_pb2 import _POKEMONTYPE
+from protos.pogoprotos.enums.activity_type_pb2 import _ACTIVITYTYPE
 
 log = logging.getLogger(__name__)
 compress = Compress()
@@ -1165,8 +1171,8 @@ class Pogom(Flask):
                                                 'gym_id': b64_gym_id,
                                                 'team_id': _TEAMCOLOR.values_by_name[fort.get('ownedByTeam', 'NEUTRAL')].number,
                                                 'spawn': float(raidinfo['raidSpawnMs']) / 1000,
-                                                'start': float(raidinfo['raidBattleMs']) / 1000,
-                                                'end': float(raidinfo['raidEndMs']) / 1000,
+                                                'start': round(float(raidinfo['raidBattleMs']) / 1000),
+                                                'end': round(float(raidinfo['raidEndMs']) / 1000),
                                                 'latitude': fort['latitude'],
                                                 'longitude': fort['longitude'],
                                                 'cp': raidpokemoncp,
@@ -1395,17 +1401,124 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
                     if 'quest' in args.wh_types:
-                        wh_quest = quest_result[quest_json["fortId"]].copy()
-                        quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
-                        if quest_pokestop:
-                            wh_quest.update(
-                                {
-                                    "latitude": quest_pokestop["latitude"],
-                                    "longitude": quest_pokestop["longitude"],
-                                    "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
-                                }
-                            )
-                        self.wh_update_queue.put(('quest', wh_quest))
+                        try:
+                            wh_quest = quest_result[quest_json["fortId"]].copy()
+                            quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+                            if quest_pokestop:
+                                pokestopdetails = pokestop_details.get(quest_json["fortId"], Pokestop.get_pokestop_details(quest_json["fortId"]))
+
+                                wh_quest.update(
+                                    {
+                                        "latitude": quest_pokestop["latitude"],
+                                        "longitude": quest_pokestop["longitude"],
+                                        "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
+                                    }
+                                )
+
+                                wh_quest.update(
+                                    {
+                                        "type": _QUESTTYPE.values_by_name[quest_json['questType']].number,
+                                        "target": quest_json['goal']['target'],
+                                        "pokestop_name": pokestopdetails["name"],
+                                        "pokestop_url": pokestopdetails["url"],
+                                        "updated": calendar.timegm(datetime.utcnow().timetuple()),
+                                    }
+                                )
+
+                                rewards = []
+                                conditions = []
+
+                                for reward in quest_json["questRewards"]:
+                                    rewardtype = _QUESTREWARD_TYPE.values_by_name[reward["type"]].number
+                                    info = {}
+                                    if rewardtype == 2:
+                                        info = {
+                                            "item_id": _ITEMID.values_by_name[reward["item"]["item"]].number,
+                                            "amount": reward["item"]["amount"],
+                                        }
+                                    elif rewardtype == 3:
+                                        info = {
+                                            "amount": reward["stardust"],
+                                        }
+                                    elif rewardtype == 7:
+                                        info = {
+                                            "pokemon_id": _POKEMONID.values_by_name[reward["pokemonEncounter"]["pokemonId"]].number,
+                                            "costume_id": _COSTUME.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get("costume", 'COSTUME_UNSET')].number,
+                                            "form_id": _FORM.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get("form", 'FORM_UNSET')].number,
+                                            "gender_id": _GENDER.values_by_name[reward["pokemonEncounter"].get("pokemonDisplay", {}).get('gender', 'GENDER_UNSET')].number,
+                                            "shiny": reward["pokemonEncounter"].get("pokemonDisplay", {}).get("shiny", False),
+                                        }
+
+                                    rewards.append({
+                                        "type": rewardtype,
+                                        "info": info,
+                                    })
+
+                                wh_quest.update({
+                                    "rewards": rewards
+                                })
+
+                                for condition in quest_json.get('goal', {}).get('condition', []):
+                                    conditiontype = _QUESTCONDITION_CONDITIONTYPE.values_by_name[condition.get('type', "UNSET")].number
+                                    condition_dict = {
+                                        "type": conditiontype,
+                                    }
+
+                                    info = {}
+
+                                    if conditiontype == 1:
+                                        pokemontype = condition.get('withPokemonType', {}).get('pokemonType', ["POKEMON_TYPE_NONE"])
+                                        types = []
+                                        for poketype in pokemontype:
+                                            types.append(_POKEMONTYPE.values_by_name[poketype].number)
+                                        info = {
+                                            "pokemon_type_ids": types
+                                        }
+                                    elif conditiontype == 2:
+                                        pokemonids = condition.get('withPokemonCategory', {}).get('pokemonIds', ["MISSINGNO"])
+                                        ids = []
+                                        for pokemonid in pokemonids:
+                                            ids.append(_POKEMONID.values_by_name[pokemonid].number)
+                                        info = {
+                                            "pokemon_ids": ids
+                                        }
+                                    elif conditiontype == 7:
+                                        raidLevel = condition.get('withRaidLevel', {}).get('raidLevel', ['RAID_LEVEL_UNSET'])
+                                        raidlevels = []
+                                        for level in raidLevel:
+                                            raidlevels.append(_RAIDLEVEL.values_by_name[level].number)
+                                        info = {
+                                            "raid_levels": raidlevels
+                                        }
+                                    elif conditiontype == 8:
+                                        throwType = condition.get('withThrowType', {}).get('throwType', 'ACTIVITY_UNKNOWN')
+                                        info = {
+                                            "throw_type_id": _ACTIVITYTYPE.values_by_name[throwType].number
+                                        }
+                                    elif conditiontype == 11:
+                                        item = condition.get('withItem', {})
+                                        if item:
+                                            info = {
+                                                "item_id": _ITEMID.values_by_name[item.get('item', 'ITEM_UNKNOWN')].number
+                                            }
+                                    elif conditiontype == 14:
+                                        throwType = condition.get('withThrowType', {}).get('throwType', 'ACTIVITY_UNKNOWN')
+                                        info = {
+                                            "throw_type_id": _ACTIVITYTYPE.values_by_name[throwType].number
+                                        }
+
+                                    if info:
+                                        condition_dict["info"] = info
+
+                                    conditions.append(condition_dict)
+
+                                wh_quest.update({
+                                    "conditions": conditions
+                                })
+
+                                self.wh_update_queue.put(('quest', wh_quest))
+                        except:
+                            continue
 
             if "EncounterResponse" in proto and int(trainerlvl) >= 30:
                 encounter_response_string = b64decode(proto['EncounterResponse'])
@@ -1698,7 +1811,8 @@ class Pogom(Flask):
             'search_display': search_display,
             'fixed_display': True,
             'custom_css': args.custom_css,
-            'custom_js': args.custom_js
+            'custom_js': args.custom_js,
+            'devices': not args.no_devices
         }
 
         map_lat = self.current_location[0]
@@ -1952,7 +2066,25 @@ class Pogom(Flask):
 
             d['geofences'] = geofences
 
-        d['deviceworkers'] = DeviceWorker.get_active()
+        if request.args.get('devices', 'true') == 'true':
+            d['deviceworkers'] = DeviceWorker.get_active()
+
+            if request.args.get('routes', 'true') == 'true':
+                routes = {}
+                for uuid, route in self.deviceschedules.iteritems():
+                    if len(route) > 0:
+                        routes[uuid] = {
+                            'name': uuid,
+                            'coordinates': []
+                        }
+                        for point in route:
+                            coordinate = {
+                                'lat': point[0],
+                                'lng': point[1]
+                            }
+                            routes[uuid]['coordinates'].append(coordinate)
+
+                d['routes'] = routes
 
         return jsonify(d)
 

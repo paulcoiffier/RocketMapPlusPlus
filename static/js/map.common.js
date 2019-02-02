@@ -978,6 +978,14 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showDevices': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
+    'showRoutes': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showSpawnpoints': {
         default: false,
         type: StoreTypes.Boolean
