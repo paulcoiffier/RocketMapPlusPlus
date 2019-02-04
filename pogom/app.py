@@ -2074,7 +2074,7 @@ class Pogom(Flask):
                 for deviceworker in d['deviceworkers']:
                     uuid = deviceworker['deviceid']
                     if deviceworker['fetching'] != 'IDLE':
-                        route = self.deviceschedules[uuid]
+                        route = self.deviceschedules.get(uuid, [])
                         if len(route) > 0:
                             routes[uuid] = {
                                 'name': uuid,
