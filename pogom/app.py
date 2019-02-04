@@ -2246,6 +2246,8 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth)
             nextlatitude = latitude
             nextlongitude = longitude
+            if unknown_tth and len(self.deviceschedules[uuid]) == 0:
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2552,6 +2554,8 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless)
             nextlatitude = latitude
             nextlongitude = longitude
+            if questless and len(self.deviceschedules[uuid]) == 0:
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
