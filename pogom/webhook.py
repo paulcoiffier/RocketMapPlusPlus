@@ -61,7 +61,8 @@ def wh_updater(args, queue, key_caches):
         'gym': 'gym_id',
         'gym_details': 'id',
         'raid': 'gym_id',
-        'quest': 'pokestop_id'
+        'quest': 'pokestop_id',
+        'devices': 'uuid'
     }
 
     # Instantiate WH LFU caches for all cached types. We separate the caches
@@ -224,6 +225,9 @@ def __get_key_fields(whtype):
         ],
         'quest': [
             'conditions', 'type', 'target', 'rewards'
+        ],
+        'devices': [
+            'name', 'fetch', 'scanning', 'message'
         ]
     }
 
