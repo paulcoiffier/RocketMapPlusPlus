@@ -994,6 +994,18 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showWeatherCells': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showS2Cells': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showWeatherAlerts': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
     'playSound': {
         default: false,
         type: StoreTypes.Boolean
@@ -1147,7 +1159,10 @@ var mapData = {
     pokestops: {},
     lurePokemons: {},
     scanned: {},
-    spawnpoints: {}
+    spawnpoints: {},
+    weather: {},
+    s2cells: {},
+    weatherAlerts: {}
 }
 
 // Populated by a JSON request.

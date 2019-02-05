@@ -88,6 +88,46 @@ const cryFileTypes = ['wav', 'mp3']
 
 const genderType = ['♂', '♀', '⚲']
 const forms = ['unset', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '?', '👤', '☀️', '☔️', '⛄️', '👤', '⚔️', '🛡️', '⚡️']
+
+const weatherImages = {
+  1: 'weather_sunny.png',
+  2: 'weather_rain.png',
+  3: 'weather_partlycloudy_day.png',
+  4: 'weather_cloudy.png',
+  5: 'weather_windy.png',
+  6: 'weather_snow.png',
+  7: 'weather_fog.png',
+  11: 'weather_clear_night.png',
+  13: 'weather_partlycloudy_night.png',
+  15: 'weather_moderate.png',
+  16: 'weather_extreme.png'
+}
+
+const weatherTexts = {
+  1: 'Clear',
+  2: 'Rain',
+  3: 'Partly Cloudy',
+  4: 'Cloudy',
+  5: 'Windy',
+  6: 'Snow',
+  7: 'Fog',
+}
+
+const weatherBoostedTypes = {
+  1: 'Grass, Ground, Fire',
+  2: 'Water, Electric, Bug',
+  3: 'Normal, Rock',
+  4: 'Fairy, Fighting, Poison',
+  5: 'Dragon, Flying, Psychic',
+  6: 'Ice, Steel',
+  7: 'Dark, Ghost',
+}
+
+const alertTexts = {
+  1: 'Moderate',
+  2: 'Extreme',
+}
+
 const pokemonWithImages = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 11,
     26, 28, 31, 34, 38, 49, 57, 59, 62, 65,
@@ -389,7 +429,7 @@ function createLocationMarker() {
         draggable: true,
         icon: null,
         optimized: false,
-        zIndex: google.maps.Marker.MAX_ZINDEX + 2
+        zIndex: google.maps.Marker.MAX_ZINDEX + 10
     })
 
     locationMarker.infoWindow = new google.maps.InfoWindow({
@@ -445,7 +485,7 @@ function createSearchMarker() {
         draggable: !Store.get('lockMarker') && isSearchMarkerMovable,
         icon: null,
         optimized: false,
-        zIndex: google.maps.Marker.MAX_ZINDEX + 1
+        zIndex: google.maps.Marker.MAX_ZINDEX + 10
     })
 
     searchMarker.infoWindow = new google.maps.InfoWindow({
@@ -535,6 +575,9 @@ function initSidebar() {
     $('#cries-switch').prop('checked', Store.get('playCries'))
     $('#map-service-provider').val(Store.get('mapServiceProvider'))
     $('#geofences-switch').prop('checked', Store.get('showGeofences'))
+    $('#weather-cells-switch').prop('checked', Store.get('showWeatherCells'))
+    $('#s2cells-switch').prop('checked', Store.get('showS2Cells'))
+    $('#weather-alerts-switch').prop('checked', Store.get('showWeatherAlerts'))
 
     // Only create the Autocomplete element if it's enabled in template.
     var elSearchBox = document.getElementById('next-location')
@@ -790,7 +833,6 @@ function gymLabel(gym, includeMembers = true) {
 
     var subtitle = ''
     var image = ''
-    var imageLbl = ''
     var navInfo = ''
     var memberStr = ''
 
@@ -909,9 +951,13 @@ function gymLabel(gym, includeMembers = true) {
         }
         else
         {
-             if (generateImages)
-             {
+            if (generateImages)
+            {
                 let gym_url = `gym_img?team=${teamName}&level=${getGymLevel(gym)}&raidlevel=${raid.level}`
+                if (raid.pokemon_id !== null)
+                {
+                    gym_url += `&pkm=${raid.pokemon_id}&form=${raid.form}`
+                }
                 if (isInBattle)
                 {
                     gym_url += '&in_battle=1'
@@ -920,32 +966,82 @@ function gymLabel(gym, includeMembers = true) {
                 {
                     gym_url += '&ex_raid=1'
                 }
-                image = `<img class='gym sprite' src='${gym_url}'>`
+                raidImage = `<img class='gym sprite' src='${gym_url}'>`
             }
             else
             {
-                image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_${raid.level}.png'>`
-                if (isInBattle)
+                if (raid.pokemon_id !== null && pokemonWithImages.indexOf(raid.pokemon_id) !== -1)
                 {
-                    image = image.replace('.png', '_isInBattle.png')
+                    var iconname = `${raid.pokemon_id}`
+                    if (raid.form > 0)
+                    {
+                        if (raid.form >= 45 && raid.form <= 80)
+                        {
+                            if (raid.form % 2 == 0)
+                            {
+                                iconname += '_A'
+                            }
+                        }
+                        else
+                        {
+                            iconname += `_${raid.form}`
+                        }
+                    }
+                    raidImage = `<img class='gym sprite' src='static/icons/${iconname}.png'>`
                 }
-
-                if (isExRaidEligible)
+                else
                 {
-                    image = image.replace('.png', '_ExRaidEligible.png')
+                    raidImage = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_${raid.level}.png'>`
+                    if (isInBattle)
+                    {
+                        raidImage = raidImage.replace('.png', '_isInBattle.png')
+                    }
+
+                    if (isExRaidEligible)
+                    {
+                        raidImage = raidImage.replace('.png', '_ExRaidEligible.png')
+                    }
                 }
             }
-        }
 
-        if (isUpcomingRaid)
-        {
-            imageLbl = `
-                <div class='raid'>
-                  <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
-                  ${levelStr}
-                  </span>
-                  Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
-                </div>`
+            if (raid.pokemon_id === null)
+            {
+                image = `
+                    ${raidImage}
+                    <div class='raid'>
+                        <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
+                            ${levelStr}
+                        </span>
+                        Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
+                    </div>
+                `
+            }
+            else
+            {
+                image = `
+                    <div class='raid container'>
+                        <div class='raid container content-left'>
+                            <div>
+                                ${raidImage}
+                            </div>
+                        </div>
+                        <div class='raid container content-right'>
+                            <div>
+                                <div class='raid pokemon'>
+                                    ${raid['pokemon_name']} <a href='http://pokemon.gameinfo.io/en/pokemon/${raid['pokemon_id']}' target='_blank' title='View in Pokédex'>#${raid['pokemon_id']}</a> | CP: ${raid['cp']}
+                                </div>
+                                ${raidStr}
+                            </div>
+                        </div>
+                    </div>
+                    <div class='raid'>
+                        <span style='color:rgb(${raidColor[Math.floor((raid.level - 1) / 2)]})'>
+                            ${levelStr}
+                        </span>
+                        Raid in <span class='raid countdown label-countdown' disappears-at='${raid.start}'>00m00s</span> (${moment(raid.start).format('HH:mm')})
+                    </div>
+                `
+            }
         }
     }
     else
@@ -1057,7 +1153,6 @@ function gymLabel(gym, includeMembers = true) {
                 ${img}
                 ${subtitle}
                 ${image}
-                ${imageLbl}
             </center>
             ${navInfo}
             <center>
@@ -1613,6 +1708,11 @@ function setupGymMarker(item) {
             labelVisible: false,
             map: map
         })
+        marker.infoWindow = new google.maps.InfoWindow({
+            content: '',
+            pixelOffset: new google.maps.Size(0, -20),
+            disableAutoPan: true
+        })
     }
     else {
         marker = new google.maps.Marker({
@@ -1622,12 +1722,11 @@ function setupGymMarker(item) {
             },
             map: map
         })
+        marker.infoWindow = new google.maps.InfoWindow({
+            content: '',
+            disableAutoPan: true
+        })
     }
-
-    marker.infoWindow = new google.maps.InfoWindow({
-        content: '',
-        disableAutoPan: true
-    })
 
     marker.addListener('click', function () {
         this.setAnimation(null)
@@ -1785,6 +1884,10 @@ function updateGymMarker(item, marker) {
         if (generateImages)
         {
             markerImage = `gym_img?team=${gymTypes[item.team_id]}&level=${getGymLevel(item)}&raidlevel=${item.raid.level}`
+            if (item.raid.pokemon_id)
+            {
+                markerImage += `&pkm=${item.raid.pokemon_id}&form=${item.raid.form}`
+            }
             if (gymInBattle)
             {
                 markerImage += '&in_battle=1'
@@ -1796,14 +1899,43 @@ function updateGymMarker(item, marker) {
         }
         else
         {
-            markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png'
-            if (gymInBattle)
+            if (item.raid.pokemon_id)
             {
-                markerImage = markerImage.replace('.png', '_isInBattle.png')
+                markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '.png'
+                if (pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1)
+                {
+                    markerImage = markerImage.replace('.png', '_' + item.raid.pokemon_id + '.png')
+                    if (item.raid.form > 0)
+                    {
+                        if (item.raid.form >= 45 && item.raid.form <= 80)
+                        {
+                            if(item.raid.form % 2 == 0)
+                            {
+                                markerImage = markerImage.replace('.png', 'A.png')
+                            }
+                        }
+                        else
+                        {
+                            markerImage = markerImage.replace('.png', '_' + item.raid.form + '.png')
+                        }
+                    }
+                }
+                if (gymExRaidEligible)
+                {
+                    markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                }
             }
-            if (gymExRaidEligible)
+            else
             {
-                markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png'
+                if (gymInBattle)
+                {
+                    markerImage = markerImage.replace('.png', '_isInBattle.png')
+                }
+                if (gymExRaidEligible)
+                {
+                    markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                }
             }
         }
 
@@ -1811,6 +1943,7 @@ function updateGymMarker(item, marker) {
             url: markerImage,
             scaledSize: new google.maps.Size(48, 48)
         })
+        marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1)
 
         if (showRaidTimers)
         {
@@ -1985,7 +2118,7 @@ function setupDeviceworkerMarker(item) {
             scaledSize: new google.maps.Size(24, 24)
         },
         optimized: false,
-        zIndex: google.maps.Marker.MAX_ZINDEX + 2
+        zIndex: google.maps.Marker.MAX_ZINDEX + 10
     })
 
     deviceworkerMarker.infoWindow = new google.maps.InfoWindow({
@@ -2298,6 +2431,10 @@ function showInBoundsMarkers(markers, type) {
                 if (map.getBounds().contains(marker.getPosition())) {
                     show = true
                 }
+            } else if(type == 's2cell') {
+                if (map.getBounds().intersects(getS2CellBounds(item))) {
+                    show = true
+                }
             }
         }
 
@@ -2347,6 +2484,9 @@ function loadRawData() {
     var loadSpawnpoints = Store.get('showSpawnpoints')
     var loadLuredOnly = Boolean(Store.get('showLuredPokestopsOnly'))
     var loadGeofences = Store.get('showGeofences')
+    var loadWeather = Store.get('showWeatherCells')
+    var loadS2Cells = Store.get('showS2Cells')
+    var loadWeatherAlerts = Store.get('showWeatherAlerts')
 
     var bounds = map.getBounds()
     var swPoint = bounds.getSouthWest()
@@ -2375,6 +2515,9 @@ function loadRawData() {
             'lastslocs': lastslocs,
             'spawnpoints': loadSpawnpoints,
             'geofences': loadGeofences,
+            'weather': loadWeather,
+            's2cells': loadS2Cells,
+            'weatherAlerts': loadWeatherAlerts,
             'lastspawns': lastspawns,
             'swLat': swLat,
             'swLng': swLng,
@@ -2771,9 +2914,16 @@ function processGym(i, item) {
 
     if (Store.get('showLastUpdatedGymsOnly')) {
         var now = new Date()
-        if ((Store.get('showLastUpdatedGymsOnly') * 3600 * 1000) + item.last_scanned < now.getTime()) {
-            removeGymFromMap(item['gym_id'])
-            return true
+        if (Store.get('showLastUpdatedGymsOnly') < 0) {
+            if (item.last_scanned - (Store.get('showLastUpdatedGymsOnly') * 3600 * 1000) > now.getTime()) {
+                removeGymFromMap(item['gym_id'])
+                return true
+            }
+        } else {
+            if ((Store.get('showLastUpdatedGymsOnly') * 3600 * 1000) + item.last_scanned < now.getTime()) {
+                removeGymFromMap(item['gym_id'])
+                return true
+            }
         }
     }
 
@@ -2908,12 +3058,19 @@ function updateMap() {
         $.each(result.gyms, processGym)
         $.each(result.scanned, processScanned)
         $.each(result.spawnpoints, processSpawnpoint)
+        $.each(result.weather, processWeather)
+        $.each(result.s2cells, processS2Cell)
+        processWeatherAlerts(result.weatherAlerts)
+        updateMainCellWeather()
         // showInBoundsMarkers(mapData.pokemons, 'pokemon')
         showInBoundsMarkers(mapData.lurePokemons, 'pokemon')
         showInBoundsMarkers(mapData.gyms, 'gym')
         showInBoundsMarkers(mapData.pokestops, 'pokestop')
         showInBoundsMarkers(mapData.scanned, 'scanned')
         showInBoundsMarkers(mapData.spawnpoints, 'inbound')
+        showInBoundsMarkers(mapData.weather, 'weather')
+        showInBoundsMarkers(mapData.s2cells, 's2cell')
+        showInBoundsMarkers(mapData.weatherAlerts, 's2cell')
         clearStaleMarkers()
 
         // We're done processing. Redraw.
@@ -4136,6 +4293,7 @@ $(function () {
         Store.set('maxGymLevel', 6)
         Store.set('showOpenGymsOnly', false)
         Store.set('showParkGymsOnly', false)
+        Store.set('showLastUpdatedGymsOnly', 0)
         Store.set('showExRaidGymsOnly', false)
 
         $('#team-gyms-only-switch').val(Store.get('showTeamGymsOnly'))
@@ -4143,11 +4301,13 @@ $(function () {
         $('#park-gyms-only-switch').prop('checked', Store.get('showParkGymsOnly'))
         $('#min-level-gyms-filter-switch').val(Store.get('minGymLevel'))
         $('#max-level-gyms-filter-switch').val(Store.get('maxGymLevel'))
+        $('#last-update-gyms-switch').val(Store.get('showLastUpdatedGymsOnly'))
         $('#ex-raid-gyms-only-switch').prop('checked', Store.get('showExRaidGymsOnly'))
 
         $('#team-gyms-only-switch').trigger('change')
         $('#min-level-gyms-filter-switch').trigger('change')
         $('#max-level-gyms-filter-switch').trigger('change')
+        $('#last-update-gyms-switch').trigger('change')
     }
 
     // Setup UI element interactions
@@ -4237,6 +4397,17 @@ $(function () {
         buildSwitchChangeListener(mapData, ['spawnpoints'], 'showSpawnpoints').bind(this)()
     })
     $('#ranges-switch').change(buildSwitchChangeListener(mapData, ['gyms', 'pokemons', 'pokestops'], 'showRanges'))
+    $('#weather-cells-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['weather'], 'showWeatherCells').bind(this)()
+    })
+
+    $('#s2cells-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['s2cells'], 'showS2Cells').bind(this)()
+    })
+
+    $('#weather-alerts-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['weatherAlerts'], 'showWeatherAlerts').bind(this)()
+    })
 
     $('#pokestops-switch').change(function () {
         var options = {

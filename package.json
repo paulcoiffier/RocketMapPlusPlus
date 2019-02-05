@@ -32,7 +32,8 @@
     "grunt-usemin": "^3.1.1",
     "grunt-zip": "^0.17.1",
     "jit-grunt": "^0.10.0",
-    "jshint-stylish": "^2.2.1"
+    "jshint-stylish": "^2.2.1",
+    "jsts": "^2.0.3"
   },
   "scripts": {
     "build": "grunt build",
