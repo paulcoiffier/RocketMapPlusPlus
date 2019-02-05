@@ -17,19 +17,21 @@ from flask.json import JSONEncoder
 from flask_compress import Compress
 from pogom.transform import jitter_location
 from pogom.dyn_img import get_gym_icon
+from pogom.weather import get_weather_cells, get_s2_coverage, get_weather_alerts
 from base64 import b64decode
 
 import gpxpy
 
+import s2sphere
 from peewee import DeleteQuery
 
 from .userAuth import DiscordAPI
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
-                     Quest, PokestopDetails, Geofence, GymMember, GymPokemon)
+                     Quest, PokestopDetails, Geofence, GymMember, GymPokemon, Weather)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, calc_pokemon_level)
+                    now, dottedQuadToNum, date_secs, calc_pokemon_level, degrees_to_cardinal)
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
@@ -39,9 +41,12 @@ import geopy
 from google.protobuf.json_format import MessageToJson
 from protos.pogoprotos.networking.responses.fort_search_response_pb2 import FortSearchResponse
 from protos.pogoprotos.networking.responses.encounter_response_pb2 import EncounterResponse
-from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse
+from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse, _GETMAPOBJECTSRESPONSE_TIMEOFDAY
 from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import GymGetInfoResponse
 from protos.pogoprotos.networking.responses.fort_details_response_pb2 import FortDetailsResponse
+from protos.pogoprotos.map.weather.display_weather_pb2 import _DISPLAYWEATHER_DISPLAYLEVEL
+from protos.pogoprotos.map.weather.gameplay_weather_pb2 import _GAMEPLAYWEATHER_WEATHERCONDITION
+from protos.pogoprotos.map.weather.weather_alert_pb2 import *
 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
@@ -572,9 +577,11 @@ class Pogom(Flask):
         sightings = {}
         new_spawn_points = []
         sp_id_list = []
+        weather = {}
         gym_members = {}
         gym_pokemon = {}
         gym_encountered = {}
+        time_of_day = "NONE"
 
         now_date = datetime.utcnow()
 
@@ -685,7 +692,7 @@ class Pogom(Flask):
                                 gender = _GENDER.values_by_name[p['pokemonData']["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
                                 costume = _COSTUME.values_by_name[p['pokemonData']["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
                                 form = _FORM.values_by_name[p['pokemonData']["pokemonDisplay"].get('form', 'FORM_UNSET')].number
-                                weather = _WEATHERCONDITION.values_by_name[p['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+                                weather_boosted_condition = _WEATHERCONDITION.values_by_name[p['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
                                 printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
@@ -709,7 +716,7 @@ class Pogom(Flask):
                                     'gender': gender,
                                     'costume': costume,
                                     'form': form,
-                                    'weather_boosted_condition': weather
+                                    'weather_boosted_condition': weather_boosted_condition
                                 }
 
                                 if 'pokemon' in args.wh_types:
@@ -736,7 +743,7 @@ class Pogom(Flask):
                                             'cp_multiplier': 0,
                                             'height': 0,
                                             'weight': 0,
-                                            'weather_id': weather
+                                            'weather_id': weather_boosted_condition
                                         })
 
                                         rarity = self.get_pokemon_rarity_code(pokemon_id)
@@ -832,7 +839,7 @@ class Pogom(Flask):
                                 gender = _GENDER.values_by_name[p["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
                                 costume = _COSTUME.values_by_name[p["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
                                 form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
-                                weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+                                weather_boosted_condition = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
                                 printPokemon(pokemon_id, p['latitude'], p['longitude'],
                                              disappear_time)
@@ -856,7 +863,7 @@ class Pogom(Flask):
                                     'gender': gender,
                                     'costume': costume,
                                     'form': form,
-                                    'weather_boosted_condition': weather
+                                    'weather_boosted_condition': weather_boosted_condition
                                 }
 
                                 if 'pokemon' in args.wh_types:
@@ -883,7 +890,7 @@ class Pogom(Flask):
                                             'cp_multiplier': 0,
                                             'height': 0,
                                             'weight': 0,
-                                            'weather_id': weather
+                                            'weather_id': weather_boosted_condition
                                         })
 
                                         rarity = self.get_pokemon_rarity_code(pokemon_id)
@@ -930,7 +937,7 @@ class Pogom(Flask):
                                 gender = _GENDER.values_by_name[p["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
                                 costume = _COSTUME.values_by_name[p["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
                                 form = _FORM.values_by_name[p["pokemonDisplay"].get('form', 'FORM_UNSET')].number
-                                weather = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+                                weather_boosted_condition = _WEATHERCONDITION.values_by_name[p["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
                                 nearby_pokemons[long(encounter_id)] = {
                                     'encounter_id': long(encounter_id),
@@ -940,7 +947,7 @@ class Pogom(Flask):
                                     'gender': gender,
                                     'costume': costume,
                                     'form': form,
-                                    'weather_boosted_condition': weather,
+                                    'weather_boosted_condition': weather_boosted_condition,
                                     'distance': distance
                                 }
                                 if nearby_pokemons[long(encounter_id)]['costume'] < -1:
@@ -1186,7 +1193,62 @@ class Pogom(Flask):
 
                                             })
                                             self.wh_update_queue.put(('raid', wh_raid))
+                if "timeOfDay" in gmo_response_json:
+                    time_of_day = gmo_response_json.get("timeOfDay", "NONE")
+                if "clientWeather" in gmo_response_json:
+                    clientWeather = gmo_response_json["clientWeather"]
+                    for cw in clientWeather:
+                        # Parse Map Weather Information
+                        s2_cell_id = cw.get("s2CellId")
+                        if not s2_cell_id:
+                            continue
+                          
+                        display_weather = cw.get("displayWeather")
+                        gameplay_weather = cw.get("gameplayWeather")
+                        weather_alerts = cw.get("alerts")
+ 
+                        s2s_cell_id = s2sphere.CellId(long(s2_cell_id))
+                        s2s_cell = s2sphere.Cell(s2s_cell_id)
+                        s2s_center = s2sphere.LatLng.from_point(s2s_cell.get_center())
+                        s2s_lat = s2s_center.lat().degrees
+                        s2s_lng = s2s_center.lng().degrees
 
+                        weather[s2_cell_id] = { 
+                            's2_cell_id': s2_cell_id,
+                            'latitude': s2s_lat,
+                            'longitude': s2s_lng,
+                            'time_of_day': _GETMAPOBJECTSRESPONSE_TIMEOFDAY.values_by_name[time_of_day].number,
+                        }
+
+                        if display_weather:
+                            weather[s2_cell_id].update({
+                                'cloud_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("cloudLevel", "LEVEL_0")].number,
+                                'rain_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("rainLevel", "LEVEL_0")].number,
+                                'wind_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("windLevel", "LEVEL_0")].number,
+                                'snow_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("snowLevel", "LEVEL_0")].number,
+                                'fog_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("fogLevel", "LEVEL_0")].number,
+                                'wind_direction': display_weather.get("windDirection", 0),
+                            })
+                            
+                        if gameplay_weather:
+                            gameplay_weathercondition = gameplay_weather.get("gameplayCondition", "NONE")
+                            weather[s2_cell_id].update({
+                                'gameplay_weather': _GAMEPLAYWEATHER_WEATHERCONDITION.values_by_name[gameplay_weathercondition].number,
+                            })
+                
+                        if weather_alerts:
+                            severity = 0
+                            warn_weather = 0
+
+                            for wa in weather_alerts:
+                                severity = wa.get("severity", 0)
+                                warn_weather = wa.get("warn_weather", 0)
+
+                            weather[s2_cell_id].update({
+                                'severity': severity,
+                                'warn_weather': warn_weather,
+                            })
+                  
         for proto in protos_dict:
             if "GymGetInfoResponse" in proto:
                 gym_get_info_response_string = b64decode(proto["GymGetInfoResponse"])
@@ -1598,7 +1660,7 @@ class Pogom(Flask):
                     gender = _GENDER.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('gender', 'GENDER_UNSET')].number
                     costume = _COSTUME.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('costume', 'COSTUME_UNSET')].number
                     form = _FORM.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('form', 'FORM_UNSET')].number
-                    weather = _WEATHERCONDITION.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
+                    weather_boosted_condition = _WEATHERCONDITION.values_by_name[wildpokemon['pokemonData']["pokemonDisplay"].get('weatherBoostedCondition', 'NONE')].number
 
                     printPokemon(pokemon_id, wildpokemon['latitude'], wildpokemon['longitude'],
                                  disappear_time)
@@ -1622,7 +1684,7 @@ class Pogom(Flask):
                         'gender': gender,
                         'costume': costume,
                         'form': form,
-                        'weather_boosted_condition': weather
+                        'weather_boosted_condition': weather_boosted_condition
                     }
 
                     if 'pokemon-iv' in args.wh_types:
@@ -1650,7 +1712,7 @@ class Pogom(Flask):
                                 'height': wildpokemon['pokemonData'].get('heightM', 0),
                                 'weight': wildpokemon['pokemonData'].get('weightKg', 0),
                                 'pokemon_level': calc_pokemon_level(wildpokemon['pokemonData'].get('cpMultiplier', 0)),
-                                'weather_id': weather
+                                'weather_id': weather_boosted_condition
                             })
 
                             rarity = self.get_pokemon_rarity_code(pokemon_id)
@@ -1690,6 +1752,8 @@ class Pogom(Flask):
             self.db_update_queue.put((ScanSpawnPoint, scan_spawn_points))
             if sightings:
                 self.db_update_queue.put((SpawnpointDetectionData, sightings))
+        if weather:
+            self.db_update_queue.put((Weather, weather))
         if nearby_pokemons:
             self.db_update_queue.put((PokestopMember, nearby_pokemons))
         if quest_result:
@@ -2044,6 +2108,15 @@ class Pogom(Flask):
                 else:
                     d['main_workers'] = MainWorker.get_all()
                     d['workers'] = WorkerStatus.get_all()
+
+        if request.args.get('weather', 'false') == 'true':
+            d['weather'] = get_weather_cells(swLat, swLng, neLat, neLng)
+
+        if request.args.get('s2cells', 'false') == 'true':
+            d['s2cells'] = get_s2_coverage(swLat, swLng, neLat, neLng)
+
+        if request.args.get('weatherAlerts', 'false') == 'true':
+            d['weatherAlerts'] = get_weather_alerts(swLat, swLng, neLat, neLng)
 
         if request.args.get('geofences', 'true') == 'true':
             db_geofences = Geofence.get_geofences()

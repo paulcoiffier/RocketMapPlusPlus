@@ -47,6 +47,7 @@
         <h1><a href="./">{{mapname}}<img class='rocket icon' src='static/images/rocket.png'></a></h1>
         <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
         <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
+        <span id="weatherInfo" style="float: right; vertical-align: middle;"></span>
       </header>
       <!-- NAV -->
       <nav id="nav">
@@ -161,6 +162,11 @@
                   <option value="12">Last 12 Hours</option>
                   <option value="24">Last 24 Hours</option>
                   <option value="168">Last Week</option>
+                  <option value="-1">Not Last Hour</option>
+                  <option value="-6">Not Last 6 Hours</option>
+                  <option value="-12">Not Last 12 Hours</option>
+                  <option value="-24">Not Last 24 Hours</option>
+                  <option value="-168">Not Last Week</option>
                 </select>
               </div>
               <div class="form-control switch-container" id="ex-raid-gyms-only-wrapper">
@@ -313,6 +319,36 @@
             </div>
                   {% endif %}
               {% endif %}
+            <div class="form-control switch-container">
+                <h3>Weather</h3>
+                <div class="onoffswitch">
+                    <input id="weather-cells-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="weather-cells-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
+                <h3>Weather Grids</h3>
+                <div class="onoffswitch">
+                    <input id="s2cells-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="s2cells-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
+                <h3>Weather Alerts</h3>
+                <div class="onoffswitch">
+                    <input id="weather-alerts-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="weather-alerts-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
           </div>
 
           <h3><i class="fa fa-location-arrow fa-fw"></i>Location &amp; Search Settings</h3>
@@ -474,6 +510,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.5.0/jsts.min.js"></script>
     <script>
       var centerLat = {{lat}};
       var centerLng = {{lng}};
@@ -488,6 +525,7 @@
       {% endif %}
     <script src="{{ url_for('static', filename='dist/js/map.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/stats.min.js').lstrip('/') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/weather.min.js').lstrip('/') }}"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&amp;callback=initMap&amp;libraries=places,geometry"></script>
     <script defer src="{{ url_for('static', filename='dist/js/label.min.js').lstrip('/') }}"></script>
     <script async src='https://www.google-analytics.com/analytics.js'></script>

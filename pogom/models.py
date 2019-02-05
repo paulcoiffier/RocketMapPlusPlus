@@ -39,13 +39,16 @@ from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
 from .proxy import get_new_proxy
 from .apiRequests import encounter
 
+from protos.pogoprotos.map.weather.gameplay_weather_pb2 import *
+from protos.pogoprotos.map.weather.weather_alert_pb2 import *
+
 log = logging.getLogger(__name__)
 
 args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 54
+db_schema_version = 55
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -2533,6 +2536,57 @@ class Token(BaseModel):
 
         return tokens
 
+class Weather(BaseModel):
+    s2_cell_id = Utf8mb4CharField(primary_key=True, max_length=50)
+    latitude = DoubleField()
+    longitude = DoubleField()
+    cloud_level = SmallIntegerField(null=True, index=True, default=0)
+    rain_level = SmallIntegerField(null=True, index=True, default=0)
+    wind_level = SmallIntegerField(null=True, index=True, default=0)
+    snow_level = SmallIntegerField(null=True, index=True, default=0)
+    fog_level = SmallIntegerField(null=True, index=True, default=0)
+    wind_direction = SmallIntegerField(null=True, index=True, default=0)
+    gameplay_weather = SmallIntegerField(null=True, index=True, default=0)
+    severity = SmallIntegerField(null=True, index=True, default=0)
+    warn_weather = SmallIntegerField(null=True, index=True, default=0)
+    time_of_day = SmallIntegerField(null=True, index=True, default=0)
+    last_updated = DateTimeField(default=datetime.utcnow, null=True, index=True)
+
+
+    @staticmethod
+    def get_weathers():
+        weathers = []
+        with Weather.database().execution_context():
+            query = Weather.select().dicts()
+            for w in query:
+                weathers.append(w)
+
+        return weathers
+
+    @staticmethod
+    def get_weather_by_location(swLat, swLng, neLat, neLng, alert):
+        # We can filter by the center of a cell, this deltas can expand the viewport bounds
+        # So cells with center outside the viewport, but close to it can be rendered
+        # otherwise edges of cells that intersects with viewport won't be rendered
+        lat_delta = 0.15
+        lng_delta = 0.4
+        weathers = []
+        with Weather.database().execution_context():
+            if not alert:
+                query = Weather.select().where((Weather.latitude >= float(swLat) - lat_delta) &
+                                               (Weather.longitude >= float(swLng) - lng_delta) &
+                                               (Weather.latitude <= float(neLat) + lat_delta) &
+                                               (Weather.longitude <= float(neLng) + lng_delta)).dicts()
+            else:
+                query = Weather.select().where((Weather.latitude >= float(swLat) - lat_delta) &
+                                               (Weather.longitude >= float(swLng) - lng_delta) &
+                                               (Weather.latitude <= float(neLat) + lat_delta) &
+                                               (Weather.longitude <= float(neLng) + lng_delta) &
+                                               (Weather.severity.is_null(False))).dicts()
+            for w in query:
+                weathers.append(w)
+
+        return weathers
 
 class HashKeys(BaseModel):
     key = Utf8mb4CharField(primary_key=True, max_length=20)
@@ -3825,7 +3879,7 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys, DeviceWorker, PokestopMember,
+              Token, LocationAltitude, PlayerLocale, HashKeys, Weather, DeviceWorker, PokestopMember,
               Quest, PokestopDetails, Geofence]
     with db.execution_context():
         for table in tables:
@@ -3842,7 +3896,7 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys, DeviceWorker, PokestopMember,
+              Token, HashKeys, Weather, DeviceWorker, PokestopMember,
               Quest, PokestopDetails, Geofence]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
@@ -4175,6 +4229,9 @@ def database_migrate(db, old_ver):
 
     if old_ver < 54:
         db.execute_sql('DROP TABLE `deviceworker`;')
+        create_tables(db)
+
+    if old_ver < 55:
         create_tables(db)
 
     # Always log that we're done.
