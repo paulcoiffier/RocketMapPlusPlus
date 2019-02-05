@@ -2147,12 +2147,17 @@ class Pogom(Flask):
                 for deviceworker in d['deviceworkers']:
                     uuid = deviceworker['deviceid']
                     if deviceworker['fetching'] != 'IDLE':
-                        route = self.deviceschedules[uuid]
+                        route = self.deviceschedules.get(uuid, [])
                         if len(route) > 0:
                             routes[uuid] = {
                                 'name': uuid,
                                 'coordinates': []
                             }
+                            coordinate = {
+                                'lat': deviceworker['latitude'],
+                                'lng': deviceworker['longitude']
+                            }
+                            routes[uuid]['coordinates'].append(coordinate)
                             for point in route:
                                 coordinate = {
                                     'lat': point[0],
@@ -2254,6 +2259,10 @@ class Pogom(Flask):
         latitude = round(lat, 5)
         longitude = round(lng, 5)
 
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
+
         deviceworker = self.get_device(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
@@ -2310,6 +2319,8 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth)
             nextlatitude = latitude
             nextlongitude = longitude
+            if unknown_tth and len(self.deviceschedules[uuid]) == 0:
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2399,6 +2410,10 @@ class Pogom(Flask):
 
         latitude = round(lat, 5)
         longitude = round(lng, 5)
+
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
 
         deviceworker = self.get_device(uuid, latitude, longitude)
 
@@ -2553,6 +2568,10 @@ class Pogom(Flask):
         latitude = round(lat, 5)
         longitude = round(lng, 5)
 
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
+
         deviceworker = self.get_device(uuid, latitude, longitude)
 
         if uuid not in self.deviceschedules:
@@ -2608,6 +2627,8 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless)
             nextlatitude = latitude
             nextlongitude = longitude
+            if questless and len(self.deviceschedules[uuid]) == 0:
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2698,6 +2719,10 @@ class Pogom(Flask):
 
         latitude = round(lat, 5)
         longitude = round(lng, 5)
+
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
 
         deviceworker = self.get_device(uuid, latitude, longitude)
 
@@ -2821,6 +2846,10 @@ class Pogom(Flask):
 
         latitude = round(lat, 5)
         longitude = round(lng, 5)
+
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
 
         deviceworker = self.get_device(uuid, latitude, longitude)
 
@@ -2953,6 +2982,10 @@ class Pogom(Flask):
 
         latitude = round(lat, 5)
         longitude = round(lng, 5)
+
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
 
         deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
