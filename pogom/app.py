@@ -46,7 +46,7 @@ from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import Gym
 from protos.pogoprotos.networking.responses.fort_details_response_pb2 import FortDetailsResponse
 from protos.pogoprotos.map.weather.display_weather_pb2 import _DISPLAYWEATHER_DISPLAYLEVEL
 from protos.pogoprotos.map.weather.gameplay_weather_pb2 import _GAMEPLAYWEATHER_WEATHERCONDITION
-from protos.pogoprotos.map.weather.weather_alert_pb2 import *
+from protos.pogoprotos.map.weather.weather_alert_pb2 import _WEATHERALERT_SEVERITY
 
 from protos.pogoprotos.enums.team_color_pb2 import _TEAMCOLOR
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
@@ -1237,15 +1237,15 @@ class Pogom(Flask):
                             })
 
                         if weather_alerts:
-                            severity = 0
-                            warn_weather = 0
+                            severity = "NONE"
+                            warn_weather = False
 
                             for wa in weather_alerts:
-                                severity = wa.get("severity", 0)
-                                warn_weather = wa.get("warn_weather", 0)
+                                severity = wa.get("severity", "NONE")
+                                warn_weather = wa.get("warnWeather", False)
 
                             weather[s2_cell_id].update({
-                                'severity': severity,
+                                'severity': _WEATHERALERT_SEVERITY.values_by_name[severity].number,
                                 'warn_weather': warn_weather,
                             })
 
