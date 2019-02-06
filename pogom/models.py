@@ -845,7 +845,7 @@ class Pokestop(LatLongModel):
                 newlong = value['longitude']
                 orderedpokestops.popitem(last=False)
                 orderedpokestops = OrderedDict(sorted(orderedpokestops.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (isinstance(questless, (int, long)) and len(result) == questless) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                if (not isinstance(questless, (bool)) and len(result) == questless) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
                     break
 
         return result
@@ -1178,7 +1178,7 @@ class Gym(LatLongModel):
                     newlat = value['latitude']
                     newlong = value['longitude']
                 orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (isinstance(raidless, (int, long)) and len(result) == raidless) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                if (not isinstance(raidless, (bool)) and len(result) == raidless) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
                     break
 
         return result
@@ -2043,7 +2043,7 @@ class SpawnPoint(LatLongModel):
                 newlong = value['longitude']
                 orderedspawnpoints.popitem(last=False)
                 orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (isinstance(unknown_tth, (int, long)) and len(result) == unknown_tth) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                if (not isinstance(unknown_tth, (bool)) and len(result) == unknown_tth) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
                     break
 
         return result
