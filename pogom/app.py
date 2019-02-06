@@ -2314,6 +2314,42 @@ class Pogom(Flask):
             unknown_tth = request.form.get('unknown_tth', unknown_tth)
             maxpoints = request.form.get('maxpoints', maxpoints)
 
+        if not isinstance(scheduletimeout, (int, long)):
+            try:
+                scheduletimeout = int(scheduletimeout)
+            except:
+                pass
+        if not isinstance(maxradius, (int, long)):
+            try:
+                maxradius = int(maxradius)
+            except:
+                pass
+        if not isinstance(stepsize, (float)):
+            try:
+                stepsize = int(stepsize)
+            except:
+                pass
+        if not isinstance(unknown_tth, (bool, int, long)):
+            try:
+                if unknown_tth.lower() == 'true':
+                    unknown_tth = True
+                elif unknown_tth.lower() == 'false':
+                    unknown_tth = False
+                else:
+                    unknown_tth = int(unknown_tth)
+            except:
+                pass
+        if not isinstance(maxpoints, (bool, int, long)):
+            try:
+                if maxpoints.lower() == 'true':
+                    maxpoints = True
+                elif maxpoints.lower() == 'false':
+                    maxpoints = False
+                else:
+                    maxpoints = int(maxpoints)
+            except:
+                pass
+
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
@@ -2456,6 +2492,17 @@ class Pogom(Flask):
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             stepsize = request.form.get('stepsize', stepsize)
+
+        if not isinstance(scheduletimeout, (int, long)):
+            try:
+                scheduletimeout = int(scheduletimeout)
+            except:
+                pass
+        if not isinstance(stepsize, (float)):
+            try:
+                stepsize = int(stepsize)
+            except:
+                pass
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2623,6 +2670,42 @@ class Pogom(Flask):
             questless = request.form.get('questless', questless)
             maxpoints = request.form.get('maxpoints', maxpoints)
 
+        if not isinstance(scheduletimeout, (int, long)):
+            try:
+                scheduletimeout = int(scheduletimeout)
+            except:
+                pass
+        if not isinstance(maxradius, (int, long)):
+            try:
+                maxradius = int(maxradius)
+            except:
+                pass
+        if not isinstance(stepsize, (float)):
+            try:
+                stepsize = int(stepsize)
+            except:
+                pass
+        if not isinstance(questless, (bool, int, long)):
+            try:
+                if questless.lower() == 'true':
+                    questless = True
+                elif questless.lower() == 'false':
+                    questless = False
+                else:
+                    questless = int(questless)
+            except:
+                pass
+        if not isinstance(maxpoints, (bool, int, long)):
+            try:
+                if maxpoints.lower() == 'true':
+                    maxpoints = True
+                elif maxpoints.lower() == 'false':
+                    maxpoints = False
+                else:
+                    maxpoints = int(maxpoints)
+            except:
+                pass
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
@@ -2781,6 +2864,47 @@ class Pogom(Flask):
             raidless = request.form.get('raidless', raidless)
             maxpoints = request.form.get('maxpoints', maxpoints)
 
+        if not isinstance(scheduletimeout, (int, long)):
+            try:
+                scheduletimeout = int(scheduletimeout)
+            except:
+                pass
+        if not isinstance(maxradius, (int, long)):
+            try:
+                maxradius = int(maxradius)
+            except:
+                pass
+        if not isinstance(teleport_interval, (int, long)):
+            try:
+                teleport_interval = int(teleport_interval)
+            except:
+                pass
+        if not isinstance(teleport_ignore, (int, long)):
+            try:
+                teleport_ignore = int(teleport_ignore)
+            except:
+                pass
+        if not isinstance(raidless, (bool, int, long)):
+            try:
+                if raidless.lower() == 'true':
+                    raidless = True
+                elif raidless.lower() == 'false':
+                    raidless = False
+                else:
+                    raidless = int(raidless)
+            except:
+                pass
+        if not isinstance(maxpoints, (bool, int, long)):
+            try:
+                if maxpoints.lower() == 'true':
+                    maxpoints = True
+                elif maxpoints.lower() == 'false':
+                    maxpoints = False
+                else:
+                    maxpoints = int(maxpoints)
+            except:
+                pass
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gym"):
@@ -2903,6 +3027,17 @@ class Pogom(Flask):
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             teleport_interval = request.form.get('teleport_interval', teleport_interval)
+
+        if not isinstance(scheduletimeout, (int, long)):
+            try:
+                scheduletimeout = int(scheduletimeout)
+            except:
+                pass
+        if not isinstance(teleport_interval, (int, long)):
+            try:
+                teleport_interval = int(teleport_interval)
+            except:
+                pass
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
