@@ -2801,6 +2801,8 @@ class Pogom(Flask):
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
+            if raidless and len(self.deviceschedules[uuid]) == 0:
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
 

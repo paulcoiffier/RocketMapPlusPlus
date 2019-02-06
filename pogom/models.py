@@ -1129,7 +1129,7 @@ class Gym(LatLongModel):
 
                 for r in raids:
                     if (r['pokemon_id'] and r['end'] > datetime.utcnow()) or r['start'] > datetime.utcnow():
-                        gym_ids.remove(r.gym_id)
+                        gym_ids.remove(r['gym_id'])
 
             from .geofence import Geofences
             geofences = Geofences()
