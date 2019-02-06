@@ -777,7 +777,7 @@ class Pokestop(LatLongModel):
         return result
 
     @staticmethod
-    def get_nearby_pokestops(lat, lng, dist, questless):
+    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints):
         pokestops = {}
         with Pokestop.database().execution_context():
             query = (Pokestop.select(
@@ -845,6 +845,8 @@ class Pokestop(LatLongModel):
                 newlong = value['longitude']
                 orderedpokestops.popitem(last=False)
                 orderedpokestops = OrderedDict(sorted(orderedpokestops.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+                if (isinstance(questless, (int, long)) and len(result) == questless) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                    break
 
         return result
 
@@ -1090,7 +1092,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1108,19 +1110,34 @@ class Gym(LatLongModel):
             if dist > 0:
                 query = (query
                          .where((Gym.latitude >= minlat) &
-                                  (Gym.longitude >= minlng) &
-                                  (Gym.latitude <= maxlat) &
-                                  (Gym.longitude <= maxlng))
+                                (Gym.longitude >= minlng) &
+                                (Gym.latitude <= maxlat) &
+                                (Gym.longitude <= maxlng))
                          .dicts())
 
             queryDict = query.dicts()
+
+            gym_ids = []
+            for g in queryDict:
+                gym_ids.append(g['gym_id'])
+
+            if raidless:
+                raids = (Raid
+                         .select()
+                         .where(Raid.gym_id << gym_ids)
+                         .dicts())
+
+                for r in raids:
+                    if r['pokemon_id'] or r['start'] > datetime.utcnow():
+                        gym_ids.remove(r.gym_id)
 
             from .geofence import Geofences
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
                 for g in queryDict:
-                    results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
+                    if g['gym_id'] in gym_ids:
+                        results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results)
                 if not results:
                     return []
@@ -1141,7 +1158,7 @@ class Gym(LatLongModel):
                     latitude = round(g['latitude'], 5)
                     longitude = round(g['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                    if dist == 0 or distance <= dist:
+                    if g['gym_id'] in gym_ids and (dist == 0 or distance <= dist):
                         gyms[key] = {
                             'latitude': latitude,
                             'longitude': longitude,
@@ -1161,6 +1178,8 @@ class Gym(LatLongModel):
                     newlat = value['latitude']
                     newlong = value['longitude']
                 orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+                if (isinstance(raidless, (int, long)) and len(result) == raidless) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                    break
 
         return result
 
@@ -1954,7 +1973,7 @@ class SpawnPoint(LatLongModel):
         return list(spawnpoints.values())
 
     @staticmethod
-    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth):
+    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
@@ -2024,6 +2043,8 @@ class SpawnPoint(LatLongModel):
                 newlong = value['longitude']
                 orderedspawnpoints.popitem(last=False)
                 orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+                if (isinstance(unknown_tth, (int, long)) and len(result) == unknown_tth) or (isinstance(maxpoints, (int, long)) and len(result) == maxpoints):
+                    break
 
         return result
 

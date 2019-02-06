@@ -1202,18 +1202,18 @@ class Pogom(Flask):
                         s2_cell_id = cw.get("s2CellId")
                         if not s2_cell_id:
                             continue
-                          
+
                         display_weather = cw.get("displayWeather")
                         gameplay_weather = cw.get("gameplayWeather")
                         weather_alerts = cw.get("alerts")
- 
+
                         s2s_cell_id = s2sphere.CellId(long(s2_cell_id))
                         s2s_cell = s2sphere.Cell(s2s_cell_id)
                         s2s_center = s2sphere.LatLng.from_point(s2s_cell.get_center())
                         s2s_lat = s2s_center.lat().degrees
                         s2s_lng = s2s_center.lng().degrees
 
-                        weather[s2_cell_id] = { 
+                        weather[s2_cell_id] = {
                             's2_cell_id': s2_cell_id,
                             'latitude': s2s_lat,
                             'longitude': s2s_lng,
@@ -1229,13 +1229,13 @@ class Pogom(Flask):
                                 'fog_level': _DISPLAYWEATHER_DISPLAYLEVEL.values_by_name[display_weather.get("fogLevel", "LEVEL_0")].number,
                                 'wind_direction': display_weather.get("windDirection", 0),
                             })
-                            
+
                         if gameplay_weather:
                             gameplay_weathercondition = gameplay_weather.get("gameplayCondition", "NONE")
                             weather[s2_cell_id].update({
                                 'gameplay_weather': _GAMEPLAYWEATHER_WEATHERCONDITION.values_by_name[gameplay_weathercondition].number,
                             })
-                
+
                         if weather_alerts:
                             severity = 0
                             warn_weather = 0
@@ -1248,7 +1248,7 @@ class Pogom(Flask):
                                 'severity': severity,
                                 'warn_weather': warn_weather,
                             })
-                  
+
         for proto in protos_dict:
             if "GymGetInfoResponse" in proto:
                 gym_get_info_response_string = b64decode(proto["GymGetInfoResponse"])
@@ -2300,27 +2300,30 @@ class Pogom(Flask):
         maxradius = args.maxradius
         stepsize = args.stepsize
         unknown_tth = False
+        maxpoints = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             unknown_tth = request.args.get('unknown_tth', unknown_tth)
+            maxpoints = request.args.get('maxpoints', maxpoints)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             unknown_tth = request.form.get('unknown_tth', unknown_tth)
+            maxpoints = request.form.get('maxpoints', maxpoints)
 
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth)
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints)
             nextlatitude = latitude
             nextlongitude = longitude
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False)
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2606,16 +2609,19 @@ class Pogom(Flask):
         maxradius = args.maxradius
         stepsize = args.stepsize
         questless = False
+        maxpoints = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             questless = request.args.get('questless', questless)
+            maxpoints = request.args.get('maxpoints', maxpoints)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             questless = request.form.get('questless', questless)
+            maxpoints = request.form.get('maxpoints', maxpoints)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2624,11 +2630,11 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless)
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints)
             nextlatitude = latitude
             nextlongitude = longitude
             if questless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False)
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2758,16 +2764,22 @@ class Pogom(Flask):
         maxradius = args.maxradius
         teleport_interval = args.teleport_interval
         teleport_ignore = args.teleport_ignore
+        raidless = False
+        maxpoints = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             teleport_interval = request.args.get('teleport_interval', teleport_interval)
             teleport_ignore = request.args.get('teleport_ignore', teleport_ignore)
+            raidless = request.args.get('raidless', raidless)
+            maxpoints = request.args.get('maxpoints', maxpoints)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             teleport_interval = request.form.get('teleport_interval', teleport_interval)
             teleport_ignore = request.form.get('teleport_ignore', teleport_ignore)
+            raidless = request.form.get('raidless', raidless)
+            maxpoints = request.form.get('maxpoints', maxpoints)
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2784,7 +2796,7 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore)
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
