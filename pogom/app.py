@@ -743,7 +743,8 @@ class Pogom(Flask):
                                             'cp_multiplier': 0,
                                             'height': 0,
                                             'weight': 0,
-                                            'weather_id': weather_boosted_condition
+                                            'weather_id': weather_boosted_condition,
+                                            'expire_timestamp_verified': SpawnPoint.tth_found(sp)
                                         })
 
                                         rarity = self.get_pokemon_rarity_code(pokemon_id)
@@ -890,7 +891,8 @@ class Pogom(Flask):
                                             'cp_multiplier': 0,
                                             'height': 0,
                                             'weight': 0,
-                                            'weather_id': weather_boosted_condition
+                                            'weather_id': weather_boosted_condition,
+                                            'expire_timestamp_verified': SpawnPoint.tth_found(sp)
                                         })
 
                                         rarity = self.get_pokemon_rarity_code(pokemon_id)
@@ -1712,7 +1714,8 @@ class Pogom(Flask):
                                 'height': wildpokemon['pokemonData'].get('heightM', 0),
                                 'weight': wildpokemon['pokemonData'].get('weightKg', 0),
                                 'pokemon_level': calc_pokemon_level(wildpokemon['pokemonData'].get('cpMultiplier', 0)),
-                                'weather_id': weather_boosted_condition
+                                'weather_id': weather_boosted_condition,
+                                'expire_timestamp_verified': SpawnPoint.tth_found(sp)
                             })
 
                             rarity = self.get_pokemon_rarity_code(pokemon_id)
