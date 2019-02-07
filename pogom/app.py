@@ -1464,6 +1464,19 @@ class Pogom(Flask):
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["item"]["amount"]
                         quest_result[quest_json["fortId"]]["reward_item"] = quest_json["questRewards"][0]["item"]["item"]
 
+                    if 'devices' in args.wh_types:
+                        for reward in quest_json["questRewards"]:
+                            rewardtype = _QUESTREWARD_TYPE.values_by_name[reward["type"]].number
+                            if rewardtype == 7 and reward["pokemonEncounter"].get("pokemonDisplay", {}).get("shiny", False):
+                                wh_worker = {
+                                    'uuid': deviceworker['deviceid'],
+                                    'name': deviceworker['name'],
+                                    'fetch': deviceworker['fetching'],
+                                    'scanning': deviceworker['scanning'],
+                                    'message': 'A Shiny Quest was discovered for this device at ' + quest_json["fortId"] + '.'
+                                }
+                                self.wh_update_queue.put(('devices', wh_worker))
+
                     if 'quest' in args.wh_types:
                         try:
                             wh_quest = quest_result[quest_json["fortId"]].copy()
@@ -1688,6 +1701,17 @@ class Pogom(Flask):
                         'form': form,
                         'weather_boosted_condition': weather_boosted_condition
                     }
+
+                    if 'devices' in args.wh_types:
+                        if wildpokemon['pokemonData']["pokemonDisplay"].get("shiny", False):
+                            wh_worker = {
+                                'uuid': deviceworker['deviceid'],
+                                'name': deviceworker['name'],
+                                'fetch': deviceworker['fetching'],
+                                'scanning': deviceworker['scanning'],
+                                'message': 'A Shiny Pokemon was discovered for this device at (' + str(wildpokemon['latitude']) + ',' + wildpokemon['longitude'] + ').'
+                            }
+                            self.wh_update_queue.put(('devices', wh_worker))
 
                     if 'pokemon-iv' in args.wh_types:
                         if (pokemon_id in args.webhook_whitelist or
