@@ -1680,7 +1680,7 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                     if worker['scanning'] != workers[worker['deviceid']]['scanning']:
                         needtosend = True
                         message += "Device changed scanning status: " + worker['deviceid'] + ". "
-                        
+
             if message != "":
                 log.info(message)
             workers[worker['deviceid']] = worker.copy()
@@ -1691,7 +1691,8 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                     'name': worker['name'],
                     'fetch': worker['fetching'],
                     'scanning': worker['scanning'],
-                    'message':  message
+                    'type': 'status_update',
+                    'message': message
                 }
                 wh_update_queue.put(('devices', wh_worker))
 
