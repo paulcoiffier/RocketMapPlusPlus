@@ -125,9 +125,12 @@ class Pogom(Flask):
         # Routes
         self.json_encoder = CustomJSONEncoder
         self.route("/", methods=['GET'])(self.fullmap)
+        self.route("/raids", methods=['GET'])(self.raidview)
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/auth_logout", methods=['GET'])(self.auth_logout)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
+        self.route("/raw_raid", methods=['GET'])(self.raw_raid)
+
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
         self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
@@ -1916,6 +1919,15 @@ class Pogom(Flask):
                                mapname=args.mapname,
                                generateImages=str(args.generate_images).lower(),
                                )
+    def raidview(self):
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
 
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
@@ -2192,6 +2204,27 @@ class Pogom(Flask):
 
                 d['routes'] = routes
 
+        return jsonify(d)
+
+    def raw_raid(self):
+        # Make sure fingerprint isn't blacklisted.
+        fingerprint_blacklisted = any([
+            fingerprints['no_referrer'](request),
+            fingerprints['iPokeGo'](request)
+        ])
+
+        if fingerprint_blacklisted:
+            log.debug('User denied access: blacklisted fingerprint.')
+            abort(403)
+
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        d = {}
+        d['timestamp'] = datetime.utcnow()
+        d['raids'] = Gym.get_raids()
         return jsonify(d)
 
     def loc(self):

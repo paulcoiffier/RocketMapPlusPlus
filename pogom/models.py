@@ -980,6 +980,31 @@ class Gym(LatLongModel):
         return gyms
 
     @staticmethod
+    def get_raids():
+        raids = (Raid
+                 .select(   Gym.latitude,
+                            Gym.longitude,
+                            Gym.is_ex_raid_eligible,
+                            GymDetails.name,
+                            GymDetails.url,
+                            Raid.level,
+                            Raid.pokemon_id,
+                            Raid.start,
+                            Raid.end,
+                            Raid.last_scanned)
+                 .join(Gym, on=(Raid.gym_id == Gym.gym_id))
+                 .join(GymDetails, on=(GymDetails.gym_id == Gym.gym_id))
+                 .where(Raid.end > datetime.utcnow())
+                 .order_by(Raid.end.asc())
+                 .dicts())
+
+        for r in raids:
+             if r['pokemon_id']:
+                 r['pokemon_name'] = get_pokemon_name(r['pokemon_id'])
+
+        return raids
+
+    @staticmethod
     def get_gym_details(id):
         try:
             details = (GymDetails
