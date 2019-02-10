@@ -14,7 +14,6 @@
                        html: "<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + val['route']?(' - ' + val['route']):'' + "</td>"
                        }).appendTo( "tbody" );
                    });
-                   applyFilter();
            }
    });
  }
