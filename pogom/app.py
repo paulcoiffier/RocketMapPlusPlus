@@ -1444,7 +1444,16 @@ class Pogom(Flask):
                 except:
                     continue
 
-                if 'challengeQuest' in fort_search_response_json:
+                if fort_search_response_json['result'] == 'INVENTORY_FULL' and 'devices' in args.wh_types:
+                    wh_worker = {
+                        'uuid': deviceworker['deviceid'],
+                        'name': deviceworker['name'],
+                        'type': 'inventory_full',
+                        'message': 'The device has no room for new items, clear your bag.'
+                    }
+                    self.wh_update_queue.put(('devices', wh_worker))
+
+                elif 'challengeQuest' in fort_search_response_json:
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
                     quest_result[quest_json['fortId']] = {
                         'pokestop_id': quest_json['fortId'],
