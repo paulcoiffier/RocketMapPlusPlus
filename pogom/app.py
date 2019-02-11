@@ -171,6 +171,7 @@ class Pogom(Flask):
     def get_device(self, uuid, lat, lng):
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+            self.devices[uuid]['route'] = ''
         device = self.devices[uuid].copy()
 
         last_updated = device['last_updated']
@@ -182,7 +183,9 @@ class Pogom(Flask):
         else:
             difference2 = (datetime.utcnow() - last_scanned).total_seconds()
         if difference > 30 and difference2 > 30:
+            route = self.devices[uuid]['route']
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+            self.devices[uuid]['route'] = route
             device = self.devices[uuid].copy()
 
         return device
@@ -200,7 +203,10 @@ class Pogom(Flask):
                 self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
 
             deviceworkers = {}
-            deviceworkers[uuid] = self.devices[uuid]
+            deviceworkers[uuid] = self.devices[uuid].copy()
+
+            if 'route' in deviceworkers[uuid]:
+                del deviceworkers[uuid]['route']
 
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
@@ -2620,14 +2626,18 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
+        routename = ""
+        if request.args:
+            routename = request.args.get('route', type=str)
+        if request.form:
+            routename = request.form.get('route', type=str)
+        if routename == "":
+            routename = uuid
+
+        if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+            self.deviceschedules[uuid] = []
+
         if len(self.deviceschedules[uuid]) == 0:
-            routename = ""
-            if request.args:
-                routename = request.args.get('route', type=str)
-            if request.form:
-                routename = request.form.get('route', type=str)
-            if routename == "":
-                routename = uuid
             if routename != "":
                 routename = os.path.join(
                     args.root_path,
@@ -2640,6 +2650,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
+            deviceworker['route'] = routename
             self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
@@ -3155,6 +3166,17 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
             self.deviceschedules[uuid] = []
 
+        routename = ""
+        if request.args:
+            routename = request.args.get('route', type=str)
+        if request.form:
+            routename = request.form.get('route', type=str)
+        if routename == "":
+            routename = uuid
+
+        if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+            self.deviceschedules[uuid] = []
+
         if difference >= teleport_interval:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
@@ -3164,13 +3186,6 @@ class Pogom(Flask):
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
-            routename = ""
-            if request.args:
-                routename = request.args.get('route', type=str)
-            if request.form:
-                routename = request.form.get('route', type=str)
-            if routename == "":
-                routename = uuid
             if routename != "":
                 routename = os.path.join(
                     args.root_path,
@@ -3184,6 +3199,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
+            deviceworker['route'] = routename
             self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
