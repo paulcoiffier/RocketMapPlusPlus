@@ -3381,7 +3381,7 @@ class Pogom(Flask):
             coords = request.form.get('coords', type=str)
             uuid = request.form.get('uuid', type=str)
 
-        if not (lat and lon and coords):
+        if not ((lat and lon) or coords):
             log.warning('Invalid next location: %s,%s', lat, lon)
             return 'bad parameters', 400
         else:
