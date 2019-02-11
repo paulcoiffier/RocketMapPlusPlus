@@ -31,7 +31,7 @@ function changeLocation(obj) {
 
   $("input[id='" + inputid + "']").each(function () {
     console.log($(this));
-    var newcoords = $(this).attr('value');
+    var newcoords = $(this).value;
     console.log(newcoords);
     $.post('next_loc?coords=' + newcoords + '&uuid=' + uuid)
   });
