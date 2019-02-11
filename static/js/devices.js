@@ -11,9 +11,8 @@
                    $.each( data['devices'], function( key, val ) {
                        $( "<tr/>", {
                        "class": 'my-new-list',
-                       html: "<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + ' - ' + val['route'] + "</td>"
+                       html: "<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + ' - ' + val['route'] + "</td><td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+'\">Check on map</a></td><td><input type="text" value="'+val['latitude']+","+val['longitude']+'" id="input-' + val['deviceid'] + '"/> <button id="button-' + val['deviceid'] + '" name="changeLocation-' + val['deviceid'] + '" onclick="changeLocation(this)">Teleport to new location</button></td>'
                        }).appendTo( "tbody" );
-                       console.log(val['deviceid']);
                    });
            }
    });
@@ -24,3 +23,16 @@
        $('#' + obj.id).toggleClass('inactive');
 
    }
+
+function changeLocation(obj) {
+  var buttonid = obj.id;
+  var inputid = buttonid.replace("button-", "input-");
+  var uuid = buttonid.replace("button-", "");
+
+  $("input[id='" + inputid + "']").each(function () {
+    console.log($(this));
+    var newcoords = $(this).attr('value');
+    console.log(newcoords);
+    $.post('next_loc?coords=' + encodeURIComponent(newcoords) + '&uuid=' + encodeURIComponent(uuid))
+  });
+}

@@ -2271,8 +2271,9 @@ class Pogom(Flask):
 
         for deviceworker in d['devices']:
             uuid = deviceworker['deviceid']
-            if deviceworker['fetching'] != 'IDLE':
-                deviceworker['route'] = len(self.deviceschedules.get(uuid, []))
+            deviceworker['route'] = 0
+            if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
+                deviceworker['route'] = len(self.deviceschedules[uuid])
 
         return jsonify(d)
 
