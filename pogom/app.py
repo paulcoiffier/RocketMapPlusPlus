@@ -134,12 +134,12 @@ class Pogom(Flask):
         self.route("/raw_devices", methods=['GET'])(self.raw_devices)
 
         self.route("/loc", methods=['GET'])(self.loc)
-        self.route("/walk_spawnpoint", methods=['POST'])(self.walk_spawnpoint)
-        self.route("/walk_gpx", methods=['POST'])(self.walk_gpx)
-        self.route("/walk_pokestop", methods=['POST'])(self.walk_pokestop)
-        self.route("/teleport_gym", methods=['POST'])(self.teleport_gym)
-        self.route("/teleport_gpx", methods=['POST'])(self.teleport_gpx)
-        self.route("/scan_loc", methods=['POST'])(self.scan_loc)
+        self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.walk_spawnpoint)
+        self.route("/walk_gpx", methods=['GET', 'POST'])(self.walk_gpx)
+        self.route("/walk_pokestop", methods=['GET', 'POST'])(self.walk_pokestop)
+        self.route("/teleport_gym", methods=['GET', 'POST'])(self.teleport_gym)
+        self.route("/teleport_gpx", methods=['GET', 'POST'])(self.teleport_gpx)
+        self.route("/scan_loc", methods=['GET', 'POST'])(self.scan_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
         self.route("/new_name", methods=['POST'])(self.new_name)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
@@ -152,7 +152,7 @@ class Pogom(Flask):
         self.route("/get_deviceworkerdata", methods=['GET'])(self.get_deviceworkerdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
-        self.route("/webhook", methods=['POST'])(self.webhook)
+        self.route("/webhook", methods=['GET', 'POST'])(self.webhook)
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
@@ -523,7 +523,10 @@ class Pogom(Flask):
         return canusedevice, devicename
 
     def webhook(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
         protos = request_json.get('protos')
         trainerlvl = request_json.get('trainerlvl', 30)
 
@@ -2347,7 +2350,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_spawnpoint(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2538,7 +2544,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_gpx(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2711,7 +2720,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_pokestop(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2901,8 +2913,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gym(self):
-        args = get_args()
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -3079,8 +3093,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gpx(self):
-        args = get_args()
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -3100,6 +3116,8 @@ class Pogom(Flask):
             d['longitude'] = map_lng
 
             return jsonify(d)
+
+        args = get_args()
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -3230,7 +3248,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def scan_loc(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
