@@ -512,7 +512,10 @@ class Pogom(Flask):
         return canusedevice, devicename
 
     def webhook(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
         protos = request_json.get('protos')
         trainerlvl = request_json.get('trainerlvl', 30)
 
