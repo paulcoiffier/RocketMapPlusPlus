@@ -141,6 +141,7 @@ class Pogom(Flask):
         self.route("/teleport_gpx", methods=['POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['POST'])(self.scan_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
+        self.route("/new_name", methods=['POST'])(self.new_name)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
         self.route("/search_control", methods=['POST'])(
@@ -186,14 +187,14 @@ class Pogom(Flask):
 
         return device
 
-    def save_device(self, device):
+    def save_device(self, device, force_save=False):
         uuid = device['deviceid']
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, device['latitude'], device['longitude'])
 
         self.devices[uuid] = device.copy()
 
-        if uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
+        if force_save or uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
             self.devicessavetime[uuid] = datetime.utcnow()
             if self.devices[uuid].get('last_scanned') is None:
                 self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
@@ -3395,6 +3396,30 @@ class Pogom(Flask):
             self.set_current_location((lat, lon, 0))
             log.info('Changing next location: %s,%s', lat, lon)
             return self.loc()
+
+    def new_name(self):
+        name = None
+        uuid = None
+        # Part of query string.
+        if request.args:
+            name = request.args.get('name', type=str)
+            uuid = request.args.get('uuid', type=str)
+        # From post requests.
+        if request.form:
+            name = request.form.get('name', type=str)
+            uuid = request.form.get('uuid', type=str)
+
+        if not (name and uuid):
+            log.warning('Missing name: %s or uuid: %s', name, uuid)
+            return 'bad parameters', 400
+        else:
+            map_lat = self.current_location[0]
+            map_lng = self.current_location[1]
+
+            deviceworker = self.get_device(uuid, map_lat, map_lng)
+            deviceworker['name'] = name
+
+            return self.save_device(deviceworker, True)
 
     def list_pokemon(self):
         # todo: Check if client is Android/iOS/Desktop for geolink, currently
