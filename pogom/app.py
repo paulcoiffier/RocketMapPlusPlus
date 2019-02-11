@@ -149,7 +149,7 @@ class Pogom(Flask):
         self.route("/get_deviceworkerdata", methods=['GET'])(self.get_deviceworkerdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
-        self.route("/webhook", methods=['POST'])(self.webhook)
+        self.route("/webhook", methods=['GET', 'POST'])(self.webhook)
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
@@ -512,7 +512,10 @@ class Pogom(Flask):
         return canusedevice, devicename
 
     def webhook(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
         protos = request_json.get('protos')
         trainerlvl = request_json.get('trainerlvl', 30)
 
