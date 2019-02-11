@@ -11,9 +11,9 @@
                    $.each( data['devices'], function( key, val ) {
                        $( "<tr/>", {
                        "class": 'my-new-list',
-                       html: "<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + val['route']?(' - ' + val['route']):'' + "</td>"
+                       html: "<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + ' - ' + val['route'] + "</td>"
                        }).appendTo( "tbody" );
-                       console.log("<td>" + val['deviceid'] + "</td><td>" + val['name']  + "</td><td>" + val['scans'] + "</td><td>" + val['scanning'] + "</td><td>" + val['fetching'] + val['route']?(' - ' + val['route']):'' + "</td>");
+                       console.log(val['deviceid']);
                    });
            }
    });
