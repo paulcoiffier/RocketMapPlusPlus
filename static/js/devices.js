@@ -33,6 +33,6 @@ function changeLocation(obj) {
     console.log($(this));
     var newcoords = $(this).attr('value');
     console.log(newcoords);
-    $.post('next_loc?coords=' + encodeURIComponent(newcoords) + '&uuid=' + encodeURIComponent(uuid))
+    $.post('next_loc?coords=' + newcoords + '&uuid=' + uuid)
   });
 }
