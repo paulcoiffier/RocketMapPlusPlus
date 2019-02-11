@@ -2637,31 +2637,34 @@ class Pogom(Flask):
 
         routename = ""
         if request.args:
-            routename = request.args.get('route', type=str)
+            routename = request.args.get('route', "", type=str)
         if request.form:
-            routename = request.form.get('route', type=str)
-        if routename == "":
+            routename = request.form.get('route', "", type=str)
+        if routename is None or routename == "":
             routename = uuid
 
         if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) == 0:
+            gpxfilename = ""
             if routename != "":
-                routename = os.path.join(
+                gpxfilename = os.path.join(
                     args.root_path,
                     'gpx',
                     routename + ".gpx")
-            if routename == "" or not os.path.isfile(routename):
+            if gpxfilename == "" or not os.path.isfile(gpxfilename):
                 return self.scan_loc()
 
             self.devicesscheduling.append(uuid)
+            self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             deviceworker['route'] = routename
             self.save_device(deviceworker)
-            self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
         nextlongitude = deviceworker['longitude']
 
@@ -3186,10 +3189,10 @@ class Pogom(Flask):
 
         routename = ""
         if request.args:
-            routename = request.args.get('route', type=str)
+            routename = request.args.get('route', "", type=str)
         if request.form:
-            routename = request.form.get('route', type=str)
-        if routename == "":
+            routename = request.form.get('route', "", type=str)
+        if routename is None or routename == "":
             routename = uuid
 
         if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
@@ -3204,23 +3207,24 @@ class Pogom(Flask):
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
+            gpxfilename = ""
             if routename != "":
-                routename = os.path.join(
+                gpxfilename = os.path.join(
                     args.root_path,
                     'gpx',
                     routename + ".gpx")
-            if routename == "" or not os.path.isfile(routename):
+            if gpxfilename == "" or not os.path.isfile(gpxfilename):
                 return self.scan_loc()
 
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = self.get_gpx_route(routename)
+            self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
+            if len(self.deviceschedules[uuid]) == 0:
+                return self.scan_loc()
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             deviceworker['route'] = routename
             self.save_device(deviceworker)
-            if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
 
         nexttarget = self.deviceschedules[uuid][0]
 
