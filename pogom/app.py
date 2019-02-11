@@ -126,10 +126,12 @@ class Pogom(Flask):
         self.json_encoder = CustomJSONEncoder
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/raids", methods=['GET'])(self.raidview)
+        self.route("/devices", methods=['GET'])(self.devicesview)
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/auth_logout", methods=['GET'])(self.auth_logout)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/raw_raid", methods=['GET'])(self.raw_raid)
+        self.route("/raw_devices", methods=['GET'])(self.raw_devices)
 
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.walk_spawnpoint)
@@ -139,6 +141,7 @@ class Pogom(Flask):
         self.route("/teleport_gpx", methods=['GET', 'POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['GET', 'POST'])(self.scan_loc)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
+        self.route("/new_name", methods=['POST'])(self.new_name)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
         self.route("/search_control", methods=['POST'])(
@@ -168,6 +171,7 @@ class Pogom(Flask):
     def get_device(self, uuid, lat, lng):
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+            self.devices[uuid]['route'] = ''
         device = self.devices[uuid].copy()
 
         last_updated = device['last_updated']
@@ -179,25 +183,30 @@ class Pogom(Flask):
         else:
             difference2 = (datetime.utcnow() - last_scanned).total_seconds()
         if difference > 30 and difference2 > 30:
+            route = self.devices[uuid]['route']
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
+            self.devices[uuid]['route'] = route
             device = self.devices[uuid].copy()
 
         return device
 
-    def save_device(self, device):
+    def save_device(self, device, force_save=False):
         uuid = device['deviceid']
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, device['latitude'], device['longitude'])
 
         self.devices[uuid] = device.copy()
 
-        if uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
+        if force_save or uuid not in self.devicessavetime or (datetime.utcnow() - self.devicessavetime[uuid]).total_seconds() > 30:
             self.devicessavetime[uuid] = datetime.utcnow()
             if self.devices[uuid].get('last_scanned') is None:
                 self.devices[uuid]['last_scanned'] = datetime.utcnow() - timedelta(days=1)
 
             deviceworkers = {}
-            deviceworkers[uuid] = self.devices[uuid]
+            deviceworkers[uuid] = self.devices[uuid].copy()
+
+            if 'route' in deviceworkers[uuid]:
+                del deviceworkers[uuid]['route']
 
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
@@ -205,6 +214,8 @@ class Pogom(Flask):
                 scan_location = ScannedLocation.get_by_loc([device['latitude'], device['longitude']])
                 ScannedLocation.update_band(scan_location, device['last_updated'])
                 self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            if force_save:
+                return 'Name saved'
 
     def gym_img(self):
         team = request.args.get('team')
@@ -1931,6 +1942,7 @@ class Pogom(Flask):
                                mapname=args.mapname,
                                generateImages=str(args.generate_images).lower(),
                                )
+
     def raidview(self):
         self.heartbeat[0] = now()
         args = get_args()
@@ -1940,6 +1952,16 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
         return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
+
+    def devicesview(self):
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
 
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
@@ -2237,6 +2259,34 @@ class Pogom(Flask):
         d = {}
         d['timestamp'] = datetime.utcnow()
         d['raids'] = Gym.get_raids()
+        return jsonify(d)
+
+    def raw_devices(self):
+        # Make sure fingerprint isn't blacklisted.
+        fingerprint_blacklisted = any([
+            fingerprints['no_referrer'](request),
+            fingerprints['iPokeGo'](request)
+        ])
+
+        if fingerprint_blacklisted:
+            log.debug('User denied access: blacklisted fingerprint.')
+            abort(403)
+
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        d = {}
+        d['timestamp'] = datetime.utcnow()
+        d['devices'] = DeviceWorker.get_active()
+
+        for deviceworker in d['devices']:
+            uuid = deviceworker['deviceid']
+            deviceworker['route'] = 0
+            if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
+                deviceworker['route'] = len(self.deviceschedules[uuid])
+
         return jsonify(d)
 
     def loc(self):
@@ -2585,14 +2635,18 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
+        routename = ""
+        if request.args:
+            routename = request.args.get('route', type=str)
+        if request.form:
+            routename = request.form.get('route', type=str)
+        if routename == "":
+            routename = uuid
+
+        if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+            self.deviceschedules[uuid] = []
+
         if len(self.deviceschedules[uuid]) == 0:
-            routename = ""
-            if request.args:
-                routename = request.args.get('route', "", type=str)
-            if request.form:
-                routename = request.form.get('route', "", type=str)
-            if routename is None or routename == "":
-                routename = uuid
             if routename != "":
                 routename = os.path.join(
                     args.root_path,
@@ -2605,6 +2659,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
+            deviceworker['route'] = routename
             self.save_device(deviceworker)
             self.deviceschedules[uuid] = self.get_gpx_route(routename)
         nextlatitude = deviceworker['latitude']
@@ -3129,6 +3184,17 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
             self.deviceschedules[uuid] = []
 
+        routename = ""
+        if request.args:
+            routename = request.args.get('route', type=str)
+        if request.form:
+            routename = request.form.get('route', type=str)
+        if routename == "":
+            routename = uuid
+
+        if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+            self.deviceschedules[uuid] = []
+
         if difference >= teleport_interval:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
@@ -3138,13 +3204,6 @@ class Pogom(Flask):
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
-            routename = ""
-            if request.args:
-                routename = request.args.get('route', "", type=str)
-            if request.form:
-                routename = request.form.get('route', "", type=str)
-            if routename is None or routename == "":
-                routename = uuid
             if routename != "":
                 routename = os.path.join(
                     args.root_path,
@@ -3158,6 +3217,7 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
+            deviceworker['route'] = routename
             self.save_device(deviceworker)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
@@ -3361,8 +3421,8 @@ class Pogom(Flask):
             coords = request.form.get('coords', type=str)
             uuid = request.form.get('uuid', type=str)
 
-        if not (lat and lon and coords):
-            log.warning('Invalid next location: %s,%s', lat, lon)
+        if not ((lat and lon) or coords):
+            log.warning('Invalid next location: (%s,%s) or (%s)', lat, lon, coords)
             return 'bad parameters', 400
         else:
             if not (lat and lon):
@@ -3375,6 +3435,30 @@ class Pogom(Flask):
             self.set_current_location((lat, lon, 0))
             log.info('Changing next location: %s,%s', lat, lon)
             return self.loc()
+
+    def new_name(self):
+        name = None
+        uuid = None
+        # Part of query string.
+        if request.args:
+            name = request.args.get('name', type=str)
+            uuid = request.args.get('uuid', type=str)
+        # From post requests.
+        if request.form:
+            name = request.form.get('name', type=str)
+            uuid = request.form.get('uuid', type=str)
+
+        if not (name and uuid):
+            log.warning('Missing name: %s or uuid: %s', name, uuid)
+            return 'bad parameters', 400
+        else:
+            map_lat = self.current_location[0]
+            map_lng = self.current_location[1]
+
+            deviceworker = self.get_device(uuid, map_lat, map_lng)
+            deviceworker['name'] = name
+
+            return self.save_device(deviceworker, True)
 
     def list_pokemon(self):
         # todo: Check if client is Android/iOS/Desktop for geolink, currently
