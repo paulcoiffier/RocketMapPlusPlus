@@ -2297,7 +2297,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_spawnpoint(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2488,7 +2491,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_gpx(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2579,10 +2585,10 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) == 0:
             routename = ""
             if request.args:
-                routename = request.args.get('route', type=str)
+                routename = request.args.get('route', "", type=str)
             if request.form:
-                routename = request.form.get('route', type=str)
-            if routename == "":
+                routename = request.form.get('route', "", type=str)
+            if routename is None or routename == "":
                 routename = uuid
             if routename != "":
                 routename = os.path.join(
@@ -2656,7 +2662,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def walk_pokestop(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2846,8 +2855,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gym(self):
-        args = get_args()
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -3024,8 +3035,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def teleport_gpx(self):
-        args = get_args()
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -3045,6 +3058,8 @@ class Pogom(Flask):
             d['longitude'] = map_lng
 
             return jsonify(d)
+
+        args = get_args()
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -3122,10 +3137,10 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) == 0:
             routename = ""
             if request.args:
-                routename = request.args.get('route', type=str)
+                routename = request.args.get('route', "", type=str)
             if request.form:
-                routename = request.form.get('route', type=str)
-            if routename == "":
+                routename = request.form.get('route', "", type=str)
+            if routename is None or routename == "":
                 routename = uuid
             if routename != "":
                 routename = os.path.join(
@@ -3170,7 +3185,10 @@ class Pogom(Flask):
         return jsonify(d)
 
     def scan_loc(self):
-        request_json = request.get_json()
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
