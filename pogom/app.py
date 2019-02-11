@@ -208,6 +208,8 @@ class Pogom(Flask):
                 scan_location = ScannedLocation.get_by_loc([device['latitude'], device['longitude']])
                 ScannedLocation.update_band(scan_location, device['last_updated'])
                 self.db_update_queue.put((ScannedLocation, {0: scan_location}))
+            if force_save:
+                return 'Name saved'
 
     def gym_img(self):
         team = request.args.get('team')
