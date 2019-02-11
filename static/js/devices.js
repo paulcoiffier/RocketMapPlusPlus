@@ -31,7 +31,7 @@ function changeLocation(obj) {
 
   $("input[id='" + inputid + "']").each(function () {
     console.log($(this));
-    var newcoords = $(this).value;
+    var newcoords = $(this).val();
     console.log(newcoords);
     $.post('next_loc?coords=' + newcoords + '&uuid=' + uuid)
   });
@@ -44,7 +44,7 @@ function changeName(obj) {
 
   $("input[id='" + inputid + "']").each(function () {
     console.log($(this));
-    var newname = $(this).value;
+    var newname = $(this).val();
     console.log(newname);
     $.post('new_name?name=' + newname + '&uuid=' + uuid)
   });
