@@ -183,7 +183,7 @@ class Pogom(Flask):
         else:
             difference2 = (datetime.utcnow() - last_scanned).total_seconds()
         if difference > 30 and difference2 > 30:
-            route = self.devices[uuid]['route']
+            route = self.devices[uuid].get('route', '')
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             self.devices[uuid]['route'] = route
             device = self.devices[uuid].copy()
