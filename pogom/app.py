@@ -168,6 +168,28 @@ class Pogom(Flask):
 
         self.geofences = None
 
+    def get_active_devices(self):
+        result = []
+
+        for uuid, dev in self.devices.iteritems():
+            device = self.get_device(uuid, dev['latitude'], dev['longitude'])
+            last_updated = device['last_updated']
+            difference = (datetime.utcnow() - last_updated).total_seconds()
+            if difference > 300 and device['fetching'] != 'IDLE':
+                device['fetching'] = 'IDLE'
+            last_scanned = device['last_scanned']
+            if last_scanned is None and device['scanning'] != -1:
+                device['scanning'] = -1
+            else:
+                difference = (datetime.utcnow() - last_scanned).total_seconds()
+                if difference > 60 and device['scanning'] == 1:
+                    device['scanning'] = 0
+
+            if device['scanning'] == 1 or device['fetching'] != 'IDLE':
+                result.append(device)
+
+        return result
+
     def get_device(self, uuid, lat, lng):
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
@@ -2211,7 +2233,8 @@ class Pogom(Flask):
             d['geofences'] = geofences
 
         if not args.no_devices and request.args.get('devices', 'true') == 'true':
-            d['deviceworkers'] = DeviceWorker.get_active()
+            # d['deviceworkers'] = DeviceWorker.get_active()
+            d['deviceworkers'] = self.get_active_devices()
 
             if request.args.get('routes', 'true') == 'true':
                 routes = {}
@@ -2279,13 +2302,17 @@ class Pogom(Flask):
 
         d = {}
         d['timestamp'] = datetime.utcnow()
-        d['devices'] = DeviceWorker.get_active()
+        if args.no_devices:
+            d['devices'] = []
+        else:
+            # d['devices'] = DeviceWorker.get_active()
+            d['devices'] = self.get_active_devices()
 
-        for deviceworker in d['devices']:
-            uuid = deviceworker['deviceid']
-            deviceworker['route'] = 0
-            if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
-                deviceworker['route'] = len(self.deviceschedules[uuid])
+            for deviceworker in d['devices']:
+                uuid = deviceworker['deviceid']
+                deviceworker['route'] = 0
+                if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
+                    deviceworker['route'] = len(self.deviceschedules[uuid])
 
         return jsonify(d)
 
