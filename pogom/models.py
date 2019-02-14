@@ -1148,7 +1148,6 @@ class Gym(LatLongModel):
             for g in queryDict:
                 gym_ids.append(g['gym_id'])
 
-            raidless = 20
             if raidless:
                 raids = (Raid
                          .select()
