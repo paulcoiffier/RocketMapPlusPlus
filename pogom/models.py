@@ -777,7 +777,7 @@ class Pokestop(LatLongModel):
         return result
 
     @staticmethod
-    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints):
+    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints, geofence_name):
         pokestops = {}
         with Pokestop.database().execution_context():
             query = (Pokestop.select(
@@ -809,7 +809,7 @@ class Pokestop(LatLongModel):
                 for p in queryDict:
                     if not questless or len(Pokestop.get_stop(p['pokestop_id'])['quest']) == 0:
                         results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
-                results = geofences.get_geofenced_coordinates(results)
+                results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
                 for index, coords in enumerate(results):
@@ -1117,7 +1117,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1163,7 +1163,7 @@ class Gym(LatLongModel):
                 for g in queryDict:
                     if g['gym_id'] in gym_ids:
                         results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
-                results = geofences.get_geofenced_coordinates(results)
+                results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
                 for index, coords in enumerate(results):
@@ -1998,7 +1998,7 @@ class SpawnPoint(LatLongModel):
         return list(spawnpoints.values())
 
     @staticmethod
-    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints):
+    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints, geofence_name):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
@@ -2032,7 +2032,7 @@ class SpawnPoint(LatLongModel):
                 for sp in queryDict:
                     if not unknown_tth or SpawnPoint.tth_found(sp):
                         results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
-                results = geofences.get_geofenced_coordinates(results)
+                results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
                 for index, coords in enumerate(results):

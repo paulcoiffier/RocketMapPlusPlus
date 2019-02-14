@@ -42,7 +42,7 @@ class Geofences:
     def is_enabled(self):
         return (self.geofenced_areas or self.excluded_areas)
 
-    def get_geofenced_coordinates(self, coordinates):
+    def get_geofenced_coordinates(self, coordinates, name=""):
         log.info('Using matplotlib: %s.', self.use_matplotlib)
         log.info('Found %d coordinates to geofence.', len(coordinates))
         geofenced_coordinates = []
@@ -55,7 +55,7 @@ class Geofences:
             # Coordinate is geofenced if in one geofenced area.
             if self.geofenced_areas:
                 for va in self.geofenced_areas:
-                    if self._in_area(c, va):
+                    if (name == "" or name == va["name"]) and self._in_area(c, va):
                         geofenced_coordinates.append(c)
                         break
             else:

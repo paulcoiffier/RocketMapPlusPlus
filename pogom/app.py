@@ -2451,18 +2451,21 @@ class Pogom(Flask):
         stepsize = args.stepsize
         unknown_tth = False
         maxpoints = False
+        geofence = ""
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             unknown_tth = request.args.get('unknown_tth', unknown_tth)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             unknown_tth = request.form.get('unknown_tth', unknown_tth)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2505,11 +2508,11 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints)
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence)
             nextlatitude = latitude
             nextlongitude = longitude
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints)
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2821,18 +2824,21 @@ class Pogom(Flask):
         stepsize = args.stepsize
         questless = False
         maxpoints = False
+        geofence = ""
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             questless = request.args.get('questless', questless)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             questless = request.form.get('questless', questless)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2877,11 +2883,11 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints)
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence)
             nextlatitude = latitude
             nextlongitude = longitude
             if questless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints)
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -3015,6 +3021,7 @@ class Pogom(Flask):
         teleport_ignore = args.teleport_ignore
         raidless = False
         maxpoints = False
+        geofence = ""
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -3022,6 +3029,7 @@ class Pogom(Flask):
             teleport_ignore = request.args.get('teleport_ignore', teleport_ignore)
             raidless = request.args.get('raidless', raidless)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -3029,6 +3037,7 @@ class Pogom(Flask):
             teleport_ignore = request.form.get('teleport_ignore', teleport_ignore)
             raidless = request.form.get('raidless', raidless)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3086,13 +3095,13 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints)
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
             if raidless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints)
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
 
