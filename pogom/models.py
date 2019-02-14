@@ -1121,7 +1121,7 @@ class Gym(LatLongModel):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
-                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
+                Gym.latitude, Gym.longitude, Gym.gym_id).where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60)).dicts())
 
             lat1 = lat - 0.1
             lat2 = lat + 0.1
@@ -1138,14 +1138,17 @@ class Gym(LatLongModel):
                                 (Gym.longitude >= minlng) &
                                 (Gym.latitude <= maxlat) &
                                 (Gym.longitude <= maxlng))
+                         .where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60))
                          .dicts())
 
             queryDict = query.dicts()
 
             gym_ids = []
+            egg_todo = []
             for g in queryDict:
                 gym_ids.append(g['gym_id'])
 
+            raidless = 20
             if raidless:
                 raids = (Raid
                          .select()
@@ -1153,6 +1156,9 @@ class Gym(LatLongModel):
                          .dicts())
 
                 for r in raids:
+                    if not isinstance(raidless, (bool)):
+                        if (r['pokemon_id'] is None and r['end'] > datetime.utcnow()) and r['start'] < datetime.utcnow():
+                            egg_todo.append(r['gym_id'])
                     if (r['pokemon_id'] and r['end'] > datetime.utcnow()) or r['start'] > datetime.utcnow():
                         gym_ids.remove(r['gym_id'])
 
@@ -1160,10 +1166,18 @@ class Gym(LatLongModel):
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
+                results_eggs = []
                 for g in queryDict:
+                    if g['gym_id'] in egg_todo:
+                        results_eggs.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                     if g['gym_id'] in gym_ids:
                         results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
-                results = geofences.get_geofenced_coordinates(results, geofence_name)
+
+                if results_eggs:
+                    results = geofences.get_geofenced_coordinates(results_eggs, geofence_name)
+                else:
+                    results = geofences.get_geofenced_coordinates(results, geofence_name)
+
                 if not results:
                     return []
                 for index, coords in enumerate(results):
@@ -1183,12 +1197,20 @@ class Gym(LatLongModel):
                     latitude = round(g['latitude'], 5)
                     longitude = round(g['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
-                    if g['gym_id'] in gym_ids and (dist == 0 or distance <= dist):
-                        gyms[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance
-                        }
+                    if egg_todo:
+                        if g['gym_id'] in egg_todo and (dist == 0 or distance <= dist):
+                            gyms[key] = {
+                                'latitude': latitude,
+                                'longitude': longitude,
+                                'distance': distance
+                            }
+                    else:
+                        if g['gym_id'] in gym_ids and (dist == 0 or distance <= dist):
+                            gyms[key] = {
+                                'latitude': latitude,
+                                'longitude': longitude,
+                                'distance': distance
+                            }
             orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
 
             newlat = 0
