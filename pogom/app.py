@@ -2520,6 +2520,13 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
+
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
 
@@ -2536,15 +2543,10 @@ class Pogom(Flask):
                 self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
+            nexttarget = self.deviceschedules[uuid][0]
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
-
-        nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
@@ -2697,6 +2699,13 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
             self.deviceschedules[uuid] = []
 
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
+
         if len(self.deviceschedules[uuid]) == 0:
             gpxfilename = ""
             if routename != "":
@@ -2720,10 +2729,6 @@ class Pogom(Flask):
         nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
@@ -2913,6 +2918,13 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
             self.deviceschedules[uuid] = []
 
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
+
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
 
@@ -2929,15 +2941,10 @@ class Pogom(Flask):
                 self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
+            nexttarget = self.deviceschedules[uuid][0]
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
-
-        nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
