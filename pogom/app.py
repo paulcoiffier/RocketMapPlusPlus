@@ -2538,7 +2538,7 @@ class Pogom(Flask):
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_spawnpoint':
-                        scheduled_points += self.deviceschedules[dev['uuid']]
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
 
             self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points)
             nextlatitude = latitude
@@ -2941,7 +2941,7 @@ class Pogom(Flask):
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_pokestop':
-                        scheduled_points += self.deviceschedules[dev['uuid']]
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
 
             self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points)
             nextlatitude = latitude
@@ -3169,7 +3169,7 @@ class Pogom(Flask):
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'teleport_gym':
-                        scheduled_points += self.deviceschedules[dev['uuid']]
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
 
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points)
             deviceworker['last_updated'] = datetime.utcnow()
