@@ -2951,7 +2951,6 @@ class Pogom(Flask):
                 self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-            nexttarget = self.deviceschedules[uuid][0]
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
