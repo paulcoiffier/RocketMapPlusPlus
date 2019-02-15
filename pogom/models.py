@@ -31,7 +31,7 @@ from .utils import (get_pokemon_name, get_pokemon_types,
                     get_move_name, get_move_damage, get_move_energy,
                     get_move_type, calc_pokemon_level, peewee_attr_to_col,
                     get_quest_icon, get_quest_quest_text, get_quest_reward_text,
-                    get_timezone_offset)
+                    get_timezone_offset, point_is_scheduled)
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .customLog import printPokemon
 
@@ -777,7 +777,7 @@ class Pokestop(LatLongModel):
         return result
 
     @staticmethod
-    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints, geofence_name):
+    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints, geofence_name, scheduled_points):
         pokestops = {}
         with Pokestop.database().execution_context():
             query = (Pokestop.select(
@@ -808,7 +808,8 @@ class Pokestop(LatLongModel):
                 results = []
                 for p in queryDict:
                     if not questless or len(Pokestop.get_stop(p['pokestop_id'])['quest']) == 0:
-                        results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
+                        if not point_is_scheduled(p['latitude'], p['longitude'], scheduled_points):
+                            results.append((round(p['latitude'], 5), round(p['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
@@ -830,11 +831,12 @@ class Pokestop(LatLongModel):
                     longitude = round(p['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                     if (not questless or len(Pokestop.get_stop(p['pokestop_id'])['quest']) == 0) and (dist == 0 or distance <= dist):
-                        pokestops[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance
-                        }
+                        if not point_is_scheduled(latitude, longitude, scheduled_points):
+                            pokestops[key] = {
+                                'latitude': latitude,
+                                'longitude': longitude,
+                                'distance': distance
+                            }
             orderedpokestops = OrderedDict(sorted(pokestops.items(), key=lambda x: x[1]['distance']))
 
             result = []
@@ -1117,7 +1119,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1162,7 +1164,8 @@ class Gym(LatLongModel):
                 results = []
                 for g in queryDict:
                     if g['gym_id'] in gym_ids:
-                        results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
+                        if not point_is_scheduled(g['latitude'], g['longitude'], scheduled_points):
+                            results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
@@ -1184,11 +1187,12 @@ class Gym(LatLongModel):
                     longitude = round(g['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                     if g['gym_id'] in gym_ids and (dist == 0 or distance <= dist):
-                        gyms[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance
-                        }
+                        if not point_is_scheduled(latitude, longitude, scheduled_points):
+                            gyms[key] = {
+                                'latitude': latitude,
+                                'longitude': longitude,
+                                'distance': distance
+                            }
             orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
 
             newlat = 0
@@ -1998,7 +2002,7 @@ class SpawnPoint(LatLongModel):
         return list(spawnpoints.values())
 
     @staticmethod
-    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints, geofence_name):
+    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints, geofence_name, scheduled_points):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
@@ -2031,7 +2035,8 @@ class SpawnPoint(LatLongModel):
                 results = []
                 for sp in queryDict:
                     if not unknown_tth or SpawnPoint.tth_found(sp):
-                        results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
+                        if not point_is_scheduled(sp['latitude'], sp['longitude'], scheduled_points):
+                            results.append((round(sp['latitude'], 5), round(sp['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
                 if not results:
                     return []
@@ -2053,11 +2058,12 @@ class SpawnPoint(LatLongModel):
                     longitude = round(sp['longitude'], 5)
                     distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                     if (not unknown_tth or SpawnPoint.tth_found(sp)) and (dist == 0 or distance <= dist):
-                        spawnpoints[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance
-                        }
+                        if not point_is_scheduled(latitude, longitude, scheduled_points):
+                            spawnpoints[key] = {
+                                'latitude': latitude,
+                                'longitude': longitude,
+                                'distance': distance
+                            }
             orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
 
             result = []
