@@ -2552,6 +2552,8 @@ class Pogom(Flask):
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
 
+        nexttarget = self.deviceschedules[uuid][0]
+
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
         dll = math.sqrt((dlat ** 2) + (dlong ** 2))
@@ -2953,6 +2955,8 @@ class Pogom(Flask):
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
+
+        nexttarget = self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
