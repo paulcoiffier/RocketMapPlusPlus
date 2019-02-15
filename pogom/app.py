@@ -232,6 +232,8 @@ class Pogom(Flask):
 
             if 'route' in deviceworkers[uuid]:
                 del deviceworkers[uuid]['route']
+            if 'no_overlap' in deviceworkers[uuid]:
+                del deviceworkers[uuid]['no_overlap']
 
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
