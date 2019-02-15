@@ -2517,6 +2517,8 @@ class Pogom(Flask):
             except:
                 pass
 
+        deviceworker['no_overlap'] = no_overlap
+
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
@@ -2682,6 +2684,8 @@ class Pogom(Flask):
                 stepsize = int(stepsize)
             except:
                 pass
+
+        deviceworker['no_overlap'] = False
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -2913,6 +2917,8 @@ class Pogom(Flask):
             except:
                 pass
 
+        deviceworker['no_overlap'] = no_overlap
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
@@ -3137,6 +3143,8 @@ class Pogom(Flask):
             except:
                 pass
 
+        deviceworker['no_overlap'] = no_overlap
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gym"):
@@ -3282,6 +3290,8 @@ class Pogom(Flask):
             except:
                 pass
 
+        deviceworker['no_overlap'] = False
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
@@ -3405,6 +3415,8 @@ class Pogom(Flask):
             d['longitude'] = deviceworker['longitude']
 
             return jsonify(d)
+
+        deviceworker['no_overlap'] = False
 
         currentlatitude = round(deviceworker['latitude'], 5)
         currentlongitude = round(deviceworker['longitude'], 5)
