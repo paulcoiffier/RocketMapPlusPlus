@@ -1202,7 +1202,7 @@ class Gym(LatLongModel):
                         egg_todo.append(r['gym_id'])
 
             if len(egg_todo) > 0:
-                gym_ids = egg_todo.copy()
+                gym_ids = egg_todo[:]
 
             from .geofence import Geofences
             geofences = Geofences()
