@@ -168,10 +168,33 @@ class Pogom(Flask):
 
         self.geofences = None
 
+    def get_active_devices(self):
+        result = []
+
+        for uuid, dev in self.devices.iteritems():
+            device = self.get_device(uuid, dev['latitude'], dev['longitude'])
+            last_updated = device['last_updated']
+            difference = (datetime.utcnow() - last_updated).total_seconds()
+            if difference > 300 and device['fetching'] != 'IDLE':
+                device['fetching'] = 'IDLE'
+            last_scanned = device['last_scanned']
+            if last_scanned is None and device['scanning'] != -1:
+                device['scanning'] = -1
+            else:
+                difference = (datetime.utcnow() - last_scanned).total_seconds()
+                if difference > 60 and device['scanning'] == 1:
+                    device['scanning'] = 0
+
+            if device['scanning'] == 1 or device['fetching'] != 'IDLE':
+                result.append(device)
+
+        return result
+
     def get_device(self, uuid, lat, lng):
         if uuid not in self.devices:
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             self.devices[uuid]['route'] = ''
+            self.devices[uuid]['no_overlap'] = False
         device = self.devices[uuid].copy()
 
         last_updated = device['last_updated']
@@ -183,9 +206,11 @@ class Pogom(Flask):
         else:
             difference2 = (datetime.utcnow() - last_scanned).total_seconds()
         if difference > 30 and difference2 > 30:
-            route = self.devices[uuid]['route']
+            route = self.devices[uuid].get('route', '')
+            no_overlap = self.devices[uuid].get('no_overlap', False)
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             self.devices[uuid]['route'] = route
+            self.devices[uuid]['no_overlap'] = no_overlap
             device = self.devices[uuid].copy()
 
         return device
@@ -207,6 +232,8 @@ class Pogom(Flask):
 
             if 'route' in deviceworkers[uuid]:
                 del deviceworkers[uuid]['route']
+            if 'no_overlap' in deviceworkers[uuid]:
+                del deviceworkers[uuid]['no_overlap']
 
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
@@ -2211,7 +2238,8 @@ class Pogom(Flask):
             d['geofences'] = geofences
 
         if not args.no_devices and request.args.get('devices', 'true') == 'true':
-            d['deviceworkers'] = DeviceWorker.get_active()
+            # d['deviceworkers'] = DeviceWorker.get_active()
+            d['deviceworkers'] = self.get_active_devices()
 
             if request.args.get('routes', 'true') == 'true':
                 routes = {}
@@ -2279,13 +2307,17 @@ class Pogom(Flask):
 
         d = {}
         d['timestamp'] = datetime.utcnow()
-        d['devices'] = DeviceWorker.get_active()
+        if args.no_devices:
+            d['devices'] = []
+        else:
+            # d['devices'] = DeviceWorker.get_active()
+            d['devices'] = self.get_active_devices()
 
-        for deviceworker in d['devices']:
-            uuid = deviceworker['deviceid']
-            deviceworker['route'] = 0
-            if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
-                deviceworker['route'] = len(self.deviceschedules[uuid])
+            for deviceworker in d['devices']:
+                uuid = deviceworker['deviceid']
+                deviceworker['route'] = 0
+                if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
+                    deviceworker['route'] = len(self.deviceschedules[uuid])
 
         return jsonify(d)
 
@@ -2424,18 +2456,24 @@ class Pogom(Flask):
         stepsize = args.stepsize
         unknown_tth = False
         maxpoints = False
+        geofence = ""
+        no_overlap = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             unknown_tth = request.args.get('unknown_tth', unknown_tth)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
+            no_overlap = request.args.get('no_overlap', no_overlap)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             unknown_tth = request.form.get('unknown_tth', unknown_tth)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
+            no_overlap = request.form.get('no_overlap', no_overlap)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2472,17 +2510,41 @@ class Pogom(Flask):
                     maxpoints = int(maxpoints)
             except:
                 pass
+        if not isinstance(no_overlap, bool):
+            try:
+                if no_overlap.lower() == 'true':
+                    no_overlap = True
+                else:
+                    no_overlap = False
+            except:
+                pass
+
+        deviceworker['no_overlap'] = no_overlap
 
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
 
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
+
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints)
+
+            scheduled_points = []
+            if no_overlap:
+                for dev in self.get_active_devices():
+                    if dev.get('no_overlap') and dev['fetching'] == 'walk_spawnpoint':
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
+
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points)
             nextlatitude = latitude
             nextlongitude = longitude
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints)
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2490,10 +2552,6 @@ class Pogom(Flask):
             nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
@@ -2630,6 +2688,8 @@ class Pogom(Flask):
             except:
                 pass
 
+        deviceworker['no_overlap'] = False
+
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
@@ -2645,6 +2705,13 @@ class Pogom(Flask):
 
         if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
             self.deviceschedules[uuid] = []
+
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
 
         if len(self.deviceschedules[uuid]) == 0:
             gpxfilename = ""
@@ -2669,10 +2736,6 @@ class Pogom(Flask):
         nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
@@ -2794,18 +2857,24 @@ class Pogom(Flask):
         stepsize = args.stepsize
         questless = False
         maxpoints = False
+        geofence = ""
+        no_overlap = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
             stepsize = request.args.get('stepsize', stepsize)
             questless = request.args.get('questless', questless)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
+            no_overlap = request.args.get('no_overlap', no_overlap)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
             stepsize = request.form.get('stepsize', stepsize)
             questless = request.form.get('questless', questless)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
+            no_overlap = request.form.get('no_overlap', no_overlap)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2842,19 +2911,43 @@ class Pogom(Flask):
                     maxpoints = int(maxpoints)
             except:
                 pass
+        if not isinstance(no_overlap, bool):
+            try:
+                if no_overlap.lower() == 'true':
+                    no_overlap = True
+                else:
+                    no_overlap = False
+            except:
+                pass
+
+        deviceworker['no_overlap'] = no_overlap
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_pokestop"):
             self.deviceschedules[uuid] = []
 
+        if len(self.deviceschedules[uuid]) > 0:
+            nexttarget = self.deviceschedules[uuid][0]
+
+            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+                if len(self.deviceschedules[uuid]) > 0:
+                    del self.deviceschedules[uuid][0]
+
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints)
+
+            scheduled_points = []
+            if no_overlap:
+                for dev in self.get_active_devices():
+                    if dev.get('no_overlap') and dev['fetching'] == 'walk_pokestop':
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
+
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points)
             nextlatitude = latitude
             nextlongitude = longitude
             if questless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints)
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -2862,10 +2955,6 @@ class Pogom(Flask):
             nextlongitude = deviceworker['longitude']
 
         nexttarget = self.deviceschedules[uuid][0]
-
-        if nextlatitude == nexttarget[0] and nextlongitude == nexttarget[1]:
-            if len(self.deviceschedules[uuid]) > 0:
-                del self.deviceschedules[uuid][0]
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
@@ -2988,6 +3077,8 @@ class Pogom(Flask):
         teleport_ignore = args.teleport_ignore
         raidless = False
         maxpoints = False
+        geofence = ""
+        no_overlap = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -2995,6 +3086,8 @@ class Pogom(Flask):
             teleport_ignore = request.args.get('teleport_ignore', teleport_ignore)
             raidless = request.args.get('raidless', raidless)
             maxpoints = request.args.get('maxpoints', maxpoints)
+            geofence = request.args.get('geofence', geofence)
+            no_overlap = request.args.get('no_overlap', no_overlap)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -3002,6 +3095,8 @@ class Pogom(Flask):
             teleport_ignore = request.form.get('teleport_ignore', teleport_ignore)
             raidless = request.form.get('raidless', raidless)
             maxpoints = request.form.get('maxpoints', maxpoints)
+            geofence = request.form.get('geofence', geofence)
+            no_overlap = request.form.get('no_overlap', no_overlap)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3043,6 +3138,16 @@ class Pogom(Flask):
                     maxpoints = int(maxpoints)
             except:
                 pass
+        if not isinstance(no_overlap, bool):
+            try:
+                if no_overlap.lower() == 'true':
+                    no_overlap = True
+                else:
+                    no_overlap = False
+            except:
+                pass
+
+        deviceworker['no_overlap'] = no_overlap
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -3059,13 +3164,20 @@ class Pogom(Flask):
 
         if len(self.deviceschedules[uuid]) == 0:
             self.devicesscheduling.append(uuid)
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints)
+
+            scheduled_points = []
+            if no_overlap:
+                for dev in self.get_active_devices():
+                    if dev.get('no_overlap') and dev['fetching'] == 'teleport_gym':
+                        scheduled_points += self.deviceschedules[dev['deviceid']]
+
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
             if raidless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints)
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
 
@@ -3181,6 +3293,8 @@ class Pogom(Flask):
                 teleport_interval = int(teleport_interval)
             except:
                 pass
+
+        deviceworker['no_overlap'] = False
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -3305,6 +3419,8 @@ class Pogom(Flask):
             d['longitude'] = deviceworker['longitude']
 
             return jsonify(d)
+
+        deviceworker['no_overlap'] = False
 
         currentlatitude = round(deviceworker['latitude'], 5)
         currentlongitude = round(deviceworker['longitude'], 5)
