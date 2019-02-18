@@ -2390,7 +2390,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -2610,7 +2610,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -2794,7 +2794,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3013,7 +3013,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3216,7 +3216,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3374,7 +3374,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
