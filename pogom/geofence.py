@@ -42,6 +42,15 @@ class Geofences:
     def is_enabled(self):
         return (self.geofenced_areas or self.excluded_areas)
 
+    def get_geofenced_results(self, list_to_check):
+        list_to_return = []
+
+        for item in list_to_check:
+            if len(self.get_geofenced_coordinates([(item.get("latitude", 0), item.get("longitude", 0), 0)])) > 0:
+                list_to_return.append(item)
+
+        return list_to_return
+
     def get_geofenced_coordinates(self, coordinates, name=""):
         log.info('Using matplotlib: %s.', self.use_matplotlib)
         log.info('Found %d coordinates to geofence.', len(coordinates))

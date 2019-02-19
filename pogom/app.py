@@ -2299,6 +2299,11 @@ class Pogom(Flask):
         d = {}
         d['timestamp'] = datetime.utcnow()
         d['raids'] = Gym.get_raids()
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+        if self.geofences.is_enabled():
+            d['raids'] = self.geofences.get_geofenced_results(d['raids'])
         return jsonify(d)
 
     def raw_devices(self):
@@ -2352,6 +2357,11 @@ class Pogom(Flask):
         d = {}
         d['timestamp'] = datetime.utcnow()
         d['quests'] = Quest.get_quests(None, None, None, None)
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+        if self.geofences.is_enabled():
+            d['quests'] = self.geofences.get_geofenced_results(d['quests'])
         return jsonify(d)
 
     def loc(self):
