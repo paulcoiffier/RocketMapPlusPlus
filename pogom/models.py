@@ -472,7 +472,7 @@ class Quest(BaseModel):
                                 (Pokestop.longitude <= neLng))
                          .dicts())
 
-        for q in quests:
+        for q in query:
             if q['quest_json'] is not None:
                 q['quest_json'] = json.loads(q['quest_json'])
             q['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
@@ -1030,16 +1030,16 @@ class Gym(LatLongModel):
     @staticmethod
     def get_raids():
         raids = (Raid
-                 .select(   Gym.latitude,
-                            Gym.longitude,
-                            Gym.is_ex_raid_eligible,
-                            GymDetails.name,
-                            GymDetails.url,
-                            Raid.level,
-                            Raid.pokemon_id,
-                            Raid.start,
-                            Raid.end,
-                            Raid.last_scanned)
+                 .select(Gym.latitude,
+                         Gym.longitude,
+                         Gym.is_ex_raid_eligible,
+                         GymDetails.name,
+                         GymDetails.url,
+                         Raid.level,
+                         Raid.pokemon_id,
+                         Raid.start,
+                         Raid.end,
+                         Raid.last_scanned)
                  .join(Gym, on=(Raid.gym_id == Gym.gym_id))
                  .join(GymDetails, on=(GymDetails.gym_id == Gym.gym_id))
                  .where(Raid.end > datetime.utcnow())
@@ -1047,8 +1047,8 @@ class Gym(LatLongModel):
                  .dicts())
 
         for r in raids:
-             if r['pokemon_id']:
-                 r['pokemon_name'] = get_pokemon_name(r['pokemon_id'])
+            if r['pokemon_id']:
+                r['pokemon_name'] = get_pokemon_name(r['pokemon_id'])
 
         return raids
 
