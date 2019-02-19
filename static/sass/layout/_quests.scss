@@ -47,6 +47,17 @@ table, th, td {
 
 #myTable tr {
   border-bottom: 1px solid #ddd;
+
+  .img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 96px;
+    width: 96px;
+    border-radius: 48px;
+    border: 5px solid rgb(29, 139, 240);
+    margin-top: 10px;
+  }
 }
 
 #myTable tr.header, #myTable tr:hover {
