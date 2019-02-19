@@ -2371,6 +2371,9 @@ class Pogom(Flask):
 
         quests = Quest.get_quests(swLat, swLng, neLat, neLng)
 
+        if self.geofences.is_enabled():
+            quests = self.geofences.get_geofenced_results(quests)
+
         now_date = datetime.utcnow()
 
         d['quests'] = []
@@ -2383,8 +2386,6 @@ class Pogom(Flask):
             if q['last_scanned'] + timedelta(minutes=pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1):
                 d['quests'].append(q)
 
-        if self.geofences.is_enabled():
-            d['quests'] = self.geofences.get_geofenced_results(d['quests'])
         return jsonify(d)
 
     def loc(self):
