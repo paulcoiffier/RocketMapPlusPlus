@@ -48,7 +48,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 55
+db_schema_version = 56
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -425,6 +425,7 @@ class Quest(BaseModel):
     reward_amount = IntegerField(null=True)
     quest_json = TextField(null=True)
     last_scanned = DateTimeField(default=datetime.utcnow, index=True)
+    expiration = DateTimeField(null=True, index=True)
 
     @staticmethod
     def get_quests(swLat, swLng, neLat, neLng, timestamp=0, oSwLat=None,
@@ -432,43 +433,41 @@ class Quest(BaseModel):
 
         query = (Quest
                  .select(Quest.pokestop_id,
+                         PokestopDetails.name,
+                         PokestopDetails.url,
                          Pokestop.latitude,
                          Pokestop.longitude,
                          Quest.quest_type,
                          Quest.reward_type,
                          Quest.reward_item,
                          Quest.reward_amount,
-                         Quest.last_scanned)
+                         Quest.last_scanned,
+                         Quest.quest_json,
+                         Quest.expiration)
                  .join(Pokestop, JOIN.LEFT_OUTER,
-                       on=(Quest.pokestop_id == Pokestop.pokestop_id)))
+                       on=(Quest.pokestop_id == Pokestop.pokestop_id))
+                 .join(PokestopDetails, JOIN.LEFT_OUTER,
+                       on=(Quest.pokestop_id == PokestopDetails.pokestop_id)))
 
         if not (swLat and swLng and neLat and neLng):
-            if args.quest_expiration_days > 0:
-                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
-                query = (query
-                         .where(Quest.last_scanned >= period)
-                         .dicts())
-            else:
-                query = (query
-                         .dicts())
+            query = (query
+                     .where(Quest.expiration >= datetime.utcnow())
+                     .dicts())
         else:
-            if args.quest_expiration_days > 0:
-                period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
-                query = (query
-                         .where((Quest.last_scanned >= period) &
-                                (Pokestop.latitude >= swLat) &
-                                (Pokestop.longitude >= swLng) &
-                                (Pokestop.latitude <= neLat) &
-                                (Pokestop.longitude <= neLng))
-                         .dicts())
-            else:
-                query = (query
-                         .where((Pokestop.latitude >= swLat) &
-                                (Pokestop.longitude >= swLng) &
-                                (Pokestop.latitude <= neLat) &
-                                (Pokestop.longitude <= neLng))
-                         .dicts())
+            query = (query
+                     .where((Quest.expiration >= datetime.utcnow()) &
+                            (Pokestop.latitude >= swLat) &
+                            (Pokestop.longitude >= swLng) &
+                            (Pokestop.latitude <= neLat) &
+                            (Pokestop.longitude <= neLng))
+                     .dicts())
 
+        for q in query:
+            if q['quest_json'] is not None:
+                q['quest_json'] = json.loads(q['quest_json'])
+            q['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
+            q['quest_text'] = get_quest_quest_text(q['quest_json'])
+            q['reward_text'] = get_quest_reward_text(q['quest_json'])
 #        quests = {}
 #        for quest in query:
 #            if args.china:
@@ -476,7 +475,7 @@ class Quest(BaseModel):
 #                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
 #            quests[quest['pokestop_id']] = quest
 
-        return list(query)
+        return query
 
 
 class Pokestop(LatLongModel):
@@ -619,31 +618,16 @@ class Pokestop(LatLongModel):
                 pokestops[d['pokestop_id']]['name'] = d['name']
                 pokestops[d['pokestop_id']]['url'] = d['url']
 
-            pokestop_timezone_offset = get_timezone_offset(pokestops[pokestop_ids[0]]['latitude'], pokestops[pokestop_ids[0]]['longitude'])
-
-            pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
-
-            if args.quest_expiration_days < 1:
-                quests = (Quest
-                          .select(
-                              Quest.pokestop_id,
-                              Quest.quest_type,
-                              Quest.reward_type,
-                              Quest.reward_item,
-                              Quest.quest_json)
-                          .where(Quest.pokestop_id << pokestop_ids)
-                          .dicts())
-            else:
-                quests = (Quest
-                          .select(
-                              Quest.pokestop_id,
-                              Quest.quest_type,
-                              Quest.reward_type,
-                              Quest.reward_item,
-                              Quest.quest_json)
-                          .where(Quest.pokestop_id << pokestop_ids)
-                          .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
-                          .dicts())
+            quests = (Quest
+                      .select(
+                          Quest.pokestop_id,
+                          Quest.quest_type,
+                          Quest.reward_type,
+                          Quest.reward_item,
+                          Quest.quest_json)
+                      .where((Quest.pokestop_id << pokestop_ids) &
+                             (Quest.expiration >= now_date))
+                      .dicts())
 
             for q in quests:
                 if q['quest_json'] is not None:
@@ -738,29 +722,14 @@ class Pokestop(LatLongModel):
 
         result['quest'] = {}
 
-        pokestop_timezone_offset = get_timezone_offset(result['latitude'], result['longitude'])
-
-        pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
-
-        if args.quest_expiration_days < 1:
-            quest = (Quest
-                     .select(
-                         Quest.quest_type,
-                         Quest.reward_type,
-                         Quest.reward_item,
-                         Quest.quest_json)
-                     .where(Quest.pokestop_id == id)
-                     .dicts())
-        else:
-            quest = (Quest
-                     .select(
-                         Quest.quest_type,
-                         Quest.reward_type,
-                         Quest.reward_item,
-                         Quest.quest_json)
-                     .where(Quest.pokestop_id == id)
-                     .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
-                     .dicts())
+        quest = (Quest
+                 .select(
+                     Quest.quest_type,
+                     Quest.reward_type,
+                     Quest.reward_item,
+                     Quest.quest_json)
+                 .where((Quest.pokestop_id == id) & (Quest.expiration >= now_date))
+                 .dicts())
 
         for q in quest:
             if q['quest_json'] is not None:
@@ -809,32 +778,17 @@ class Pokestop(LatLongModel):
                 for p in queryDict:
                     pokestop_ids.append(p['pokestop_id'])
 
-                pokestop_timezone_offset = get_timezone_offset(queryDict[0]['latitude'], queryDict[0]['longitude'])
-
                 now_date = datetime.utcnow()
-                pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
-                if args.quest_expiration_days < 1:
-                    quests = (Quest
-                              .select(
-                                  Quest.pokestop_id,
-                                  Quest.quest_type,
-                                  Quest.reward_type,
-                                  Quest.reward_item,
-                                  Quest.quest_json)
-                              .where(Quest.pokestop_id << pokestop_ids)
-                              .dicts())
-                else:
-                    quests = (Quest
-                              .select(
-                                  Quest.pokestop_id,
-                                  Quest.quest_type,
-                                  Quest.reward_type,
-                                  Quest.reward_item,
-                                  Quest.quest_json)
-                              .where(Quest.pokestop_id << pokestop_ids)
-                              .where(SQL('DATE_ADD(last_scanned, INTERVAL %s MINUTE)', pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1))
-                              .dicts())
+                quests = (Quest
+                          .select(
+                              Quest.pokestop_id,
+                              Quest.quest_type,
+                              Quest.reward_type,
+                              Quest.reward_item,
+                              Quest.quest_json)
+                          .where((Quest.pokestop_id << pokestop_ids) & (Quest.expiration >= now_date))
+                          .dicts())
 
                 for q in quests:
                     pokestop_quest_ids.append(q['pokestop_id'])
@@ -1021,16 +975,16 @@ class Gym(LatLongModel):
     @staticmethod
     def get_raids():
         raids = (Raid
-                 .select(   Gym.latitude,
-                            Gym.longitude,
-                            Gym.is_ex_raid_eligible,
-                            GymDetails.name,
-                            GymDetails.url,
-                            Raid.level,
-                            Raid.pokemon_id,
-                            Raid.start,
-                            Raid.end,
-                            Raid.last_scanned)
+                 .select(Gym.latitude,
+                         Gym.longitude,
+                         Gym.is_ex_raid_eligible,
+                         GymDetails.name,
+                         GymDetails.url,
+                         Raid.level,
+                         Raid.pokemon_id,
+                         Raid.start,
+                         Raid.end,
+                         Raid.last_scanned)
                  .join(Gym, on=(Raid.gym_id == Gym.gym_id))
                  .join(GymDetails, on=(GymDetails.gym_id == Gym.gym_id))
                  .where(Raid.end > datetime.utcnow())
@@ -1038,8 +992,8 @@ class Gym(LatLongModel):
                  .dicts())
 
         for r in raids:
-             if r['pokemon_id']:
-                 r['pokemon_name'] = get_pokemon_name(r['pokemon_id'])
+            if r['pokemon_id']:
+                r['pokemon_name'] = get_pokemon_name(r['pokemon_id'])
 
         return raids
 
@@ -1196,6 +1150,9 @@ class Gym(LatLongModel):
                          .dicts())
 
                 for r in raids:
+                    if not isinstance(raidless, (bool)):
+                        if (r['pokemon_id'] is None and r['end'] > datetime.utcnow()) and r['start'] < datetime.utcnow():
+                            egg_todo.append(r['gym_id'])
                     if (r['pokemon_id'] and r['end'] > datetime.utcnow()) or r['start'] > datetime.utcnow():
                         gym_ids.remove(r['gym_id'])
                     elif r['pokemon_id'] is None and r['end'] > datetime.utcnow() and r['start'] < datetime.utcnow():
@@ -1213,6 +1170,7 @@ class Gym(LatLongModel):
                         if not point_is_scheduled(g['latitude'], g['longitude'], scheduled_points):
                             results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
+
                 if not results:
                     return []
                 for index, coords in enumerate(results):
@@ -4281,10 +4239,8 @@ def database_migrate(db, old_ver):
         create_tables(db)
 
     if old_ver < 46 and old_ver > 40:
-        migrate(
-            migrator.add_column('deviceworker', 'fetch', Utf8mb4CharField(max_length=50, default='IDLE')),
-            migrator.add_column('deviceworker', 'scanning', SmallIntegerField(default=0))
-        )
+        db.execute_sql('DROP TABLE `deviceworker`;')
+        create_tables(db)
 
     if old_ver < 47:
         create_tables(db)
@@ -4331,6 +4287,11 @@ def database_migrate(db, old_ver):
 
     if old_ver < 55:
         create_tables(db)
+
+    if old_ver < 56:
+        migrate(
+            migrator.add_column('quest', 'expiration', DateTimeField(index=True, null=True)),
+        )
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')

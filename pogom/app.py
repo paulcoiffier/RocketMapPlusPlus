@@ -31,7 +31,8 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
                      Quest, PokestopDetails, Geofence, GymMember, GymPokemon, Weather)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, calc_pokemon_level, degrees_to_cardinal)
+                    now, dottedQuadToNum, date_secs, calc_pokemon_level,
+                    get_timezone_offset)
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
@@ -127,11 +128,13 @@ class Pogom(Flask):
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/raids", methods=['GET'])(self.raidview)
         self.route("/devices", methods=['GET'])(self.devicesview)
+        self.route("/quests", methods=['GET'])(self.questview)
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/auth_logout", methods=['GET'])(self.auth_logout)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
         self.route("/raw_raid", methods=['GET'])(self.raw_raid)
         self.route("/raw_devices", methods=['GET'])(self.raw_devices)
+        self.route("/raw_quests", methods=['GET'])(self.raw_quests)
 
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.walk_spawnpoint)
@@ -1498,7 +1501,22 @@ class Pogom(Flask):
                     self.wh_update_queue.put(('devices', wh_worker))
 
                 elif 'challengeQuest' in fort_search_response_json:
+                    utcnow_datetime = datetime.utcnow()
+
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
+
+                    quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+
+                    pokestop_timezone_offset = get_timezone_offset(quest_pokestop['latitude'], quest_pokestop['longitude'])
+
+                    pokestop_localtime = utcnow_datetime + timedelta(minutes=pokestop_timezone_offset)
+                    next_day_localtime = datetime(
+                        year=pokestop_localtime.year,
+                        month=pokestop_localtime.month,
+                        day=pokestop_localtime.day
+                    ) + timedelta(days=1)
+                    next_day_utc = next_day_localtime - timedelta(minutes=pokestop_timezone_offset)
+
                     quest_result[quest_json['fortId']] = {
                         'pokestop_id': quest_json['fortId'],
                         'quest_type': quest_json['questType'],
@@ -1507,7 +1525,8 @@ class Pogom(Flask):
                         'reward_item': None,
                         'reward_amount': None,
                         'quest_json': json.dumps(quest_json),
-                        'last_scanned': datetime.utcnow()
+                        'last_scanned': datetime.utcnow(),
+                        'expiration': next_day_utc
                     }
                     if quest_json["questRewards"][0]["type"] == "STARDUST":
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
@@ -1532,7 +1551,6 @@ class Pogom(Flask):
                     if 'quest' in args.wh_types:
                         try:
                             wh_quest = quest_result[quest_json["fortId"]].copy()
-                            quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                             if quest_pokestop:
                                 pokestopdetails = pokestop_details.get(quest_json["fortId"], Pokestop.get_pokestop_details(quest_json["fortId"]))
 
@@ -1541,6 +1559,7 @@ class Pogom(Flask):
                                         "latitude": quest_pokestop["latitude"],
                                         "longitude": quest_pokestop["longitude"],
                                         "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
+                                        "expiration": calendar.timegm(next_day_utc.timetuple()),
                                     }
                                 )
 
@@ -1990,6 +2009,16 @@ class Pogom(Flask):
         map_lng = self.current_location[1]
         return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
 
+    def questview(self):
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
+
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
         fingerprint_blacklisted = any([
@@ -2071,6 +2100,10 @@ class Pogom(Flask):
         d['oNeLat'] = neLat
         d['oNeLng'] = neLng
 
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+
         if (request.args.get('pokemon', 'true') == 'true' and
                 not args.no_pokemon):
 
@@ -2122,6 +2155,9 @@ class Pogom(Flask):
                                                  neLng)))
                 d['reids'] = reids
 
+            if self.geofences.is_enabled():
+                d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'])
+
         if (request.args.get('pokestops', 'true') == 'true' and
                 not args.no_pokestops):
             if lastpokestops != 'true':
@@ -2136,6 +2172,8 @@ class Pogom(Flask):
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
                                            lured=luredonly))
+            if self.geofences.is_enabled():
+                d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'])
 
         if request.args.get('gyms', 'true') == 'true' and not args.no_gyms:
             if lastgyms != 'true':
@@ -2148,6 +2186,8 @@ class Pogom(Flask):
                         Gym.get_gyms(swLat, swLng, neLat, neLng,
                                      oSwLat=oSwLat, oSwLng=oSwLng,
                                      oNeLat=oNeLat, oNeLng=oNeLng))
+            if self.geofences.is_enabled():
+                d['gyms'] = self.geofences.get_geofenced_results(d['gyms'])
 
         if request.args.get('scanned', 'true') == 'true':
             if lastslocs != 'true':
@@ -2191,6 +2231,8 @@ class Pogom(Flask):
                             swLat, swLng, neLat, neLng,
                             oSwLat=oSwLat, oSwLng=oSwLng,
                             oNeLat=oNeLat, oNeLng=oNeLng))
+            if self.geofences.is_enabled():
+                d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'])
 
         if request.args.get('status', 'false') == 'true':
             args = get_args()
@@ -2287,6 +2329,11 @@ class Pogom(Flask):
         d = {}
         d['timestamp'] = datetime.utcnow()
         d['raids'] = Gym.get_raids()
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+        if self.geofences.is_enabled():
+            d['raids'] = self.geofences.get_geofenced_results(d['raids'])
         return jsonify(d)
 
     def raw_devices(self):
@@ -2318,6 +2365,43 @@ class Pogom(Flask):
                 deviceworker['route'] = 0
                 if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
                     deviceworker['route'] = len(self.deviceschedules[uuid])
+
+        return jsonify(d)
+
+    def raw_quests(self):
+        # Make sure fingerprint isn't blacklisted.
+        fingerprint_blacklisted = any([
+            fingerprints['no_referrer'](request),
+            fingerprints['iPokeGo'](request)
+        ])
+
+        if fingerprint_blacklisted:
+            log.debug('User denied access: blacklisted fingerprint.')
+            abort(403)
+
+        self.heartbeat[0] = now()
+        args = get_args()
+        if args.on_demand_timeout > 0:
+            self.control_flags['on_demand'].clear()
+
+        d = {}
+        d['timestamp'] = datetime.utcnow()
+
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+        if self.geofences.is_enabled():
+            swLat, swLng, neLat, neLng = self.geofences.get_boundary_coords()
+        else:
+            swLat = None
+            swLng = None
+            neLat = None
+            neLng = None
+
+        d['quests'] = Quest.get_quests(swLat, swLng, neLat, neLng)
+
+        if self.geofences.is_enabled():
+            d['quests'] = self.geofences.get_geofenced_results(d['quests'])
 
         return jsonify(d)
 
@@ -2390,7 +2474,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -2610,7 +2694,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -2794,7 +2878,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3013,7 +3097,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3216,7 +3300,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
@@ -3374,7 +3458,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        uuid = request_json.get('uuid')
+        uuid = request_json.get('uuid', '')
         if uuid == "":
             d = {}
             d['latitude'] = map_lat
