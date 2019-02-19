@@ -1167,7 +1167,7 @@ class Gym(LatLongModel):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
-                Gym.latitude, Gym.longitude, Gym.gym_id).where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60)).dicts())
+                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
 
             lat1 = lat - 0.1
             lat2 = lat + 0.1
@@ -1218,10 +1218,7 @@ class Gym(LatLongModel):
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
-                results_eggs = []
                 for g in queryDict:
-                    if g['gym_id'] in egg_todo:
-                        results_eggs.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                     if g['gym_id'] in gym_ids:
                         if not point_is_scheduled(g['latitude'], g['longitude'], scheduled_points):
                             results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
