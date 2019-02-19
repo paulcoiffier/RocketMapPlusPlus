@@ -443,7 +443,7 @@ class Quest(BaseModel):
                  .join(Pokestop, JOIN.LEFT_OUTER,
                        on=(Quest.pokestop_id == Pokestop.pokestop_id))
                  .join(PokestopDetails, JOIN.LEFT_OUTER,
-                       on=(Quest.pokestop_id == PokestopDetails.pokestop_id))
+                       on=(Quest.pokestop_id == PokestopDetails.pokestop_id)))
 
         if not (swLat and swLng and neLat and neLng):
             if args.quest_expiration_days > 0:
