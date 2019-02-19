@@ -2383,7 +2383,7 @@ class Pogom(Flask):
 
             pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
 
-            if q['last_scanned'] + timedelta(minutes=pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1):
+            if (q['last_scanned'] + timedelta(minutes=pokestop_timezone_offset)).date() >= (pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1)).date():
                 d['quests'].append(q)
 
         return jsonify(d)
