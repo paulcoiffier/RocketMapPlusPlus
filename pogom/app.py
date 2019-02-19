@@ -1510,11 +1510,11 @@ class Pogom(Flask):
                     pokestop_timezone_offset = get_timezone_offset(quest_pokestop['latitude'], quest_pokestop['longitude'])
 
                     pokestop_localtime = utcnow_datetime + timedelta(minutes=pokestop_timezone_offset)
-                    next_day_localtime = datetime.datetime(
+                    next_day_localtime = datetime(
                         year=pokestop_localtime.year,
                         month=pokestop_localtime.month,
                         day=pokestop_localtime.day
-                    ) + datetime.timedelta(days=1)
+                    ) + timedelta(days=1)
                     next_day_utc = next_day_localtime - timedelta(minutes=pokestop_timezone_offset)
 
                     quest_result[quest_json['fortId']] = {
