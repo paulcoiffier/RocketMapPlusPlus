@@ -134,7 +134,7 @@ class Pogom(Flask):
         self.route("/raw_raid", methods=['GET'])(self.raw_raid)
         self.route("/raw_devices", methods=['GET'])(self.raw_devices)
         self.route("/raw_quests", methods=['GET'])(self.raw_quests)
-        
+
         self.route("/loc", methods=['GET'])(self.loc)
         self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.walk_spawnpoint)
         self.route("/walk_gpx", methods=['GET', 'POST'])(self.walk_gpx)
@@ -2001,7 +2001,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
         return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
-        
+
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
         fingerprint_blacklisted = any([
@@ -2351,9 +2351,9 @@ class Pogom(Flask):
 
         d = {}
         d['timestamp'] = datetime.utcnow()
-        d['quests'] = Quest.get_quests()
+        d['quests'] = Quest.get_quests(None, None, None, None)
         return jsonify(d)
-        
+
     def loc(self):
         d = {}
         d['lat'] = self.current_location[0]
