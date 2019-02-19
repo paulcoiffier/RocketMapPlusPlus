@@ -445,10 +445,6 @@ class Quest(BaseModel):
                  .join(PokestopDetails, JOIN.LEFT_OUTER,
                        on=(Quest.pokestop_id == PokestopDetails.pokestop_id))
 
-            for d in details:
-                pokestops[d['pokestop_id']]['name'] = d['name']
-                pokestops[d['pokestop_id']]['url'] = d['url']
-
         if not (swLat and swLng and neLat and neLng):
             if args.quest_expiration_days > 0:
                 period = datetime.utcnow() - timedelta(days=args.quest_expiration_days)
