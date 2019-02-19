@@ -1160,7 +1160,7 @@ class Gym(LatLongModel):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
-                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
+                Gym.latitude, Gym.longitude, Gym.gym_id).where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60)).dicts())
 
             lat1 = lat - 0.1
             lat2 = lat + 0.1
@@ -1196,6 +1196,9 @@ class Gym(LatLongModel):
                          .dicts())
 
                 for r in raids:
+                    if not isinstance(raidless, (bool)):
+                        if (r['pokemon_id'] is None and r['end'] > datetime.utcnow()) and r['start'] < datetime.utcnow():
+                            egg_todo.append(r['gym_id'])
                     if (r['pokemon_id'] and r['end'] > datetime.utcnow()) or r['start'] > datetime.utcnow():
                         gym_ids.remove(r['gym_id'])
                     elif r['pokemon_id'] is None and r['end'] > datetime.utcnow() and r['start'] < datetime.utcnow():
@@ -1208,11 +1211,15 @@ class Gym(LatLongModel):
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
+                results_eggs = []
                 for g in queryDict:
+                    if g['gym_id'] in egg_todo:
+                        results_eggs.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                     if g['gym_id'] in gym_ids:
                         if not point_is_scheduled(g['latitude'], g['longitude'], scheduled_points):
                             results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
+
                 if not results:
                     return []
                 for index, coords in enumerate(results):
