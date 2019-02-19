@@ -66,22 +66,41 @@ class Geofences:
     def get_geofenced_results(self, list_to_check, name=""):
         log.info('Using matplotlib: %s.', self.use_matplotlib)
         log.info('Found %d coordinates to geofence.', len(list_to_check))
-        geofenced_coordinates = []
-        startTime = timeit.default_timer()
-        for item in list_to_check:
-            c = (item.get("latitude", 0), item.get("longitude", 0), 0)
-            # Coordinate is not valid if in one excluded area.
-            if self._is_excluded(c):
-                continue
 
-            # Coordinate is geofenced if in one geofenced area.
-            if self.geofenced_areas:
-                for va in self.geofenced_areas:
-                    if (name == "" or name == va["name"]) and self._in_area(c, va):
-                        geofenced_coordinates.append(item)
-                        break
-            else:
-                geofenced_coordinates.append(item)
+        if isinstance(list_to_check, dict):
+            geofenced_coordinates = {}
+            startTime = timeit.default_timer()
+            for key, item in list_to_check.items():
+                c = (item.get("latitude", 0), item.get("longitude", 0), 0)
+                # Coordinate is not valid if in one excluded area.
+                if self._is_excluded(c):
+                    continue
+
+                # Coordinate is geofenced if in one geofenced area.
+                if self.geofenced_areas:
+                    for va in self.geofenced_areas:
+                        if (name == "" or name == va["name"]) and self._in_area(c, va):
+                            geofenced_coordinates[key] = item
+                            break
+                else:
+                    geofenced_coordinates[key] = item
+        else:
+            geofenced_coordinates = []
+            startTime = timeit.default_timer()
+            for item in list_to_check:
+                c = (item.get("latitude", 0), item.get("longitude", 0), 0)
+                # Coordinate is not valid if in one excluded area.
+                if self._is_excluded(c):
+                    continue
+
+                # Coordinate is geofenced if in one geofenced area.
+                if self.geofenced_areas:
+                    for va in self.geofenced_areas:
+                        if (name == "" or name == va["name"]) and self._in_area(c, va):
+                            geofenced_coordinates.append(item)
+                            break
+                else:
+                    geofenced_coordinates.append(item)
 
         elapsedTime = timeit.default_timer() - startTime
         log.info('Geofenced to %s coordinates in %.2fs.',
