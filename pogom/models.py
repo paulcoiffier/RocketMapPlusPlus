@@ -439,7 +439,8 @@ class Quest(BaseModel):
                          Quest.reward_type,
                          Quest.reward_item,
                          Quest.reward_amount,
-                         Quest.last_scanned)
+                         Quest.last_scanned,
+                         Quest.quest_json)
                  .join(Pokestop, JOIN.LEFT_OUTER,
                        on=(Quest.pokestop_id == Pokestop.pokestop_id))
                  .join(PokestopDetails, JOIN.LEFT_OUTER,
