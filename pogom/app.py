@@ -31,7 +31,8 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
                      Quest, PokestopDetails, Geofence, GymMember, GymPokemon, Weather)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, calc_pokemon_level, degrees_to_cardinal)
+                    now, dottedQuadToNum, date_secs, calc_pokemon_level, degrees_to_cardinal,
+                    get_timezone_offset)
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
@@ -2356,10 +2357,32 @@ class Pogom(Flask):
 
         d = {}
         d['timestamp'] = datetime.utcnow()
-        d['quests'] = Quest.get_quests(None, None, None, None)
+
         if not self.geofences:
             from .geofence import Geofences
             self.geofences = Geofences()
+        if self.geofences.is_enabled():
+            swLat, swLng, neLat, neLng = self.geofences.get_boundary_coords()
+        else:
+            swLat = None
+            swLng = None
+            neLat = None
+            neLng = None
+
+        quests = Quest.get_quests(swLat, swLng, neLat, neLng)
+
+        now_date = datetime.utcnow()
+
+        d['quests'] = []
+
+        for q in quests:
+            pokestop_timezone_offset = get_timezone_offset(q['latitude'], q['longitude'])
+
+            pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
+
+            if q['last_scanned'] + timedelta(minutes=pokestop_timezone_offset) >= pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1):
+                d['quests'].append(q)
+
         if self.geofences.is_enabled():
             d['quests'] = self.geofences.get_geofenced_results(d['quests'])
         return jsonify(d)
