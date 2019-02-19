@@ -50,6 +50,24 @@ function applyFilter() {
     }
 }
 
+function getTimeUntil(time) {
+    var now = Date.now()
+    var tdiff = time - now
+
+    var sec = Math.floor((tdiff / 1000) % 60)
+    var min = Math.floor((tdiff / 1000 / 60) % 60)
+    var hour = Math.floor((tdiff / (1000 * 60 * 60)) % 24)
+
+    return {
+        'total': tdiff,
+        'hour': hour,
+        'min': min,
+        'sec': sec,
+        'now': now,
+        'ttime': time
+    }
+}
+
 var updateLabelDiffTime = function () {
     $('.label-countdown').each(function (index, element) {
         var disappearsAt = getTimeUntil(parseInt(element.getAttribute('disappears-at')))
