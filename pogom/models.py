@@ -432,6 +432,7 @@ class Quest(BaseModel):
 
         query = (Quest
                  .select(Quest.pokestop_id,
+                         Pokestop.name,
                          Pokestop.latitude,
                          Pokestop.longitude,
                          Quest.quest_type,
@@ -468,7 +469,13 @@ class Quest(BaseModel):
                                 (Pokestop.latitude <= neLat) &
                                 (Pokestop.longitude <= neLng))
                          .dicts())
-
+        
+        for q in quests:
+            if q['quest_json'] is not None:
+                q['quest_json'] = json.loads(q['quest_json'])
+            q['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
+            q['quest_text'] = get_quest_quest_text(q['quest_json'])
+            q['reward_text'] = get_quest_reward_text(q['quest_json'])
 #        quests = {}
 #        for quest in query:
 #            if args.china:
@@ -476,7 +483,7 @@ class Quest(BaseModel):
 #                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
 #            quests[quest['pokestop_id']] = quest
 
-        return list(query)
+        return query
 
 
 class Pokestop(LatLongModel):
