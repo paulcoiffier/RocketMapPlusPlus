@@ -432,6 +432,7 @@ class Quest(BaseModel):
 
         query = (Quest
                  .select(Quest.pokestop_id,
+                         Pokestop.name,
                          Pokestop.latitude,
                          Pokestop.longitude,
                          Quest.quest_type,
@@ -468,7 +469,13 @@ class Quest(BaseModel):
                                 (Pokestop.latitude <= neLat) &
                                 (Pokestop.longitude <= neLng))
                          .dicts())
-
+        
+        for q in quests:
+            if q['quest_json'] is not None:
+                q['quest_json'] = json.loads(q['quest_json'])
+            q['icon'] = get_quest_icon(q['reward_type'], q['reward_item'])
+            q['quest_text'] = get_quest_quest_text(q['quest_json'])
+            q['reward_text'] = get_quest_reward_text(q['quest_json'])
 #        quests = {}
 #        for quest in query:
 #            if args.china:
@@ -476,7 +483,7 @@ class Quest(BaseModel):
 #                    transform_from_wgs_to_gcj(quest['latitude'], quest['longitude'])
 #            quests[quest['pokestop_id']] = quest
 
-        return list(query)
+        return query
 
 
 class Pokestop(LatLongModel):
@@ -1160,7 +1167,7 @@ class Gym(LatLongModel):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
-                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
+                Gym.latitude, Gym.longitude, Gym.gym_id).where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60)).dicts())
 
             lat1 = lat - 0.1
             lat2 = lat + 0.1
@@ -1196,6 +1203,9 @@ class Gym(LatLongModel):
                          .dicts())
 
                 for r in raids:
+                    if not isinstance(raidless, (bool)):
+                        if (r['pokemon_id'] is None and r['end'] > datetime.utcnow()) and r['start'] < datetime.utcnow():
+                            egg_todo.append(r['gym_id'])
                     if (r['pokemon_id'] and r['end'] > datetime.utcnow()) or r['start'] > datetime.utcnow():
                         gym_ids.remove(r['gym_id'])
                     elif r['pokemon_id'] is None and r['end'] > datetime.utcnow() and r['start'] < datetime.utcnow():
@@ -1208,11 +1218,15 @@ class Gym(LatLongModel):
             geofences = Geofences()
             if geofences.is_enabled():
                 results = []
+                results_eggs = []
                 for g in queryDict:
+                    if g['gym_id'] in egg_todo:
+                        results_eggs.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                     if g['gym_id'] in gym_ids:
                         if not point_is_scheduled(g['latitude'], g['longitude'], scheduled_points):
                             results.append((round(g['latitude'], 5), round(g['longitude'], 5), 0))
                 results = geofences.get_geofenced_coordinates(results, geofence_name)
+
                 if not results:
                     return []
                 for index, coords in enumerate(results):
