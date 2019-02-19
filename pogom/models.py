@@ -433,6 +433,7 @@ class Quest(BaseModel):
         query = (Quest
                  .select(Quest.pokestop_id,
                          PokestopDetails.name,
+                         PokestopDetails.url,
                          Pokestop.latitude,
                          Pokestop.longitude,
                          Quest.quest_type,

@@ -9,13 +9,20 @@ function start(){
            if (data != null){
                  console.log("got data no position");
                    $.each( data['quests'], function( key, val ) {
-                       $( "<tr/>", {
+                      let imgSrc
+                      if (val['url'] === '') {
+                          imgSrc = 'static/images/pokestop/Pokestop_Quest.png'
+                      } else {
+                          imgSrc = val['url']
+                      }
+
+                      $( "<tr/>", {
                        "class": 'my-new-list',
                        "type": val['reward_type'],
-                       html: "<td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
+                       html: "<td><img class='reward-icon' src='static/icons/" + val['icon'] +".png'></td><td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
 															 Quest: "+ val['quest_text']+ "</br> \
-															 Reward: "+ val['reward_text'] + "<img class='reward-icon' src='static/icons/" + val['icon'] +".png'>" + "</br> \
-                                                             </td><td>"+ moment(val['last_scanned']).format('HH:mm') + "</td>"
+															 Reward: "+ val['reward_text'] + "</br> \
+                                                             </td><td><img class='pokestop img sprite' src='" + imgSrc + "'></td><td>"+ moment(val['last_scanned']).format('HH:mm') + "</td>"
                        }).appendTo( "tbody" );
                    });
                    applyFilter();
