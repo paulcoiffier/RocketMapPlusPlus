@@ -50,6 +50,10 @@ function applyFilter() {
     }
 }
 
+function lpad(str, len, padstr) {
+    return Array(Math.max(len - String(str).length + 1, 0)).join(padstr) + str
+}
+
 function getTimeUntil(time) {
     var now = Date.now()
     var tdiff = time - now
