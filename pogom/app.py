@@ -31,7 +31,7 @@ from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
                      Quest, PokestopDetails, Geofence, GymMember, GymPokemon, Weather)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
-                    now, dottedQuadToNum, date_secs, calc_pokemon_level, degrees_to_cardinal,
+                    now, dottedQuadToNum, date_secs, calc_pokemon_level,
                     get_timezone_offset)
 from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
@@ -1501,7 +1501,22 @@ class Pogom(Flask):
                     self.wh_update_queue.put(('devices', wh_worker))
 
                 elif 'challengeQuest' in fort_search_response_json:
+                    utcnow_datetime = datetime.utcnow()
+
                     quest_json = fort_search_response_json["challengeQuest"]["quest"]
+
+                    quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
+
+                    pokestop_timezone_offset = get_timezone_offset(quest_pokestop['latitude'], quest_pokestop['longitude'])
+
+                    pokestop_localtime = utcnow_datetime + timedelta(minutes=pokestop_timezone_offset)
+                    next_day_localtime = datetime.datetime(
+                        year=pokestop_localtime.year,
+                        month=pokestop_localtime.month,
+                        day=pokestop_localtime.day
+                    ) + datetime.timedelta(days=1)
+                    next_day_utc = next_day_localtime - timedelta(minutes=pokestop_timezone_offset)
+
                     quest_result[quest_json['fortId']] = {
                         'pokestop_id': quest_json['fortId'],
                         'quest_type': quest_json['questType'],
@@ -1510,7 +1525,8 @@ class Pogom(Flask):
                         'reward_item': None,
                         'reward_amount': None,
                         'quest_json': json.dumps(quest_json),
-                        'last_scanned': datetime.utcnow()
+                        'last_scanned': datetime.utcnow(),
+                        'expiration': next_day_utc
                     }
                     if quest_json["questRewards"][0]["type"] == "STARDUST":
                         quest_result[quest_json["fortId"]]["reward_amount"] = quest_json["questRewards"][0]["stardust"]
@@ -1535,7 +1551,6 @@ class Pogom(Flask):
                     if 'quest' in args.wh_types:
                         try:
                             wh_quest = quest_result[quest_json["fortId"]].copy()
-                            quest_pokestop = pokestops.get(quest_json["fortId"], Pokestop.get_stop(quest_json["fortId"]))
                             if quest_pokestop:
                                 pokestopdetails = pokestop_details.get(quest_json["fortId"], Pokestop.get_pokestop_details(quest_json["fortId"]))
 
@@ -1544,6 +1559,7 @@ class Pogom(Flask):
                                         "latitude": quest_pokestop["latitude"],
                                         "longitude": quest_pokestop["longitude"],
                                         "last_scanned": calendar.timegm(datetime.utcnow().timetuple()),
+                                        "expiration": calendar.timegm(next_day_utc.timetuple()),
                                     }
                                 )
 
@@ -2369,22 +2385,10 @@ class Pogom(Flask):
             neLat = None
             neLng = None
 
-        quests = Quest.get_quests(swLat, swLng, neLat, neLng)
+        d['quests'] = Quest.get_quests(swLat, swLng, neLat, neLng)
 
         if self.geofences.is_enabled():
-            quests = self.geofences.get_geofenced_results(quests)
-
-        now_date = datetime.utcnow()
-
-        d['quests'] = []
-
-        for q in quests:
-            pokestop_timezone_offset = get_timezone_offset(q['latitude'], q['longitude'])
-
-            pokestop_localtime = now_date + timedelta(minutes=pokestop_timezone_offset)
-
-            if (q['last_scanned'] + timedelta(minutes=pokestop_timezone_offset)).date() >= (pokestop_localtime.date() - timedelta(days=args.quest_expiration_days - 1)).date():
-                d['quests'].append(q)
+            d['quests'] = self.geofences.get_geofenced_results(d['quests'])
 
         return jsonify(d)
 
