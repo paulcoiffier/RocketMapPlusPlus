@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/quests.min.css').lstrip('/') }}">
 </head>
 <body class="questsPage" onload="start()">
-    <input type="text" id="quest" onkeyup="myFunction()" placeholder="Search for pokestop or quest.." title="Type in a pokestop or quest">
+    <input type="text" id="quest" onkeyup="applyFilter()" placeholder="Search for pokestop or quest.." title="Type in a pokestop or quest">
     <table id="myTable">
         <thead>
             <tr class="header">

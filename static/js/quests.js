@@ -14,7 +14,7 @@ function start(){
                        "type": val['reward_type'],
                        html: "<td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
 															 Quest: "+ val['quest_text']+ "</br> \
-															 Reward: "+ val['reward_text']+ "</br> \
+															 Reward: "+ val['reward_text'] + "<img class='reward-icon' src='static/icons/" + val['icon'] +".png'>" + "</br> \
                                                              </td><td>"+ moment(val['last_scanned']).format('HH:mm') + "</td>"
                        }).appendTo( "tbody" );
                    });
@@ -23,7 +23,7 @@ function start(){
    });
  }
 
-function myFunction() {
+function applyFilter() {
     var input, filter, table, tr, td, i;
     input = document.getElementById("quest");
     filter = input.value.toUpperCase();
