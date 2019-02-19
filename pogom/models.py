@@ -432,7 +432,7 @@ class Quest(BaseModel):
 
         query = (Quest
                  .select(Quest.pokestop_id,
-                         Pokestop.name,
+                         PokestopDetails.name,
                          Pokestop.latitude,
                          Pokestop.longitude,
                          Quest.quest_type,
@@ -441,7 +441,13 @@ class Quest(BaseModel):
                          Quest.reward_amount,
                          Quest.last_scanned)
                  .join(Pokestop, JOIN.LEFT_OUTER,
-                       on=(Quest.pokestop_id == Pokestop.pokestop_id)))
+                       on=(Quest.pokestop_id == Pokestop.pokestop_id))
+                 .join(PokestopDetails, JOIN.LEFT_OUTER,
+                       on=(Quest.pokestop_id == PokestopDetails.pokestop_id))
+
+            for d in details:
+                pokestops[d['pokestop_id']]['name'] = d['name']
+                pokestops[d['pokestop_id']]['url'] = d['url']
 
         if not (swLat and swLng and neLat and neLng):
             if args.quest_expiration_days > 0:
@@ -469,7 +475,7 @@ class Quest(BaseModel):
                                 (Pokestop.latitude <= neLat) &
                                 (Pokestop.longitude <= neLng))
                          .dicts())
-        
+
         for q in quests:
             if q['quest_json'] is not None:
                 q['quest_json'] = json.loads(q['quest_json'])
