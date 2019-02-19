@@ -1,5 +1,7 @@
 function start(){
     showQuests(null);
+
+    window.setInterval(updateLabelDiffTime, 1000)
 }
 
  function showQuests(position) {
@@ -22,7 +24,7 @@ function start(){
                        html: "<td><img class='reward-icon' src='static/icons/" + val['icon'] +".png'></td><td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
 															 Quest: "+ val['quest_text']+ "</br> \
 															 Reward: "+ val['reward_text'] + "</br> \
-                                                             </td><td><img class='pokestop img sprite' src='" + imgSrc + "'></td><td>"+ moment(val['last_scanned']).format('HH:mm') + "</td>"
+                                                             </td><td><img class='pokestop img sprite' src='" + imgSrc + "'></td><td>"+ moment(val['last_scanned']).format('HH:mm') + " - <span class='label-countdown' disappears-at='" + val['expiration'] + "'>00m00s</span> left</td>"
                        }).appendTo( "tbody" );
                    });
                    applyFilter();
@@ -46,4 +48,23 @@ function applyFilter() {
             }
         }
     }
+}
+
+var updateLabelDiffTime = function () {
+    $('.label-countdown').each(function (index, element) {
+        var disappearsAt = getTimeUntil(parseInt(element.getAttribute('disappears-at')))
+
+        var hours = disappearsAt.hour
+        var minutes = disappearsAt.min
+        var seconds = disappearsAt.sec
+        var timestring = ''
+
+        if (disappearsAt.ttime < disappearsAt.now) {
+            timestring = '(expired)'
+        } else {
+            timestring = lpad(hours, 2, 0) + ':' + lpad(minutes, 2, 0) + ':' + lpad(seconds, 2, 0)
+        }
+
+        $(element).text(timestring)
+    })
 }

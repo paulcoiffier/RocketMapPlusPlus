@@ -2100,6 +2100,10 @@ class Pogom(Flask):
         d['oNeLat'] = neLat
         d['oNeLng'] = neLng
 
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+
         if (request.args.get('pokemon', 'true') == 'true' and
                 not args.no_pokemon):
 
@@ -2151,6 +2155,9 @@ class Pogom(Flask):
                                                  neLng)))
                 d['reids'] = reids
 
+            if self.geofences.is_enabled():
+                d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'])
+
         if (request.args.get('pokestops', 'true') == 'true' and
                 not args.no_pokestops):
             if lastpokestops != 'true':
@@ -2165,6 +2172,8 @@ class Pogom(Flask):
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
                                            lured=luredonly))
+            if self.geofences.is_enabled():
+                d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'])
 
         if request.args.get('gyms', 'true') == 'true' and not args.no_gyms:
             if lastgyms != 'true':
@@ -2177,6 +2186,8 @@ class Pogom(Flask):
                         Gym.get_gyms(swLat, swLng, neLat, neLng,
                                      oSwLat=oSwLat, oSwLng=oSwLng,
                                      oNeLat=oNeLat, oNeLng=oNeLng))
+            if self.geofences.is_enabled():
+                d['gyms'] = self.geofences.get_geofenced_results(d['gyms'])
 
         if request.args.get('scanned', 'true') == 'true':
             if lastslocs != 'true':
@@ -2220,6 +2231,8 @@ class Pogom(Flask):
                             swLat, swLng, neLat, neLng,
                             oSwLat=oSwLat, oSwLng=oSwLng,
                             oNeLat=oNeLat, oNeLng=oNeLng))
+            if self.geofences.is_enabled():
+                d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'])
 
         if request.args.get('status', 'false') == 'true':
             args = get_args()
