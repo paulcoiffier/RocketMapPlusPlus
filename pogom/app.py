@@ -3497,8 +3497,8 @@ class Pogom(Flask):
             latitude = map_lat
             longitude = map_lng
 
-        import requests
-        r = requests.get("/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
+        # import requests
+        r = self.get("/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
 
         return r.json()
 
