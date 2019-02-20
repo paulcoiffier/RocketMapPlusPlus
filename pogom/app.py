@@ -146,6 +146,7 @@ class Pogom(Flask):
         self.route("/mapcontrolled", methods=['GET', 'POST'])(self.mapcontrolled)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
         self.route("/new_name", methods=['POST'])(self.new_name)
+        self.route("/new_endpoint", methods=['POST'])(self.new_endpoint)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
         self.route("/search_control", methods=['POST'])(
@@ -199,6 +200,7 @@ class Pogom(Flask):
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             self.devices[uuid]['route'] = ''
             self.devices[uuid]['no_overlap'] = False
+            self.devices[uuid]['mapcontrolled'] = False
         device = self.devices[uuid].copy()
 
         last_updated = device['last_updated']
@@ -212,9 +214,11 @@ class Pogom(Flask):
         if difference > 30 and difference2 > 30:
             route = self.devices[uuid].get('route', '')
             no_overlap = self.devices[uuid].get('no_overlap', False)
+            mapcontrolled = self.devices[uuid].get('mapcontrolled', False)
             self.devices[uuid] = DeviceWorker.get_by_id(uuid, lat, lng)
             self.devices[uuid]['route'] = route
             self.devices[uuid]['no_overlap'] = no_overlap
+            self.devices[uuid]['mapcontrolled'] = mapcontrolled
             device = self.devices[uuid].copy()
 
         return device
@@ -238,6 +242,8 @@ class Pogom(Flask):
                 del deviceworkers[uuid]['route']
             if 'no_overlap' in deviceworkers[uuid]:
                 del deviceworkers[uuid]['no_overlap']
+            if 'mapcontrolled' in deviceworkers[uuid]:
+                del deviceworkers[uuid]['mapcontrolled']
 
             self.db_update_queue.put((DeviceWorker, deviceworkers))
 
@@ -2543,6 +2549,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+        mapcontrolled = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -2551,6 +2558,7 @@ class Pogom(Flask):
             maxpoints = request.args.get('maxpoints', maxpoints)
             geofence = request.args.get('geofence', geofence)
             no_overlap = request.args.get('no_overlap', no_overlap)
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -2559,6 +2567,7 @@ class Pogom(Flask):
             maxpoints = request.form.get('maxpoints', maxpoints)
             geofence = request.form.get('geofence', geofence)
             no_overlap = request.form.get('no_overlap', no_overlap)
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2603,8 +2612,17 @@ class Pogom(Flask):
                     no_overlap = False
             except:
                 pass
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
 
         deviceworker['no_overlap'] = no_overlap
+        deviceworker['mapcontrolled'] = mapcontrolled
 
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_spawnpoint"):
             self.deviceschedules[uuid] = []
@@ -2759,12 +2777,15 @@ class Pogom(Flask):
 
         scheduletimeout = args.scheduletimeout
         stepsize = args.stepsize
+        mapcontrolled = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             stepsize = request.args.get('stepsize', stepsize)
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             stepsize = request.form.get('stepsize', stepsize)
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2776,7 +2797,16 @@ class Pogom(Flask):
                 stepsize = int(stepsize)
             except:
                 pass
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
 
+        deviceworker['mapcontrolled'] = mapcontrolled
         deviceworker['no_overlap'] = False
 
         last_updated = deviceworker['last_updated']
@@ -2948,6 +2978,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+        mapcontrolled = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -2956,6 +2987,7 @@ class Pogom(Flask):
             maxpoints = request.args.get('maxpoints', maxpoints)
             geofence = request.args.get('geofence', geofence)
             no_overlap = request.args.get('no_overlap', no_overlap)
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -2964,6 +2996,7 @@ class Pogom(Flask):
             maxpoints = request.form.get('maxpoints', maxpoints)
             geofence = request.form.get('geofence', geofence)
             no_overlap = request.form.get('no_overlap', no_overlap)
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3008,8 +3041,17 @@ class Pogom(Flask):
                     no_overlap = False
             except:
                 pass
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
 
         deviceworker['no_overlap'] = no_overlap
+        deviceworker['mapcontrolled'] = mapcontrolled
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -3172,6 +3214,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+        mapcontrolled = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -3181,6 +3224,7 @@ class Pogom(Flask):
             maxpoints = request.args.get('maxpoints', maxpoints)
             geofence = request.args.get('geofence', geofence)
             no_overlap = request.args.get('no_overlap', no_overlap)
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -3190,6 +3234,7 @@ class Pogom(Flask):
             maxpoints = request.form.get('maxpoints', maxpoints)
             geofence = request.form.get('geofence', geofence)
             no_overlap = request.form.get('no_overlap', no_overlap)
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3239,8 +3284,17 @@ class Pogom(Flask):
                     no_overlap = False
             except:
                 pass
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
 
         deviceworker['no_overlap'] = no_overlap
+        deviceworker['mapcontrolled'] = mapcontrolled
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -3373,12 +3427,15 @@ class Pogom(Flask):
 
         scheduletimeout = args.scheduletimeout
         teleport_interval = args.teleport_interval
+        mapcontrolled = False
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             teleport_interval = request.args.get('teleport_interval', teleport_interval)
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             teleport_interval = request.form.get('teleport_interval', teleport_interval)
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3390,8 +3447,17 @@ class Pogom(Flask):
                 teleport_interval = int(teleport_interval)
             except:
                 pass
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
 
         deviceworker['no_overlap'] = False
+        deviceworker['mapcontrolled'] = mapcontrolled
 
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
@@ -3499,8 +3565,11 @@ class Pogom(Flask):
 
         args = get_args()
 
+        deviceworker = self.get_device(uuid, latitude, longitude)
+        endpoint = str(deviceworker('endpoint', 'scan_loc?uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)))
+
         import requests
-        r = requests.get("http://localhost:" + str(args.port) + "/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
+        r = requests.get("http://localhost:" + str(args.port) + "/" + endpoint + "&mapcontrolled=true")
 
         return jsonify(r.json())
 
@@ -3559,7 +3628,23 @@ class Pogom(Flask):
 
             return jsonify(d)
 
+        mapcontrolled = False
+        if request.args:
+            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
+        if request.form:
+            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
+
+        if not isinstance(mapcontrolled, bool):
+            try:
+                if mapcontrolled.lower() == 'true':
+                    mapcontrolled = True
+                else:
+                    mapcontrolled = False
+            except:
+                pass
+
         deviceworker['no_overlap'] = False
+        deviceworker['mapcontrolled'] = mapcontrolled
 
         currentlatitude = round(deviceworker['latitude'], 5)
         currentlongitude = round(deviceworker['longitude'], 5)
@@ -3716,6 +3801,33 @@ class Pogom(Flask):
 
             deviceworker = self.get_device(uuid, map_lat, map_lng)
             deviceworker['name'] = name
+
+            return self.save_device(deviceworker, True)
+
+    def new_endpoint(self):
+        endpoint = None
+        uuid = None
+        # Part of query string.
+        if request.args:
+            endpoint = request.args.get('name', type=str)
+            uuid = request.args.get('uuid', type=str)
+        # From post requests.
+        if request.form:
+            endpoint = request.form.get('name', type=str)
+            uuid = request.form.get('uuid', type=str)
+
+        if not (endpoint and uuid):
+            log.warning('Missing endpoint: %s or uuid: %s', endpoint, uuid)
+            return 'bad parameters', 400
+        else:
+            map_lat = self.current_location[0]
+            map_lng = self.current_location[1]
+
+            endpoint = endpoint.replace('||', '?')
+            endpoint = endpoint.replace('|', '&')
+
+            deviceworker = self.get_device(uuid, map_lat, map_lng)
+            deviceworker['endpoint'] = endpoint
 
             return self.save_device(deviceworker, True)
 
