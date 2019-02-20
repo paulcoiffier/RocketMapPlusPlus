@@ -1610,10 +1610,10 @@ def get_debug_dump_link():
     return upload_to_hastebin(result)
 
 
-def point_is_scheduled(latitude, longitude, scheduled_points):
+def point_is_scheduled(key, scheduled_points):
     found = False
     for point in scheduled_points:
-        if round(latitude, 5) == round(point[0], 5) and round(longitude, 5) == round(point[1], 5):
+        if key == point[2]:
             found = True
             break
     return found
