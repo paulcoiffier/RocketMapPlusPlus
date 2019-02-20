@@ -3603,7 +3603,7 @@ class Pogom(Flask):
         args = get_args()
 
         import requests
-        r = requests.get("http://localhost:" + args.port + "/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
+        r = requests.get("http://localhost:" + str(args.port) + "/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
 
         return r.json()
 
