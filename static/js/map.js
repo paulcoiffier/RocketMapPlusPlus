@@ -707,10 +707,10 @@ function pokemonLabel(item) {
                 iconname += '_F'
             }
         }
-    }
-    if (possibleShinySprites.indexOf(id) !== -1)
-    {
-        iconname += '_P'
+        if (possibleShinySprites.indexOf(id) !== -1)
+        {
+            iconname += '_P'
+        }
     }
 
     if (showStats && cp !== null && cpMultiplier !== null) {
@@ -1269,10 +1269,10 @@ function pokestopLabel(pokestop, includeQuest = true, includeMembers = true) {
                         iconname += '_F'
                     }
                 }
-            }
-            if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
-            {
-                iconname += '_P'
+                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
+                {
+                    iconname += '_P'
+                }
             }
 
             memberStr += `
@@ -1679,10 +1679,10 @@ function customizePokemonMarker(marker, item, skipNotification) {
                 iconname += '_F'
             }
         }
-    }
-    if (possibleShinySprites.indexOf(item['pokemon_id']) !== -1)
-    {
-        iconname += '_P'
+        if (possibleShinySprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            iconname += '_P'
+        }
     }
 
     if (isNotifyPoke(item)) {
@@ -3710,10 +3710,10 @@ function getSidebarPokestopMember(pokemon) {
                 iconname += '_F'
             }
         }
-    }
-    if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1)
-    {
-        iconname += '_P'
+        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1)
+        {
+            iconname += '_P'
+        }
     }
 
     return `
