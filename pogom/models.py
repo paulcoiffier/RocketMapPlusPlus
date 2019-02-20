@@ -48,7 +48,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 56
+db_schema_version = 57
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1288,6 +1288,7 @@ class DeviceWorker(LatLongModel):
     direction = Utf8mb4CharField(max_length=1, default="U")
     fetching = Utf8mb4CharField(max_length=50, default='IDLE')
     scanning = SmallIntegerField(default=0)
+    endpoint = Utf8mb4CharField(max_length=2000, default="")
 
     @staticmethod
     def get_by_id(id, latitude=0, longitude=0):
@@ -1312,7 +1313,8 @@ class DeviceWorker(LatLongModel):
                 'scans': 0,
                 'direction': 'U',
                 'fetching': 'IDLE',
-                'scanning': 0
+                'scanning': 0,
+                'endpoint': ''
             }
         return result
 
@@ -1352,7 +1354,8 @@ class DeviceWorker(LatLongModel):
                              DeviceWorker.last_updated,
                              DeviceWorker.scans,
                              DeviceWorker.fetching,
-                             DeviceWorker.scanning)
+                             DeviceWorker.scanning,
+                             DeviceWorker.endpoint)
                      .where((DeviceWorker.scanning == 1) |
                             (DeviceWorker.fetching != 'IDLE'))
                      .dicts())
@@ -1376,7 +1379,8 @@ class DeviceWorker(LatLongModel):
                              DeviceWorker.last_updated,
                              DeviceWorker.scans,
                              DeviceWorker.fetching,
-                             DeviceWorker.scanning)
+                             DeviceWorker.scanning,
+                             DeviceWorker.endpoint)
                      .where(DeviceWorker.id == id)
                      .dicts())
 
@@ -4244,6 +4248,11 @@ def database_migrate(db, old_ver):
     if old_ver < 56:
         migrate(
             migrator.add_column('quest', 'expiration', DateTimeField(index=True, null=True)),
+        )
+
+    if old_ver < 57:
+        migrate(
+            migrator.add_column('deviceworker', 'endpoint', Utf8mb4CharField(max_length=2000, default="")),
         )
 
     # Always log that we're done.
