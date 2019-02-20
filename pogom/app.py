@@ -1029,7 +1029,7 @@ class Pogom(Flask):
                                     nearby_pokemons[long(encounter_id)]['form'] = -1
 
                                 pokestopdetails = pokestop_details.get(p['fortId'], Pokestop.get_pokestop_details(p['fortId']))
-                                pokestop_url = p.get('fortImageUrl', "")
+                                pokestop_url = p.get('fortImageUrl', "").replace('http://', 'https://')
                                 if pokestopdetails:
                                     pokestop_name = pokestopdetails.get("name")
                                     pokestop_description = pokestopdetails.get("description")
@@ -1089,7 +1089,7 @@ class Pogom(Flask):
                                     pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
                                     pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     pokestop_description = ""
-                                    pokestop_url = fort.get('imageUrl', "")
+                                    pokestop_url = fort.get('imageUrl', "").replace('http://', 'https://')
                                     if pokestopdetails:
                                         pokestop_name = pokestopdetails.get("name", pokestop_name)
                                         pokestop_description = pokestopdetails.get("description", pokestop_description)
@@ -1160,7 +1160,7 @@ class Pogom(Flask):
                                     gymdetails = gym_details.get(gym_id, Gym.get_gym_details(gym_id))
                                     gym_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     gym_description = ""
-                                    gym_url = fort.get('imageUrl', "")
+                                    gym_url = fort.get('imageUrl', "").replace('http://', 'https://')
                                     if gymdetails:
                                         gym_name = gymdetails.get("name", gym_name)
                                         gym_description = gymdetails.get("description", gym_description)
@@ -1387,7 +1387,7 @@ class Pogom(Flask):
                 gymdetails = gym_details.get(gym_id, Gym.get_gym_details(gym_id))
                 gym_name = gym_get_info_response_json["name"]
                 gym_description = gym_get_info_response_json.get("description", "")
-                gym_url = gym_get_info_response_json.get("url", "")
+                gym_url = gym_get_info_response_json.get("url", "").replace('http://', 'https://')
 
                 gym_details[gym_id] = {
                     'gym_id': gym_id,
@@ -1501,7 +1501,7 @@ class Pogom(Flask):
                     fort_name = fort_details_response_json.get("name", "")
                     fort_description = fort_details_response_json.get("description", "")
                     fort_imageurls = fort_details_response_json.get("imageUrls", [])
-                    fort_imageurl = fort_imageurls[0] if len(fort_imageurls) else ""
+                    fort_imageurl = fort_imageurls[0].replace('http://', 'https://') if len(fort_imageurls) else ""
 
                     pokestop_details[fort_id] = {
                         'pokestop_id': fort_id,
@@ -2185,7 +2185,7 @@ class Pogom(Flask):
                                                  neLng)))
                 d['reids'] = reids
 
-            if self.geofences.is_enabled():
+            if len(d['pokemons']) > 0 and self.geofences.is_enabled():
                 d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'])
 
         if (request.args.get('pokestops', 'true') == 'true' and
@@ -2202,7 +2202,7 @@ class Pogom(Flask):
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
                                            lured=luredonly))
-            if self.geofences.is_enabled():
+            if len(d['pokestops']) > 0 and self.geofences.is_enabled():
                 d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'])
 
         if request.args.get('gyms', 'true') == 'true' and not args.no_gyms:
@@ -2216,7 +2216,7 @@ class Pogom(Flask):
                         Gym.get_gyms(swLat, swLng, neLat, neLng,
                                      oSwLat=oSwLat, oSwLng=oSwLng,
                                      oNeLat=oNeLat, oNeLng=oNeLng))
-            if self.geofences.is_enabled():
+            if len(d['gyms']) > 0 and self.geofences.is_enabled():
                 d['gyms'] = self.geofences.get_geofenced_results(d['gyms'])
 
         if request.args.get('scanned', 'true') == 'true':
@@ -2261,7 +2261,7 @@ class Pogom(Flask):
                             swLat, swLng, neLat, neLng,
                             oSwLat=oSwLat, oSwLng=oSwLng,
                             oNeLat=oNeLat, oNeLng=oNeLng))
-            if self.geofences.is_enabled():
+            if len(d['spawnpoints']) > 0 and self.geofences.is_enabled():
                 d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'])
 
         if request.args.get('status', 'false') == 'true':
@@ -2362,7 +2362,7 @@ class Pogom(Flask):
         if not self.geofences:
             from .geofence import Geofences
             self.geofences = Geofences()
-        if self.geofences.is_enabled():
+        if len(d['raids']) > 0 and self.geofences.is_enabled():
             d['raids'] = self.geofences.get_geofenced_results(d['raids'])
         return jsonify(d)
 
@@ -2430,7 +2430,7 @@ class Pogom(Flask):
 
         d['quests'] = Quest.get_quests(swLat, swLng, neLat, neLng)
 
-        if self.geofences.is_enabled():
+        if len(d['quests']) > 0 and self.geofences.is_enabled():
             d['quests'] = self.geofences.get_geofenced_results(d['quests'])
 
         return jsonify(d)
@@ -2655,11 +2655,15 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_spawnpoint':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points, self.geofences)
             nextlatitude = latitude
             nextlongitude = longitude
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -3059,11 +3063,15 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_pokestop':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points, self.geofences)
             nextlatitude = latitude
             nextlongitude = longitude
             if questless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -3322,9 +3330,13 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'teleport_gym':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences)
             if raidless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
             self.devices_last_teleport_time[uuid] = dt_now
