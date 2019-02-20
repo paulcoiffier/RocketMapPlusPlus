@@ -2155,7 +2155,7 @@ class Pogom(Flask):
                                                  neLng)))
                 d['reids'] = reids
 
-            if self.geofences.is_enabled():
+            if len(d['pokemons']) > 0 and self.geofences.is_enabled():
                 d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'])
 
         if (request.args.get('pokestops', 'true') == 'true' and
@@ -2172,7 +2172,7 @@ class Pogom(Flask):
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
                                            lured=luredonly))
-            if self.geofences.is_enabled():
+            if len(d['pokestops']) > 0 and self.geofences.is_enabled():
                 d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'])
 
         if request.args.get('gyms', 'true') == 'true' and not args.no_gyms:
@@ -2186,7 +2186,7 @@ class Pogom(Flask):
                         Gym.get_gyms(swLat, swLng, neLat, neLng,
                                      oSwLat=oSwLat, oSwLng=oSwLng,
                                      oNeLat=oNeLat, oNeLng=oNeLng))
-            if self.geofences.is_enabled():
+            if len(d['gyms']) > 0 and self.geofences.is_enabled():
                 d['gyms'] = self.geofences.get_geofenced_results(d['gyms'])
 
         if request.args.get('scanned', 'true') == 'true':
@@ -2231,7 +2231,7 @@ class Pogom(Flask):
                             swLat, swLng, neLat, neLng,
                             oSwLat=oSwLat, oSwLng=oSwLng,
                             oNeLat=oNeLat, oNeLng=oNeLng))
-            if self.geofences.is_enabled():
+            if len(d['spawnpoints']) > 0 and self.geofences.is_enabled():
                 d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'])
 
         if request.args.get('status', 'false') == 'true':
@@ -2332,7 +2332,7 @@ class Pogom(Flask):
         if not self.geofences:
             from .geofence import Geofences
             self.geofences = Geofences()
-        if self.geofences.is_enabled():
+        if len(d['raids']) > 0 and self.geofences.is_enabled():
             d['raids'] = self.geofences.get_geofenced_results(d['raids'])
         return jsonify(d)
 
@@ -2400,7 +2400,7 @@ class Pogom(Flask):
 
         d['quests'] = Quest.get_quests(swLat, swLng, neLat, neLng)
 
-        if self.geofences.is_enabled():
+        if len(d['quests']) > 0 and self.geofences.is_enabled():
             d['quests'] = self.geofences.get_geofenced_results(d['quests'])
 
         return jsonify(d)

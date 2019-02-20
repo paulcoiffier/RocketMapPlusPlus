@@ -798,7 +798,7 @@ class Pokestop(LatLongModel):
                 for q in quests:
                     pokestop_quest_ids.append(q['pokestop_id'])
 
-            if geofences.is_enabled():
+            if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
             for p in queryDict:
@@ -1153,7 +1153,7 @@ class Gym(LatLongModel):
             if len(egg_todo) > 0:
                 gym_ids = egg_todo[:]
 
-            if geofences.is_enabled():
+            if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
             for g in queryDict:
@@ -2005,7 +2005,7 @@ class SpawnPoint(LatLongModel):
 
             queryDict = query.dicts()
 
-            if geofences.is_enabled():
+            if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
             for sp in queryDict:
