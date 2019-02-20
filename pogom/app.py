@@ -3566,7 +3566,9 @@ class Pogom(Flask):
         args = get_args()
 
         deviceworker = self.get_device(uuid, latitude, longitude)
-        endpoint = str(deviceworker.get('endpoint', 'scan_loc?uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)))
+        endpoint = str(deviceworker.get('endpoint', ''))
+        if endpoint == "":
+            endpoint = 'scan_loc?uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)
 
         import requests
         r = requests.get("http://localhost:" + str(args.port) + "/" + endpoint + "&mapcontrolled=true")
@@ -3809,11 +3811,11 @@ class Pogom(Flask):
         uuid = None
         # Part of query string.
         if request.args:
-            endpoint = request.args.get('name', type=str)
+            endpoint = request.args.get('endpoint', type=str)
             uuid = request.args.get('uuid', type=str)
         # From post requests.
         if request.form:
-            endpoint = request.form.get('name', type=str)
+            endpoint = request.form.get('endpoint', type=str)
             uuid = request.form.get('uuid', type=str)
 
         if not (endpoint and uuid):
