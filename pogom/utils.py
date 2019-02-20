@@ -254,6 +254,30 @@ def get_args():
     parser.add_argument('-tf', '--teleport-factor',
                         help=('Teleport factor for the stepsize'),
                         type=float, default=10)
+    parser.add_argument('-twgop', '--teleport-wait-gyms-or-pokestops',
+                        help=('Wait for gym or pokestop data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twg', '--teleport-wait-gyms',
+                        help=('Wait for gym data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twp', '--teleport-wait-pokestops',
+                        help=('Wait for pokestop data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twnowp', '--teleport-wait-nearby-or-wild-pokemon',
+                        help=('Wait for nearby or wild pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twnp', '--teleport-wait-nearby-pokemon',
+                        help=('Wait for nearby pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twwp', '--teleport-wait-wild-pokemon',
+                        help=('Wait for wild pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twti', '--teleport-wait-teleport-interval',
+                        help=('Wait for teleport interval to expire before teleporting again'),
+                        action='store_true', default=True)
+    parser.add_argument('-twt', '--teleport-wait-timeout',
+                        help=('Maximum time between teleports in seconds'),
+                        type=int, default=120)
     parser.add_argument('-ti', '--teleport-interval',
                         help=('Time between teleports in seconds'),
                         type=int, default=60)

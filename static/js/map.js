@@ -883,8 +883,7 @@ function gymLabel(gym, includeMembers = true) {
             }
             else
             {
-                // set Pokémon-specific image if we have one.
-                if (raid.pokemon_id !== null && pokemonWithImages.indexOf(raid.pokemon_id) !== -1)
+                if (raid.pokemon_id !== null)
                 {
                     var iconname = `${raid.pokemon_id}`
                     if (raid.form > 0)
@@ -905,11 +904,12 @@ function gymLabel(gym, includeMembers = true) {
                 }
                 else
                 {
-                    raidImage = `<img class='gym sprite' src='static/images/raid/${teamName}_${raid.level}_unknown.png'>`
+                    var iconname = `${teamName}_${raid.level}_unknown`
                     if (isExRaidEligible)
                     {
-                        raidImage = raidImage.replace('.png', '_ExRaidEligible.png')
+                        iconname += '_ExRaidEligible'
                     }
+                    raidImage = `<img class='gym sprite' src='static/images/raid/${iconname}.png'>`
                 }
             }
             if (raid.pokemon_id === null)
@@ -972,7 +972,7 @@ function gymLabel(gym, includeMembers = true) {
             }
             else
             {
-                if (raid.pokemon_id !== null && pokemonWithImages.indexOf(raid.pokemon_id) !== -1)
+                if (raid.pokemon_id !== null)
                 {
                     var iconname = `${raid.pokemon_id}`
                     if (raid.form > 0)
@@ -993,16 +993,16 @@ function gymLabel(gym, includeMembers = true) {
                 }
                 else
                 {
-                    raidImage = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}_${raid.level}.png'>`
+                    var iconname = `${teamName}_${getGymLevel(gym)}_${raid.level}`
                     if (isInBattle)
                     {
-                        raidImage = raidImage.replace('.png', '_isInBattle.png')
+                        iconname += '_isInBattle'
                     }
-
                     if (isExRaidEligible)
                     {
-                        raidImage = raidImage.replace('.png', '_ExRaidEligible.png')
+                        iconname += '_ExRaidEligible'
                     }
+                    raidImage = `<img class='gym sprite' src='static/images/gym/${iconname}.png'>`
                 }
             }
 
@@ -1063,14 +1063,16 @@ function gymLabel(gym, includeMembers = true) {
         }
         else
         {
-            image = `<img class='gym sprite' src='static/images/gym/${teamName}_${getGymLevel(gym)}.png'>`
+            var iconname = `${teamName}_${getGymLevel(gym)}`
             if (isInBattle)
             {
-                image = image.replace('.png', '_isInBattle.png')
+                iconname += '_isInBattle'
             }
-            if (isExRaidEligible) {
-                image = image.replace('.png', '_ExRaidEligible.png')
+            if (isExRaidEligible)
+            {
+                iconname += '_ExRaidEligible'
             }
+            image = `<img class='gym sprite' src='static/images/gym/${iconname}.png'>`
         }
     }
 
@@ -1123,10 +1125,10 @@ function gymLabel(gym, includeMembers = true) {
                         iconname += '_F'
                     }
                 }
-                if (possibleShinySprites.indexOf(member.pokemon_id) !== -1)
-                {
-                    iconname += '_P'
-                }
+            }
+            if (member.shiny == 1)
+            {
+                iconname += '_S'
             }
             memberStr += `
             <span class='gym member'>
@@ -1809,33 +1811,34 @@ function updateGymMarker(item, marker) {
         }
         else
         {
-            markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '.png'
-            if (pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1)
+            var iconname = `${gymTypes[item.team_id]}`
+            if (item.raid.pokemon_id && pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1)
             {
-                markerImage = markerImage.replace('.png', '_' + item.raid.pokemon_id + '.png')
+                iconname += `_${item.raid.pokemon_id}`
                 if (item.raid.form > 0)
                 {
                     if (item.raid.form >= 45 && item.raid.form <= 80)
                     {
                         if(item.raid.form % 2 == 0)
                         {
-                            markerImage = markerImage.replace('.png', 'A.png')
+                            iconname += 'A'
                         }
                     }
                     else
                     {
-                        markerImage = markerImage.replace('.png', '_' + item.raid.form + '.png')
+                        iconname += `_${item.raid.form}`
                     }
                 }
             }
             else
             {
-                markerImage = markerImage.replace('.png', '_' + item.raid.level + '_unknown.png')
+                iconname += `_${item.raid.level}_unknown`
             }
             if (gymExRaidEligible)
             {
-                markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                iconname += '_ExRaidEligible'
             }
+            markerImage = `static/images/raid/${iconname}.png`
         }
 
         marker.setIcon({
@@ -1903,41 +1906,47 @@ function updateGymMarker(item, marker) {
         {
             if (item.raid.pokemon_id)
             {
-                markerImage = 'static/images/raid/' + gymTypes[item.team_id] + '.png'
+                var iconname = `${gymTypes[item.team_id]}`
                 if (pokemonWithImages.indexOf(item.raid.pokemon_id) !== -1)
                 {
-                    markerImage = markerImage.replace('.png', '_' + item.raid.pokemon_id + '.png')
+                    iconname += `_${item.raid.pokemon_id}`
                     if (item.raid.form > 0)
                     {
                         if (item.raid.form >= 45 && item.raid.form <= 80)
                         {
                             if(item.raid.form % 2 == 0)
                             {
-                                markerImage = markerImage.replace('.png', 'A.png')
+                                iconname += 'A'
                             }
                         }
                         else
                         {
-                            markerImage = markerImage.replace('.png', '_' + item.raid.form + '.png')
+                            iconname += `_${item.raid.form}`
                         }
                     }
                 }
+                else
+                {
+                    iconname += `_${item.raid.level}_unknown`
+                }
                 if (gymExRaidEligible)
                 {
-                    markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                    iconname += '_ExRaidEligible'
                 }
+                markerImage = `static/images/raid/${iconname}.png`
             }
             else
             {
-                markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '_' + item['raid']['level'] + '.png'
+                var iconname = `${gymTypes[item.team_id]}_${getGymLevel(item)}_${item.raid.level}`
                 if (gymInBattle)
                 {
-                    markerImage = markerImage.replace('.png', '_isInBattle.png')
+                    iconname += '_isInBattle'
                 }
                 if (gymExRaidEligible)
                 {
-                    markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                    iconname += '_ExRaidEligible'
                 }
+                markerImage = `static/images/gym/${iconname}.png`
             }
         }
 
@@ -1981,15 +1990,16 @@ function updateGymMarker(item, marker) {
         }
         else
         {
-            markerImage = 'static/images/gym/' + gymTypes[item.team_id] + '_' + getGymLevel(item) + '.png'
+            var iconname = `${gymTypes[item.team_id]}_${getGymLevel(item)}`
             if (gymInBattle)
             {
-                markerImage = markerImage.replace('.png', '_isInBattle.png')
+                iconname += '_isInBattle'
             }
             if (gymExRaidEligible)
             {
-                markerImage = markerImage.replace('.png', '_ExRaidEligible.png')
+                iconname += '_ExRaidEligible'
             }
+            markerImage = `static/images/gym/${iconname}.png`
         }
 
         marker.setIcon({
@@ -3506,10 +3516,10 @@ function getSidebarGymMember(pokemon) {
                 iconname += '_F'
             }
         }
-        if (possibleShinySprites.indexOf(pokemon.pokemon_id) !== -1)
-        {
-            iconname += '_P'
-        }
+    }
+    if (pokemon.shiny)
+    {
+        iconname += '_S'
     }
 
     return `

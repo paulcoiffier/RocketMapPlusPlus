@@ -169,6 +169,8 @@ class Pogom(Flask):
         self.trusteddevices = {}
         self.devicessavetime = {}
 
+        self.devices_last_scanned_times = {}
+        self.devices_last_teleport_time = {}
         self.geofences = None
 
     def get_active_devices(self):
@@ -640,6 +642,19 @@ class Pogom(Flask):
 
         ScannedLocation.update_band(scan_location, now_date)
 
+        uuid = deviceworker['deviceid']
+
+        if uuid not in self.devices_last_scanned_times:
+            self.devices_last_scanned_times[uuid] = {
+                'pokemon': None,
+                'nearby_pokemon': None,
+                'wild_pokemon': None,
+                'forts': None,
+                'gyms': None,
+                'pokestops': None,
+            }
+        last_scanned_times = self.devices_last_scanned_times[uuid]
+
         for proto in protos_dict:
             if "GetMapObjects" in proto:
                 gmo_response_string = b64decode(proto['GetMapObjects'])
@@ -653,6 +668,9 @@ class Pogom(Flask):
                 if "mapCells" in gmo_response_json:
                     for mapcell in gmo_response_json["mapCells"]:
                         if "wildPokemons" in mapcell:
+                            last_scanned_times['pokemon'] = now_date
+                            last_scanned_times['wild_pokemon'] = now_date
+
                             encounter_ids = [long(p['encounterId']) for p in mapcell["wildPokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
@@ -802,6 +820,9 @@ class Pogom(Flask):
                                         self.wh_update_queue.put(('pokemon', wh_poke))
 
                         if "catchablePokemons" in mapcell:
+                            last_scanned_times['pokemon'] = now_date
+                            last_scanned_times['wild_pokemon'] = now_date
+
                             encounter_ids = [long(p['encounterId']) for p in mapcell["catchablePokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
@@ -950,6 +971,9 @@ class Pogom(Flask):
                                         self.wh_update_queue.put(('pokemon', wh_poke))
 
                         if "nearbyPokemons" in mapcell:
+                            last_scanned_times['pokemon'] = now_date
+                            last_scanned_times['nearby_pokemon'] = now_date
+
                             nearby_encounter_ids = [long(p['encounterId']) for p in mapcell["nearbyPokemons"]]
                             # For all the wild Pokemon we found check if an active Pokemon is in
                             # the database.
@@ -1019,6 +1043,8 @@ class Pogom(Flask):
                                     }
 
                         if "forts" in mapcell:
+                            last_scanned_times['forts'] = now_date
+
                             stop_ids = [f['id'] for f in mapcell["forts"]]
                             if stop_ids:
                                 with Pokemon.database().execution_context():
@@ -1030,6 +1056,8 @@ class Pogom(Flask):
                                         for f in query]
                             for fort in mapcell["forts"]:
                                 if fort.get("type") == "CHECKPOINT":
+                                    last_scanned_times['pokestops'] = now_date
+
                                     activeFortModifier = fort.get('activeFortModifier', [])
                                     if 'ITEM_TROY_DISK' in activeFortModifier:
                                         lure_expiration = datetime.utcfromtimestamp(long(fort['lastModifiedTimestampMs']) / 1000) + timedelta(minutes=args.lure_duration)
@@ -1094,6 +1122,8 @@ class Pogom(Flask):
                                         })
                                         self.wh_update_queue.put(('pokestop', wh_pokestop))
                                 else:
+                                    last_scanned_times['gyms'] = now_date
+
                                     b64_gym_id = str(fort['id'])
                                     park = Gym.get_gyms_park(fort['id'])
 
@@ -2542,6 +2572,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -2815,11 +2846,11 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['route'] = routename
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
-            deviceworker['route'] = routename
             self.save_device(deviceworker)
+
         nextlatitude = deviceworker['latitude']
         nextlongitude = deviceworker['longitude']
 
@@ -2947,6 +2978,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -3122,6 +3154,7 @@ class Pogom(Flask):
             return jsonify(d)
 
         args = get_args()
+        dt_now = datetime.utcnow()
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -3139,7 +3172,7 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = []
 
         if deviceworker['fetching'] == "jump_now":
-            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['last_updated'] = dt_now
             deviceworker['fetching'] = "teleport_gym"
 
             if devicename != "" and devicename != deviceworker['name']:
@@ -3171,6 +3204,7 @@ class Pogom(Flask):
         maxpoints = False
         geofence = ""
         no_overlap = False
+
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -3242,14 +3276,47 @@ class Pogom(Flask):
         deviceworker['no_overlap'] = no_overlap
 
         last_updated = deviceworker['last_updated']
-        difference = (datetime.utcnow() - last_updated).total_seconds()
+        difference = (dt_now - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gym"):
             self.deviceschedules[uuid] = []
 
-        if difference >= teleport_interval:
+        ls_times = self.devices_last_scanned_times.get(uuid)
+        last_teleport_time = self.devices_last_teleport_time[uuid] if uuid in self.devices_last_teleport_time else last_updated
+        difference = (dt_now - last_teleport_time).total_seconds()
+
+        waitForGymsOrPokestops = args.teleport_wait_gyms_or_pokestops
+        waitForGyms = args.teleport_wait_gyms
+        waitForPokestops = args.teleport_wait_pokestops
+        waitForNearbyOrWildPokemon = args.teleport_wait_nearby_or_wild_pokemon
+        waitForNearbyPokemon = args.teleport_wait_nearby_pokemon
+        waitForWildPokemon = args.teleport_wait_wild_pokemon
+        waitForTeleportInterval = args.teleport_wait_teleport_interval
+
+        teleportToNextLocation = True
+
+        if waitForGymsOrPokestops == True and ((ls_times is None) or (ls_times.get('forts') is None) or (ls_times.get('forts') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForGyms == True and ((ls_times is None) or (ls_times.get('gyms') is None) or (ls_times.get('gyms') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForPokestops == True and ((ls_times is None) or (ls_times.get('pokestops') is None) or (ls_times.get('pokestops') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForNearbyOrWildPokemon == True and ((ls_times is None) or (ls_times.get('pokemon') is None) or (ls_times.get('pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForNearbyPokemon == True and ((ls_times is None) or (ls_times.get('nearby_pokemon') is None) or (ls_times.get('nearby_pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForWildPokemon == True and ((ls_times is None) or (ls_times.get('wild_pokemon') is None) or (ls_times.get('wild_pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForTeleportInterval == True and (difference < teleport_interval):
+            teleportToNextLocation = False
+
+        if (difference >= args.teleport_wait_timeout):         
+            # timeout expired, force the teleport
+            teleportToNextLocation = True
+
+        if teleportToNextLocation == True:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
-            deviceworker['last_updated'] = datetime.utcnow()
+            self.devices_last_teleport_time[uuid] = dt_now
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
@@ -3268,14 +3335,14 @@ class Pogom(Flask):
                 self.geofences = Geofences()
 
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences)
-            deviceworker['last_updated'] = datetime.utcnow()
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-            self.save_device(deviceworker)
             if raidless and len(self.deviceschedules[uuid]) == 0:
                 self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
+            self.devices_last_teleport_time[uuid] = dt_now
+            if devicename != "" and devicename != deviceworker['name']:
+                deviceworker['name'] = devicename
+            self.save_device(deviceworker)
 
         nexttarget = self.deviceschedules[uuid][0]
 
@@ -3290,6 +3357,7 @@ class Pogom(Flask):
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['last_updated'] = dt_now
         deviceworker['fetching'] = "teleport_gym"
 
         if devicename != "" and devicename != deviceworker['name']:
@@ -3329,6 +3397,7 @@ class Pogom(Flask):
             return jsonify(d)
 
         args = get_args()
+        dt_now = datetime.utcnow()
 
         lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
         lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
@@ -3346,7 +3415,7 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = []
 
         if deviceworker['fetching'] == "jump_now":
-            deviceworker['last_updated'] = datetime.utcnow()
+            deviceworker['last_updated'] = dt_now
             deviceworker['fetching'] = "teleport_gpx"
 
             if devicename != "" and devicename != deviceworker['name']:
@@ -3393,7 +3462,7 @@ class Pogom(Flask):
         deviceworker['no_overlap'] = False
 
         last_updated = deviceworker['last_updated']
-        difference = (datetime.utcnow() - last_updated).total_seconds()
+        difference = (dt_now - last_updated).total_seconds()
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "teleport_gpx"):
             self.deviceschedules[uuid] = []
 
@@ -3408,10 +3477,43 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
             self.deviceschedules[uuid] = []
 
-        if difference >= teleport_interval:
+        ls_times = self.devices_last_scanned_times.get(uuid)
+        last_teleport_time = self.devices_last_teleport_time[uuid] if uuid in self.devices_last_teleport_time else last_updated
+        difference = (dt_now - last_teleport_time).total_seconds()
+
+        waitForGymsOrPokestops = args.teleport_wait_gyms_or_pokestops
+        waitForGyms = args.teleport_wait_gyms
+        waitForPokestops = args.teleport_wait_pokestops
+        waitForNearbyOrWildPokemon = args.teleport_wait_nearby_or_wild_pokemon
+        waitForNearbyPokemon = args.teleport_wait_nearby_pokemon
+        waitForWildPokemon = args.teleport_wait_wild_pokemon
+        waitForTeleportInterval = args.teleport_wait_teleport_interval
+
+        teleportToNextLocation = True
+
+        if waitForGymsOrPokestops == True and ((ls_times is None) or (ls_times.get('forts') is None) or (ls_times.get('forts') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForGyms == True and ((ls_times is None) or (ls_times.get('gyms') is None) or (ls_times.get('gyms') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForPokestops == True and ((ls_times is None) or (ls_times.get('pokestops') is None) or (ls_times.get('pokestops') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForNearbyOrWildPokemon == True and ((ls_times is None) or (ls_times.get('pokemon') is None) or (ls_times.get('pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForNearbyPokemon == True and ((ls_times is None) or (ls_times.get('nearby_pokemon') is None) or (ls_times.get('nearby_pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForWildPokemon == True and ((ls_times is None) or (ls_times.get('wild_pokemon') is None) or (ls_times.get('wild_pokemon') < last_teleport_time)):
+            teleportToNextLocation = False
+        if waitForTeleportInterval == True and (difference < teleport_interval):
+            teleportToNextLocation = False
+
+        if (difference >= args.teleport_wait_timeout):         
+            # timeout expired, force the teleport
+            teleportToNextLocation = True
+
+        if teleportToNextLocation == True:
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
-            deviceworker['last_updated'] = datetime.utcnow()
+            self.devices_last_teleport_time[uuid] = dt_now
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
@@ -3430,7 +3532,7 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
-            deviceworker['last_updated'] = datetime.utcnow()
+            self.devices_last_teleport_time[uuid] = dt_now
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             deviceworker['route'] = routename
@@ -3449,6 +3551,7 @@ class Pogom(Flask):
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
+        deviceworker['last_updated'] = dt_now
         deviceworker['fetching'] = "teleport_gpx"
         if devicename != "" and devicename != deviceworker['name']:
             deviceworker['name'] = devicename
