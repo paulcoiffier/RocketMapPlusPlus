@@ -3600,8 +3600,10 @@ class Pogom(Flask):
             latitude = map_lat
             longitude = map_lng
 
-        # import requests
-        r = self.get("/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
+        args = get_args()
+
+        import requests
+        r = requests.get("http://localhost:" + args.port + "/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
 
         return r.json()
 
