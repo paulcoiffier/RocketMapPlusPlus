@@ -143,6 +143,7 @@ class Pogom(Flask):
         self.route("/teleport_gym", methods=['GET', 'POST'])(self.teleport_gym)
         self.route("/teleport_gpx", methods=['GET', 'POST'])(self.teleport_gpx)
         self.route("/scan_loc", methods=['GET', 'POST'])(self.scan_loc)
+        self.route("/mapcontrolled", methods=['GET', 'POST'])(self.mapcontrolled)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
         self.route("/new_name", methods=['POST'])(self.new_name)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
@@ -3460,6 +3461,46 @@ class Pogom(Flask):
         d['longitude'] = deviceworker['longitude']
 
         return jsonify(d)
+
+    def mapcontrolled(self):
+        if request.method == "GET":
+            request_json = request.args
+        else:
+            request_json = request.get_json()
+
+        map_lat = self.current_location[0]
+        map_lng = self.current_location[1]
+
+        uuid = request_json.get('uuid', '')
+        if uuid == "":
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
+
+        canusedevice, devicename = self.trusted_device(uuid)
+        if not canusedevice:
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
+
+        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
+        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
+
+        latitude = round(lat, 5)
+        longitude = round(lng, 5)
+
+        if latitude == 0 and longitude == 0:
+            latitude = map_lat
+            longitude = map_lng
+
+        import requests
+        r = requests.get("/scan_loc?latitude=" + str(latitude) + "&longitude=" + str(longitude) + "&uuid=" + str(uuid))
+
+        return r.json()
 
     def scan_loc(self):
         if request.method == "GET":
