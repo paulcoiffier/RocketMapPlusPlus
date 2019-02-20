@@ -3566,7 +3566,7 @@ class Pogom(Flask):
         args = get_args()
 
         deviceworker = self.get_device(uuid, latitude, longitude)
-        endpoint = str(deviceworker('endpoint', 'scan_loc?uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)))
+        endpoint = str(deviceworker.get('endpoint', 'scan_loc?uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)))
 
         import requests
         r = requests.get("http://localhost:" + str(args.port) + "/" + endpoint + "&mapcontrolled=true")
