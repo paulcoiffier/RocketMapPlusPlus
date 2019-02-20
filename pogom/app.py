@@ -2624,11 +2624,15 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_spawnpoint':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, unknown_tth, maxpoints, geofence, scheduled_points, self.geofences)
             nextlatitude = latitude
             nextlongitude = longitude
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -3027,11 +3031,15 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_pokestop':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, questless, maxpoints, geofence, scheduled_points, self.geofences)
             nextlatitude = latitude
             nextlongitude = longitude
             if questless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
         else:
@@ -3255,13 +3263,17 @@ class Pogom(Flask):
                     if dev.get('no_overlap') and dev['fetching'] == 'teleport_gym':
                         scheduled_points += self.deviceschedules[dev['deviceid']]
 
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points)
+            if not self.geofences:
+                from .geofence import Geofences
+                self.geofences = Geofences()
+
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences)
             deviceworker['last_updated'] = datetime.utcnow()
             if devicename != "" and devicename != deviceworker['name']:
                 deviceworker['name'] = devicename
             self.save_device(deviceworker)
             if raidless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points)
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc()
 

@@ -751,7 +751,7 @@ class Pokestop(LatLongModel):
         return result
 
     @staticmethod
-    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints, geofence_name, scheduled_points):
+    def get_nearby_pokestops(lat, lng, dist, questless, maxpoints, geofence_name, scheduled_points, geofences):
         pokestops = {}
         with Pokestop.database().execution_context():
             query = (Pokestop.select(
@@ -798,8 +798,6 @@ class Pokestop(LatLongModel):
                 for q in quests:
                     pokestop_quest_ids.append(q['pokestop_id'])
 
-            from .geofence import Geofences
-            geofences = Geofences()
             if geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
@@ -1104,7 +1102,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1155,8 +1153,6 @@ class Gym(LatLongModel):
             if len(egg_todo) > 0:
                 gym_ids = egg_todo[:]
 
-            from .geofence import Geofences
-            geofences = Geofences()
             if geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
@@ -1982,7 +1978,7 @@ class SpawnPoint(LatLongModel):
         return list(spawnpoints.values())
 
     @staticmethod
-    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints, geofence_name, scheduled_points):
+    def get_nearby_spawnpoints(lat, lng, dist, unknown_tth, maxpoints, geofence_name, scheduled_points, geofences):
         spawnpoints = {}
         with SpawnPoint.database().execution_context():
             query = (SpawnPoint.select(
@@ -2009,8 +2005,6 @@ class SpawnPoint(LatLongModel):
 
             queryDict = query.dicts()
 
-            from .geofence import Geofences
-            geofences = Geofences()
             if geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
