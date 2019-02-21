@@ -21,7 +21,10 @@
                  var egg = ['', 'egg_normal.png', 'egg_normal.png', 'egg_rare.png','egg_rare.png','egg_legendary.png'];
 
                  console.log("got data no position");
-                   $.each( data['raids'], function( key, val ) {
+                 let raids = data['raids'].sort(function(a, b) {
+                    return a['end'] - b['end'];
+                 });
+                   $.each( raids, function( key, val ) {
                        $( "<tr/>", {
                        "class": (val['is_ex_raid_eligible']?'exraid':'my-new-list'),
                        "level": val['level'],
