@@ -2713,7 +2713,7 @@ class Pogom(Flask):
 
         distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
         num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
-        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
+        # log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
         if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
@@ -2919,7 +2919,7 @@ class Pogom(Flask):
 
         distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
         num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
-        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
+        # log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
         if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
@@ -3164,7 +3164,7 @@ class Pogom(Flask):
 
         distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
         num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
-        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
+        # log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
         if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
