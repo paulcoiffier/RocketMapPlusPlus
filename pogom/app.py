@@ -2580,6 +2580,8 @@ class Pogom(Flask):
         geofence = ""
         no_overlap = False
         mapcontrolled = False
+        speed = args.speed
+        arrived_range = args.arrived_range
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -2589,6 +2591,8 @@ class Pogom(Flask):
             geofence = request.args.get('geofence', geofence)
             no_overlap = request.args.get('no_overlap', no_overlap)
             mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
+            speed = request.args.get('speed', speed)
+            arrived_range = request.args.get('arrived_range', arrived_range)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -2598,6 +2602,8 @@ class Pogom(Flask):
             geofence = request.form.get('geofence', geofence)
             no_overlap = request.form.get('no_overlap', no_overlap)
             mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
+            speed = request.form.get('speed', speed)
+            arrived_range = request.form.get('arrived_range', arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2650,6 +2656,16 @@ class Pogom(Flask):
                     mapcontrolled = False
             except:
                 pass
+        if not isinstance(speed, (int, long)):
+            try:
+                speed = int(speed)
+            except:
+                pass
+        if not isinstance(arrived_range, (int, long)):
+            try:
+                arrived_range = int(arrived_range)
+            except:
+                pass
 
         deviceworker['no_overlap'] = no_overlap
         deviceworker['mapcontrolled'] = mapcontrolled
@@ -2660,7 +2676,9 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) > 0:
             nexttarget = self.deviceschedules[uuid][0]
 
-            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+            distance_m = geopy.distance.vincenty((latitude, longitude), (nexttarget[0], nexttarget[1])).meters
+
+            if distance_m <= arrived_range:
                 if len(self.deviceschedules[uuid]) > 0:
                     del self.deviceschedules[uuid][0]
 
@@ -2692,35 +2710,27 @@ class Pogom(Flask):
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
-        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > stepsize:
-            adjusted_dlat = 0.0
-            adjusted_dlong = 0.0
+        distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
+        num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
+        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
-            if dlat == 0.0:
-                adjusted_dlat = 0.0
-                adjusted_dlong = stepsize
-            elif dlong == 0.0:
-                adjusted_dlat = stepsize
-                adjusted_dlong = 0.0
-            else:
-                angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = stepsize * math.sin(angle_radians)
-                adjusted_dlong = stepsize * math.cos(angle_radians)
-
-            if nextlatitude < nexttarget[0]:
-                nextlatitude += adjusted_dlat
-            else:
-                nextlatitude -= adjusted_dlat
-
-            if nextlongitude < nexttarget[1]:
-                nextlongitude += adjusted_dlong
-            else:
-                nextlongitude -= adjusted_dlong
-        else:
+        if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
             nextlongitude = nexttarget[1]
+        else:
+            dlat_per_second = dlat / num_seconds
+            dlong_per_second = dlong / num_seconds
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += dlat_per_second
+            else:
+                nextlatitude -= dlat_per_second
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += dlong_per_second
+            else:
+                nextlongitude -= dlong_per_second
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
@@ -2808,14 +2818,20 @@ class Pogom(Flask):
         scheduletimeout = args.scheduletimeout
         stepsize = args.stepsize
         mapcontrolled = False
+        speed = args.speed
+        arrived_range = args.arrived_range
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             stepsize = request.args.get('stepsize', stepsize)
             mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
+            speed = request.args.get('speed', speed)
+            arrived_range = request.args.get('arrived_range', arrived_range)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             stepsize = request.form.get('stepsize', stepsize)
             mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
+            speed = request.form.get('speed', speed)
+            arrived_range = request.form.get('arrived_range', arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2833,6 +2849,16 @@ class Pogom(Flask):
                     mapcontrolled = True
                 else:
                     mapcontrolled = False
+            except:
+                pass
+        if not isinstance(speed, (int, long)):
+            try:
+                speed = int(speed)
+            except:
+                pass
+        if not isinstance(arrived_range, (int, long)):
+            try:
+                arrived_range = int(arrived_range)
             except:
                 pass
 
@@ -2858,7 +2884,9 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) > 0:
             nexttarget = self.deviceschedules[uuid][0]
 
-            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+            distance_m = geopy.distance.vincenty((latitude, longitude), (nexttarget[0], nexttarget[1])).meters
+
+            if distance_m <= arrived_range:
                 if len(self.deviceschedules[uuid]) > 0:
                     del self.deviceschedules[uuid][0]
 
@@ -2888,35 +2916,27 @@ class Pogom(Flask):
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
-        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > stepsize:
-            adjusted_dlat = 0.0
-            adjusted_dlong = 0.0
+        distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
+        num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
+        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
-            if dlat == 0.0:
-                adjusted_dlat = 0.0
-                adjusted_dlong = stepsize
-            elif dlong == 0.0:
-                adjusted_dlat = stepsize
-                adjusted_dlong = 0.0
-            else:
-                angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = stepsize * math.sin(angle_radians)
-                adjusted_dlong = stepsize * math.cos(angle_radians)
-
-            if nextlatitude < nexttarget[0]:
-                nextlatitude += adjusted_dlat
-            else:
-                nextlatitude -= adjusted_dlat
-
-            if nextlongitude < nexttarget[1]:
-                nextlongitude += adjusted_dlong
-            else:
-                nextlongitude -= adjusted_dlong
-        else:
+        if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
             nextlongitude = nexttarget[1]
+        else:
+            dlat_per_second = dlat / num_seconds
+            dlong_per_second = dlong / num_seconds
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += dlat_per_second
+            else:
+                nextlatitude -= dlat_per_second
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += dlong_per_second
+            else:
+                nextlongitude -= dlong_per_second
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)
@@ -3009,6 +3029,8 @@ class Pogom(Flask):
         geofence = ""
         no_overlap = False
         mapcontrolled = False
+        speed = args.speed
+        arrived_range = args.arrived_range
         if request.args:
             scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
             maxradius = request.args.get('maxradius', maxradius)
@@ -3018,6 +3040,8 @@ class Pogom(Flask):
             geofence = request.args.get('geofence', geofence)
             no_overlap = request.args.get('no_overlap', no_overlap)
             mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
+            speed = request.args.get('speed', speed)
+            arrived_range = request.args.get('arrived_range', arrived_range)
         if request.form:
             scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
             maxradius = request.form.get('maxradius', maxradius)
@@ -3027,6 +3051,8 @@ class Pogom(Flask):
             geofence = request.form.get('geofence', geofence)
             no_overlap = request.form.get('no_overlap', no_overlap)
             mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
+            speed = request.form.get('speed', speed)
+            arrived_range = request.form.get('arrived_range', arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3079,6 +3105,16 @@ class Pogom(Flask):
                     mapcontrolled = False
             except:
                 pass
+        if not isinstance(speed, (int, long)):
+            try:
+                speed = int(speed)
+            except:
+                pass
+        if not isinstance(arrived_range, (int, long)):
+            try:
+                arrived_range = int(arrived_range)
+            except:
+                pass
 
         deviceworker['no_overlap'] = no_overlap
         deviceworker['mapcontrolled'] = mapcontrolled
@@ -3091,7 +3127,9 @@ class Pogom(Flask):
         if len(self.deviceschedules[uuid]) > 0:
             nexttarget = self.deviceschedules[uuid][0]
 
-            if latitude == nexttarget[0] and longitude == nexttarget[1]:
+            distance_m = geopy.distance.vincenty((latitude, longitude), (nexttarget[0], nexttarget[1])).meters
+
+            if distance_m <= arrived_range:
                 if len(self.deviceschedules[uuid]) > 0:
                     del self.deviceschedules[uuid][0]
 
@@ -3123,35 +3161,27 @@ class Pogom(Flask):
 
         dlat = abs(nexttarget[0] - nextlatitude)
         dlong = abs(nexttarget[1] - nextlongitude)
-        dll = math.sqrt((dlat ** 2) + (dlong ** 2))
 
-        if dll > stepsize:
-            adjusted_dlat = 0.0
-            adjusted_dlong = 0.0
+        distance_m = geopy.distance.vincenty((nextlatitude, nextlongitude), (nexttarget[0], nexttarget[1])).meters
+        num_seconds = distance_m / speed * 3.6  # 7.6 = 2x walk speed
+        log.info("{} - Distance to go: {} metres, Time until arrival: {} seconds".format(deviceworker['name'], distance_m, num_seconds))
 
-            if dlat == 0.0:
-                adjusted_dlat = 0.0
-                adjusted_dlong = stepsize
-            elif dlong == 0.0:
-                adjusted_dlat = stepsize
-                adjusted_dlong = 0.0
-            else:
-                angle_radians = math.atan(dlat / dlong)
-                adjusted_dlat = stepsize * math.sin(angle_radians)
-                adjusted_dlong = stepsize * math.cos(angle_radians)
-
-            if nextlatitude < nexttarget[0]:
-                nextlatitude += adjusted_dlat
-            else:
-                nextlatitude -= adjusted_dlat
-
-            if nextlongitude < nexttarget[1]:
-                nextlongitude += adjusted_dlong
-            else:
-                nextlongitude -= adjusted_dlong
-        else:
+        if num_seconds <= 1.0:
             nextlatitude = nexttarget[0]
             nextlongitude = nexttarget[1]
+        else:
+            dlat_per_second = dlat / num_seconds
+            dlong_per_second = dlong / num_seconds
+
+            if nextlatitude < nexttarget[0]:
+                nextlatitude += dlat_per_second
+            else:
+                nextlatitude -= dlat_per_second
+
+            if nextlongitude < nexttarget[1]:
+                nextlongitude += dlong_per_second
+            else:
+                nextlongitude -= dlong_per_second
 
         deviceworker['latitude'] = round(nextlatitude, 5)
         deviceworker['longitude'] = round(nextlongitude, 5)

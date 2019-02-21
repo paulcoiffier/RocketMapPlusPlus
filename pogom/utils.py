@@ -284,6 +284,12 @@ def get_args():
     parser.add_argument('-tig', '--teleport-ignore',
                         help=('Ignore coordinates inside this radius for teleport scheduling'),
                         type=int, default=300)
+    parser.add_argument('-s', '--speed',
+                        help=('Speed in km/h for walking endpoints'),
+                        type=int, default=10)
+    parser.add_argument('-ar', '--arrived-range',
+                        help=('Range in which walking endpoints consider your device as arrived at next location (in metres)'),
+                        type=int, default=40)
     parser.add_argument('-qed', '--quest-expiration-days',
                         help=('Number of days before quest info expires (use 0 for no expiration)'),
                         type=int, default=1)
