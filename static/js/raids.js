@@ -77,11 +77,11 @@
                    });
                });
            }
-   				// if (! $("button[name='exraid']").hasClass('inactive')) {
-   				// 		$("#myTable tbody tr").each(function () {
-   				// 				var show = false;
-   				// 				var row = $(this);
-   				// 				if (!row.hasClass('exraid')) { row.hide(); }
-   				// 		});
-   				// }
+           if (! $("button[name='exraid']").hasClass('inactive')) {
+             $("#myTable tbody tr").each(function () {
+               var show = false;
+               var row = $(this);
+               if (!row.hasClass('exraid')) { row.hide(); }
+             });
+           }
        }
