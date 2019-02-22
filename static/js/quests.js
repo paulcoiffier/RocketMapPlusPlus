@@ -10,7 +10,10 @@ function start(){
        $.getJSON( "raw_quests", function( data ) {
            if (data != null){
                  console.log("got data no position");
-                   $.each( data['quests'], function( key, val ) {
+                 let quests = data['quests'].sort(function(a, b) {
+                    return b['last_scanned'] - a['last_scanned'];
+                 });
+                   $.each( quests, function( key, val ) {
                       let imgSrc
                       if (val['url'] === '') {
                           imgSrc = 'static/images/pokestop/Pokestop_Quest.png'
