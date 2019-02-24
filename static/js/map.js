@@ -2150,7 +2150,7 @@ function setupScannedMarker(item) {
         map: map,
         clickable: false,
         center: circleCenter,
-        radius: (showConfig.pokemons === true ? 70 : 450), // metres
+        radius: (showConfig.pokemons === true ? item['monradius'] : item['fortradius']), // metres
         fillColor: getColorByDate(item['last_modified']),
         fillOpacity: 0.1,
         strokeWeight: 1,

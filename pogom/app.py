@@ -673,6 +673,8 @@ class Pogom(Flask):
                     continue
 
                 if "mapCells" in gmo_response_json:
+                    monmaxdist = 0
+                    fortmaxdist = 0
                     for mapcell in gmo_response_json["mapCells"]:
                         if "wildPokemons" in mapcell:
                             last_scanned_times['pokemon'] = now_date
@@ -790,6 +792,9 @@ class Pogom(Flask):
                                     'form': form,
                                     'weather_boosted_condition': weather_boosted_condition
                                 }
+
+                                distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (p['latitude'], p['longitude'])).meters
+                                monmaxdist = max(monmaxdist, distance_m)
 
                                 if 'pokemon' in args.wh_types:
                                     if (pokemon_id in args.webhook_whitelist or
@@ -942,6 +947,9 @@ class Pogom(Flask):
                                     'weather_boosted_condition': weather_boosted_condition
                                 }
 
+                                distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (p['latitude'], p['longitude'])).meters
+                                monmaxdist = max(monmaxdist, distance_m)
+
                                 if 'pokemon' in args.wh_types:
                                     if (pokemon_id in args.webhook_whitelist or
                                         (not args.webhook_whitelist and pokemon_id
@@ -1093,6 +1101,9 @@ class Pogom(Flask):
                                         'active_pokemon_expiration': active_pokemon_expiration
                                     }
 
+                                    distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (fort['latitude'], fort['longitude'])).meters
+                                    fortmaxdist = max(fortmaxdist, distance_m)
+
                                     pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
                                     pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
                                     pokestop_description = ""
@@ -1161,6 +1172,9 @@ class Pogom(Flask):
                                         'is_ex_raid_eligible':
                                             fort.get('isExRaidEligible', False)
                                     }
+
+                                    distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (fort['latitude'], fort['longitude'])).meters
+                                    fortmaxdist = max(fortmaxdist, distance_m)
 
                                     gym_id = fort['id']
 
@@ -1279,6 +1293,10 @@ class Pogom(Flask):
 
                                             })
                                             self.wh_update_queue.put(('raid', wh_raid))
+                    if monmaxdist > 0:
+                        scan_location['monradius'] = round(monmaxdist)
+                    if fortmaxdist > 0:
+                        scan_location['fortradius'] = round(fortmaxdist)
                 if "timeOfDay" in gmo_response_json:
                     time_of_day = gmo_response_json.get("timeOfDay", "NONE")
                 if "clientWeather" in gmo_response_json:
