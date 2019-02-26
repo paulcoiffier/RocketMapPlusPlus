@@ -48,7 +48,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 58
+db_schema_version = 59
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1420,6 +1420,7 @@ class ScannedLocation(LatLongModel):
 
     fortradius = UBigIntegerField(default=450)
     monradius = UBigIntegerField(default=70)
+    scanningforts = SmallIntegerField(default=0)
 
     class Meta:
         indexes = ((('latitude', 'longitude'), False),)
@@ -1495,6 +1496,7 @@ class ScannedLocation(LatLongModel):
                 'midpoint': 0,
                 'fortradius': 450,
                 'monradius': 70,
+                'scanningforts': 0,
                 'last_modified': None}
 
     # Used to update bands.
@@ -4264,6 +4266,10 @@ def database_migrate(db, old_ver):
         migrate(
             migrator.add_column('scannedlocation', 'fortradius', UBigIntegerField(default=450)),
             migrator.add_column('scannedlocation', 'monradius', UBigIntegerField(default=70))
+        )
+    if old_ver < 59:
+        migrate(
+            migrator.add_column('scannedlocation', 'scanningforts', SmallIntegerField(default=0))
         )
 
     # Always log that we're done.

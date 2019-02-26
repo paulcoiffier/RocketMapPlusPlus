@@ -252,6 +252,10 @@ class Pogom(Flask):
             if device['fetching'] != 'IDLE':
                 scan_location = ScannedLocation.get_by_loc([device['latitude'], device['longitude']])
                 ScannedLocation.update_band(scan_location, device['last_updated'])
+                if 'teleport' in device['fetching']:
+                    scan_location['scanningforts'] = 1
+                else:
+                    scan_location['scanningforts'] = 1
                 self.db_update_queue.put((ScannedLocation, {0: scan_location}))
             if force_save:
                 return 'Name saved'
@@ -646,6 +650,11 @@ class Pogom(Flask):
         now_secs = date_secs(now_date)
 
         scan_location = ScannedLocation.get_by_loc([deviceworker['latitude'], deviceworker['longitude']])
+
+        if 'teleport' in deviceworker['fetching']:
+            scan_location['scanningforts'] = 1
+        else:
+            scan_location['scanningforts'] = 1
 
         ScannedLocation.update_band(scan_location, now_date)
 
