@@ -2154,7 +2154,7 @@ function setupScannedMarker(item) {
         circleRadius = item['monradius']
     } else if (showConfig.pokemons === true) {
         circleRadius = item['monradius']
-    } else {? item['monradius'] : item['fortradius']
+    } else {
         circleRadius = item['fortradius']
     }
 
