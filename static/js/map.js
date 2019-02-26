@@ -2146,11 +2146,23 @@ function setupDeviceworkerMarker(item) {
 function setupScannedMarker(item) {
     var circleCenter = new google.maps.LatLng(item['latitude'], item['longitude'])
 
+    var circleRadius = 70
+
+    if (item['scanningforts'] === 1) {
+        circleRadius = item['fortradius']
+    } else if (item['scanningforts'] === 0) {
+        circleRadius = item['monradius']
+    } else if (showConfig.pokemons === true) {
+        circleRadius = item['monradius']
+    } else {? item['monradius'] : item['fortradius']
+        circleRadius = item['fortradius']
+    }
+
     var marker = new google.maps.Circle({
         map: map,
         clickable: false,
         center: circleCenter,
-        radius: (item['scanningforts'] === 1 ? item['fortradius'] : item['monradius']), // metres
+        radius: circleRadius, // metres
         fillColor: getColorByDate(item['last_modified']),
         fillOpacity: 0.1,
         strokeWeight: 1,

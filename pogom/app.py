@@ -255,7 +255,7 @@ class Pogom(Flask):
                 if 'teleport' in device['fetching']:
                     scan_location['scanningforts'] = 1
                 else:
-                    scan_location['scanningforts'] = 1
+                    scan_location['scanningforts'] = 0
                 self.db_update_queue.put((ScannedLocation, {0: scan_location}))
             if force_save:
                 return 'Name saved'
@@ -653,8 +653,10 @@ class Pogom(Flask):
 
         if 'teleport' in deviceworker['fetching']:
             scan_location['scanningforts'] = 1
+        elif deviceworker['fetching'] == 'IDLE':
+            scan_location['scanningforts'] = -1
         else:
-            scan_location['scanningforts'] = 1
+            scan_location['scanningforts'] = 0
 
         ScannedLocation.update_band(scan_location, now_date)
 
@@ -803,7 +805,8 @@ class Pogom(Flask):
                                 }
 
                                 distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (p['latitude'], p['longitude'])).meters
-                                monmaxdist = max(monmaxdist, distance_m)
+                                if distance_m <= 150:
+                                    monmaxdist = max(monmaxdist, distance_m)
 
                                 if 'pokemon' in args.wh_types:
                                     if (pokemon_id in args.webhook_whitelist or
@@ -957,7 +960,8 @@ class Pogom(Flask):
                                 }
 
                                 distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (p['latitude'], p['longitude'])).meters
-                                monmaxdist = max(monmaxdist, distance_m)
+                                if distance_m <= 150:
+                                    monmaxdist = max(monmaxdist, distance_m)
 
                                 if 'pokemon' in args.wh_types:
                                     if (pokemon_id in args.webhook_whitelist or
@@ -1111,7 +1115,8 @@ class Pogom(Flask):
                                     }
 
                                     distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (fort['latitude'], fort['longitude'])).meters
-                                    fortmaxdist = max(fortmaxdist, distance_m)
+                                    if distance_m <= 1500:
+                                        fortmaxdist = max(fortmaxdist, distance_m)
 
                                     pokestopdetails = pokestop_details.get(fort['id'], Pokestop.get_pokestop_details(fort['id']))
                                     pokestop_name = str(fort['latitude']) + ',' + str(fort['longitude'])
@@ -1183,7 +1188,8 @@ class Pogom(Flask):
                                     }
 
                                     distance_m = geopy.distance.vincenty((deviceworker['latitude'], deviceworker['longitude']), (fort['latitude'], fort['longitude'])).meters
-                                    fortmaxdist = max(fortmaxdist, distance_m)
+                                    if distance_m <= 1500:
+                                        fortmaxdist = max(fortmaxdist, distance_m)
 
                                     gym_id = fort['id']
 
