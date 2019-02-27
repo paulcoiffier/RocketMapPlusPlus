@@ -2411,7 +2411,7 @@ class Pogom(Flask):
     def is_devices_user(self, username, password):
         args = get_args()
 
-        if len(self.devices_users) == 0:
+        if len(self.devices_users) == 0 and args.devices_page_accounts:
             with open(args.devices_page_accounts) as f:
                 for line in f:
                     line = line.strip()
@@ -2442,7 +2442,7 @@ class Pogom(Flask):
             self.control_flags['on_demand'].clear()
 
         d = {}
-        if args.devices_page_accounts is None:
+        if not args.devices_page_accounts:
             abort(404)
 
         d['timestamp'] = datetime.utcnow()
