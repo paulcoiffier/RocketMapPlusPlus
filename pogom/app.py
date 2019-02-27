@@ -146,6 +146,7 @@ class Pogom(Flask):
         self.route("/mapcontrolled", methods=['GET', 'POST'])(self.mapcontrolled)
         self.route("/next_loc", methods=['POST'])(self.next_loc)
         self.route("/new_name", methods=['POST'])(self.new_name)
+        self.route("/new_username", methods=['POST'])(self.new_username)
         self.route("/new_endpoint", methods=['POST'])(self.new_endpoint)
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
@@ -174,6 +175,7 @@ class Pogom(Flask):
         self.devices_last_scanned_times = {}
         self.devices_last_teleport_time = {}
         self.geofences = None
+        self.devices_users = {}
 
     def get_active_devices(self):
         result = []
@@ -2406,6 +2408,23 @@ class Pogom(Flask):
             d['raids'] = self.geofences.get_geofenced_results(d['raids'])
         return jsonify(d)
 
+    def is_devices_user(self, username, password):
+        args = get_args()
+
+        if len(self.devices_users) == 0:
+            with open(args.devices_page_accounts) as f:
+                for line in f:
+                    line = line.strip()
+                    if len(line) == 0:  # Empty line.
+                        continue
+                    user, pwd = line.split(":")
+                    self.devices_users[user.strip()] = pwd.strip()
+
+        if username in self.devices_users and self.devices_users[username] == password:
+            return True
+
+        return False
+
     def raw_devices(self):
         # Make sure fingerprint isn't blacklisted.
         fingerprint_blacklisted = any([
@@ -2423,18 +2442,28 @@ class Pogom(Flask):
             self.control_flags['on_demand'].clear()
 
         d = {}
-        d['timestamp'] = datetime.utcnow()
-        if args.no_devices:
-            d['devices'] = []
-        else:
-            # d['devices'] = DeviceWorker.get_active()
-            d['devices'] = self.get_active_devices()
+        if args.devices_page_accounts is None:
+            abort(404)
 
-            for deviceworker in d['devices']:
-                uuid = deviceworker['deviceid']
-                deviceworker['route'] = 0
-                if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
-                    deviceworker['route'] = len(self.deviceschedules[uuid])
+        d['timestamp'] = datetime.utcnow()
+        enteredusername = request.form('username', None)
+        enteredpassword = request.form('password', None)
+        if self.is_devices_user(enteredusername, enteredpassword):
+            d['login'] = 'ok'
+            d['devices'] = []
+            if not args.no_devices:
+                active_devices = self.get_active_devices()
+
+                for deviceworker in active_devices:
+                    if enteredusername == 'admin' or enteredusername == deviceworker['username']:
+                        d['devices'].append(deviceworker)
+                        uuid = deviceworker['deviceid']
+                        deviceworker['route'] = 0
+                        if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
+                            deviceworker['route'] = len(self.deviceschedules[uuid])
+
+        else:
+            d['login'] = 'failed'
 
         return jsonify(d)
 
@@ -3971,6 +4000,30 @@ class Pogom(Flask):
 
             deviceworker = self.get_device(uuid, map_lat, map_lng)
             deviceworker['name'] = name
+
+            return self.save_device(deviceworker, True)
+
+    def new_username(self):
+        username = None
+        uuid = None
+        # Part of query string.
+        if request.args:
+            username = request.args.get('username', type=str)
+            uuid = request.args.get('uuid', type=str)
+        # From post requests.
+        if request.form:
+            username = request.form.get('username', type=str)
+            uuid = request.form.get('uuid', type=str)
+
+        if not (username and uuid):
+            log.warning('Missing username: %s or uuid: %s', username, uuid)
+            return 'bad parameters', 400
+        else:
+            map_lat = self.current_location[0]
+            map_lng = self.current_location[1]
+
+            deviceworker = self.get_device(uuid, map_lat, map_lng)
+            deviceworker['username'] = username
 
             return self.save_device(deviceworker, True)
 

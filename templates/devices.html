@@ -31,6 +31,7 @@
             <tr class="header">
                  <th>UUID</th>
                  <th>Friendly Name</th>
+                 <th>Username</th>
                  <th>Scans</th>
                  <th>Scanning</th>
                  <th>Fetching</th>
@@ -42,6 +43,16 @@
         <tbody>
         </tbody>
     </table>
+
+    <div class="status_container" id="status_container">
+        <div class="status_form">
+            <form class="login-form" id="password_form">
+                <input id="username" type="text" placeholder="username"/>
+                <input id="password" type="password" placeholder="password"/>
+                <button>login</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Load JS libs before custom scripts. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
