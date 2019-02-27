@@ -89,10 +89,25 @@ function loadRawData() {
                 rawDataIsLoading = true
             }
         },
-        complete: function (data) {
-            rawDataIsLoading = false;
-            showDevices(data);
+        complete: function () {
+            rawDataIsLoading = false
         }
+    })
+}
+
+function updateDevices() {
+    lastRawUpdateTime = new Date()
+    loadRawData().done(function (result) {
+        // Parse result on success.
+        showDevices(result)
+    }).always(function () {
+        // Only queue next request when previous is over.
+        // Minimum delay of minUpdateDelay.
+        var diff = new Date() - lastRawUpdateTime
+        var delay = Math.max(minUpdateDelay - diff, 1) // Don't go below 1.
+
+        // Don't use interval.
+        window.setTimeout(updateDevices, delay)
     })
 }
 
@@ -114,8 +129,8 @@ $(document).ready(function () {
         loadRawData().done(function (result) {
             if (result.login === 'ok') {
                 $('.status_form').remove()
-                parseResult(result)
-                window.setTimeout(updateStatus, minUpdateDelay)
+                showDevices(result)
+                window.setTimeout(updateDevices, minUpdateDelay)
             } else {
                 $('.status_form').effect('bounce')
                 $('#password').focus()
