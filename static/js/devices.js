@@ -22,8 +22,8 @@ function showDevices(data) {
 
     if (admin != true) {
         $("button").each(function() {
-          if ($(this).id.indexOf('buttonusername') !== -1) {
-            $(this).style.display="none";
+          if ($(this).attr('id').indexOf('buttonusername') !== -1) {
+            document.getElementById($(this).attr('id')).style.display="none";
           }
         });
       }
