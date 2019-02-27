@@ -3815,7 +3815,11 @@ class Pogom(Flask):
 
         deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
-            return "Device need to have posted data first"
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
 
         if deviceworker['fetching'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
