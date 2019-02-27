@@ -2082,7 +2082,7 @@ class Pogom(Flask):
         needlogin = True
         if not args.devices_page_accounts:
             needlogin = False
-        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=needlogin,)
+        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(),)
 
     def questview(self):
         self.heartbeat[0] = now()
