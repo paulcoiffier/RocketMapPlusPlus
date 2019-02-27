@@ -1,3 +1,11 @@
+var rawDataIsLoading = false
+var statusPageUsername = false
+var statusPagePassword = false
+
+// Raw data updating
+var minUpdateDelay = 1000 // Minimum delay between updates (in ms).
+var lastRawUpdateTime = new Date()
+
 function showDevices(data) {
   $('#myTable tbody > tr').remove();
   console.log("fetch devices");
