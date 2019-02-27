@@ -2079,7 +2079,10 @@ class Pogom(Flask):
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
-        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
+        needlogin = True
+        if not args.devices_page_accounts:
+            needlogin = False
+        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=needlogin,)
 
     def questview(self):
         self.heartbeat[0] = now()
@@ -2442,14 +2445,15 @@ class Pogom(Flask):
             self.control_flags['on_demand'].clear()
 
         d = {}
-        if not args.devices_page_accounts:
-            abort(404)
 
         d['timestamp'] = datetime.utcnow()
         enteredusername = request.form.get('username', None)
         enteredpassword = request.form.get('password', None)
-        if self.is_devices_user(enteredusername, enteredpassword):
+        if not args.devices_page_accounts or self.is_devices_user(enteredusername, enteredpassword):
+            if not not args.devices_page_accounts:
+                enteredusername = 'admin'
             d['login'] = 'ok'
+            d['admin'] = enteredusername == 'admin'
             d['devices'] = []
             if not args.no_devices:
                 active_devices = self.get_active_devices()
