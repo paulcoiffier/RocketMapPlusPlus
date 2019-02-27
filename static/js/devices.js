@@ -122,25 +122,4 @@ $(document).ready(function () {
             }
         })
     })
-
-    $('#hashkey-switch').change(function () {
-        showHashTable = this.checked
-
-        $('#status_container .status_table').remove()
-        $('#status_container .worker').remove()
-    })
-
-    $('#showworker-switch').change(function () {
-        showWorkers = this.checked
-
-        $('#status_container .status_table').remove()
-        $('#status_container .worker').remove()
-    })
-
-    $('#showinstances-switch').change(function () {
-        showInstances = this.checked
-
-        $('#status_container .status_table').remove()
-        $('#status_container .worker').remove()
-    })
 })
