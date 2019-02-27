@@ -2450,7 +2450,7 @@ class Pogom(Flask):
         enteredusername = request.form.get('username', None)
         enteredpassword = request.form.get('password', None)
         if not args.devices_page_accounts or self.is_devices_user(enteredusername, enteredpassword):
-            if not not args.devices_page_accounts:
+            if not args.devices_page_accounts:
                 enteredusername = 'admin'
             d['login'] = 'ok'
             d['admin'] = enteredusername == 'admin'
