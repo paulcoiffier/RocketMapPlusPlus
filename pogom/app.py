@@ -2446,8 +2446,8 @@ class Pogom(Flask):
             abort(404)
 
         d['timestamp'] = datetime.utcnow()
-        enteredusername = request.form('username', None)
-        enteredpassword = request.form('password', None)
+        enteredusername = request.form.get('username', None)
+        enteredpassword = request.form.get('password', None)
         if self.is_devices_user(enteredusername, enteredpassword):
             d['login'] = 'ok'
             d['devices'] = []
