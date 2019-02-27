@@ -305,6 +305,9 @@ def get_args():
     parser.add_argument('-df', '--devices-file',
                         help=('Device file with trusted devices'),
                         default='')
+    parser.add_argument('-du', '--devices-page-accounts',
+                        help=('File with trusted device users'),
+                        default='')
     group = parser.add_argument_group('Database')
     group.add_argument(
         '--db-name', help='Name of the database to be used.', required=True)

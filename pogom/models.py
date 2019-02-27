@@ -48,7 +48,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 59
+db_schema_version = 60
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -1275,7 +1275,7 @@ class PlayerLocale(BaseModel):
 class DeviceWorker(LatLongModel):
     deviceid = Utf8mb4CharField(primary_key=True, max_length=100, index=True)
     name = Utf8mb4CharField(max_length=100, default="")
-    discord_id = Utf8mb4CharField(max_length=100, default="")
+    username = Utf8mb4CharField(max_length=100, default="")
     latitude = DoubleField()
     longitude = DoubleField()
     centerlatitude = DoubleField()
@@ -1301,7 +1301,7 @@ class DeviceWorker(LatLongModel):
             result = query[0] if query else {
                 'deviceid': id,
                 'name': '',
-                'discord_id': '',
+                'username': '',
                 'latitude': latitude,
                 'longitude': longitude,
                 'centerlatitude': latitude,
@@ -1347,7 +1347,7 @@ class DeviceWorker(LatLongModel):
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
                              DeviceWorker.name,
-                             DeviceWorker.discord_id,
+                             DeviceWorker.username,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -1372,7 +1372,7 @@ class DeviceWorker(LatLongModel):
             query = (DeviceWorker
                      .select(DeviceWorker.deviceid,
                              DeviceWorker.name,
-                             DeviceWorker.discord_id,
+                             DeviceWorker.username,
                              DeviceWorker.latitude,
                              DeviceWorker.longitude,
                              DeviceWorker.last_scanned,
@@ -4270,6 +4270,11 @@ def database_migrate(db, old_ver):
     if old_ver < 59:
         migrate(
             migrator.add_column('scannedlocation', 'scanningforts', SmallIntegerField(default=0))
+        )
+    if old_ver < 60:
+        migrate(
+            migrator.drop_column('deviceworker', 'discord_id'),
+            migrator.add_column('deviceworker', 'username', Utf8mb4CharField(max_length=100, default="")),
         )
 
     # Always log that we're done.

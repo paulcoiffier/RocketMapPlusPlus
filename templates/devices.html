@@ -25,12 +25,13 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/180x180.png').lstrip('/') }}" sizes="180x180">
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/devices.min.css').lstrip('/') }}">
 </head>
-<body class="devicesPage" onload="start()">
+<body class="devicesPage"">
     <table id="myTable">
         <thead>
             <tr class="header">
                  <th>UUID</th>
                  <th>Friendly Name</th>
+                 <th>Username</th>
                  <th>Scans</th>
                  <th>Scanning</th>
                  <th>Fetching</th>
@@ -42,6 +43,20 @@
         <tbody>
         </tbody>
     </table>
+
+    <div class="status_container" id="status_container">
+        <div class="status_form">
+            <form class="login-form" id="password_form">
+                <input id="username" type="text" placeholder="username"/>
+                <input id="password" type="password" placeholder="password"/>
+                <button>login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+      var needlogin = {{needlogin}};
+    </script>
 
     <!-- Load JS libs before custom scripts. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
