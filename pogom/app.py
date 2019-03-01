@@ -3761,13 +3761,11 @@ class Pogom(Flask):
             latitude = map_lat
             longitude = map_lng
 
-        args = get_args()
-
         deviceworker = self.get_device(uuid, latitude, longitude)
-        #Update the username of the device is sent along and incorrect in database
-        username = request_json.get('username','')
+        # Update the username of the device is sent along and incorrect in database
+        username = request_json.get('username', '')
         if username != "" and username != deviceworker['username']:
-            log.info('Updateing username: %s, for UUID:%s', username,uuid)
+            log.info('Updateing username: %s, for UUID:%s', username, uuid)
             deviceworker['username'] = username
             self.save_device(deviceworker, True)
 
@@ -3778,12 +3776,9 @@ class Pogom(Flask):
             endpoint += "&"
         else:
             endpoint += "?"
-        endpoint += 'uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude)
+        endpoint += 'uuid=' + str(uuid) + '&latitude=' + str(latitude) + '&longitude=' + str(longitude) + "&mapcontrolled=true"
 
-        import requests
-        r = requests.get("http://localhost:" + str(args.port) + "/" + endpoint + "&mapcontrolled=true")
-
-        return jsonify(r.json())
+        return redirect(endpoint)
 
     def scan_loc(self):
         if request.method == "GET":
