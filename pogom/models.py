@@ -3768,6 +3768,10 @@ def bulk_upsert(cls, data, db):
     # Sqlite: 999
     step = 500
 
+    if db.is_closed():
+        log.execution("Database connection is closed, connect again")
+        db.connect()
+
     # Prepare for our query.
     conn = db.get_conn()
     cursor = db.get_cursor()
