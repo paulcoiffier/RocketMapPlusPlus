@@ -3769,7 +3769,7 @@ def bulk_upsert(cls, data, db):
     step = 500
 
     if db.is_closed():
-        log.execution("Database connection is closed, connect again")
+        log.info("Database connection is closed, connect again")
         db = MyRetryDB(
             args.db_name,
             user=args.db_user,
