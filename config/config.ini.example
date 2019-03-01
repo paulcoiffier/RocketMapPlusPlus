@@ -8,7 +8,7 @@
 # Image settings
 ###################
 
-#generate-images                # Turn on automatic on-demand icon generation useing ImageMagick.
+#generate-images                # Turn on automatic on-demand icon generation using ImageMagick.
 
 # Required settings
 ###################

@@ -18,7 +18,7 @@ from flask_cache_bust import init_cache_busting
 
 from pogom.app import Pogom
 from pogom.utils import (get_args, now, log_resource_usage_loop, get_debug_dump_link,
-                         dynamic_rarity_refresher, device_worker_refresher)
+                         dynamic_rarity_refresher, device_worker_refresher, get_timezone_offset)
 from pogom.altitude import get_gmaps_altitude
 
 from pogom.models import (init_database, create_tables, drop_tables,
@@ -254,6 +254,8 @@ def main():
     log.info('Parsed location is: %.4f/%.4f/%.4f (lat/lng/alt).',
              position[0], position[1], position[2])
 
+    log.info('Timezone offset from UTC: {} minutes'.format(get_timezone_offset(position[0], position[1])))
+
     # Scanning toggles.
     log.info('Parsing of Pokemon %s.',
              'disabled' if args.no_pokemon else 'enabled')
@@ -267,7 +269,7 @@ def main():
         app = Pogom(__name__,
                     root_path=os.path.dirname(
                               os.path.abspath(__file__)).decode('utf8'),
-                    db_update_queue=db_updates_queue, wh_update_queue=wh_updates_queue, args=args)
+                    db_update_queue=db_updates_queue, wh_update_queue=wh_updates_queue)
         app.before_request(app.validate_request)
         app.set_current_location(position)
 

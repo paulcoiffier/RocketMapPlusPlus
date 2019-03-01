@@ -47,6 +47,7 @@
         <h1><a href="./">{{mapname}}<img class='rocket icon' src='static/images/rocket.png'></a></h1>
         <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
         <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
+        <span id="weatherInfo" style="float: right; vertical-align: middle;"></span>
       </header>
       <!-- NAV -->
       <nav id="nav">
@@ -161,10 +162,15 @@
                   <option value="12">Last 12 Hours</option>
                   <option value="24">Last 24 Hours</option>
                   <option value="168">Last Week</option>
+                  <option value="-1">Not Last Hour</option>
+                  <option value="-6">Not Last 6 Hours</option>
+                  <option value="-12">Not Last 12 Hours</option>
+                  <option value="-24">Not Last 24 Hours</option>
+                  <option value="-168">Not Last Week</option>
                 </select>
               </div>
               <div class="form-control switch-container" id="ex-raid-gyms-only-wrapper">
-                <h3>Ex Raid Gyms</h3>
+                <h3>Ex Raid Gyms only</h3>
                 <div class="onoffswitch">
                   <input id="ex-raid-gyms-only-switch" type="checkbox" name="ex-raid-gyms-only-switch" class="onoffswitch-checkbox" checked>
                   <label class="onoffswitch-label" for="ex-raid-gyms-only-switch">
@@ -186,17 +192,28 @@
                 </label>
               </div>
             </div>
-            <div class="form-control switch-container" id="lured-pokestops-only-wrapper" style="display:none">
-              <select name="lured-pokestops-only-switch" id="lured-pokestops-only-switch">
+            <div class="form-control switch-container" id="pokestops-with-quest-status-wrapper" style="display:none">
+              <select name="pokestops-with-quest-status-select" id="pokestops-with-quest-status-select">
                 <option value="0">All</option>
-                <option value="1">Only Lured</option>
+                <option value="1">With Quest Details</option>
+                <option value="2">Without Quest Details</option>
               </select>
             </div>
             <div class="form-control switch-container" id="pokestop-sidebar-wrapper" style="display:none">
-              <h3>Use Pokestop Sidebar</h3>
+              <h3>Use Pokéstop Sidebar</h3>
               <div class="onoffswitch">
                 <input id="pokestop-sidebar-switch" type="checkbox" name="pokestop-sidebar-switch" class="onoffswitch-checkbox" checked>
                 <label class="onoffswitch-label" for="pokestop-sidebar-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-control switch-container" id="lured-pokestops-only-wrapper" style="display:none">
+              <h3>Lured Pokéstops only</h3>
+              <div class="onoffswitch">
+                <input id="lured-pokestops-only-switch" type="checkbox" name="lured-pokestops-only-switch" class="onoffswitch-checkbox" checked>
+                <label class="onoffswitch-label" for="lured-pokestops-only-switch">
                 <span class="switch-label" data-on="On" data-off="Off"></span>
                 <span class="switch-handle"></span>
                 </label>
@@ -213,6 +230,30 @@
                 </label>
               </div>
             </div>
+              {% if show.devices %}
+            <div class="form-control switch-container">
+              <h3>Show Devices</h3>
+              <div class="onoffswitch">
+                <input id="devices-switch" type="checkbox" name="devices-switch" class="onoffswitch-checkbox">
+                <label class="onoffswitch-label" for="devices-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+            <div id="devices-filter-wrapper" style="display:none">
+              <div class="form-control switch-container">
+                <h3>Show Device Routes</h3>
+                <div class="onoffswitch">
+                  <input id="routes-switch" type="checkbox" name="routes-switch" class="onoffswitch-checkbox">
+                  <label class="onoffswitch-label" for="routes-switch">
+                  <span class="switch-label" data-on="On" data-off="Off"></span>
+                  <span class="switch-handle"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+              {% endif %}
             <div class="form-control switch-container">
               <h3>Spawn Points</h3>
               <div class="onoffswitch">
@@ -278,6 +319,36 @@
             </div>
                   {% endif %}
               {% endif %}
+            <div class="form-control switch-container">
+                <h3>Weather</h3>
+                <div class="onoffswitch">
+                    <input id="weather-cells-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="weather-cells-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
+                <h3>Weather Grids</h3>
+                <div class="onoffswitch">
+                    <input id="s2cells-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="s2cells-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
+                <h3>Weather Alerts</h3>
+                <div class="onoffswitch">
+                    <input id="weather-alerts-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="weather-alerts-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
           </div>
 
           <h3><i class="fa fa-location-arrow fa-fw"></i>Location &amp; Search Settings</h3>
@@ -439,6 +510,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.5.0/jsts.min.js"></script>
     <script>
       var centerLat = {{lat}};
       var centerLng = {{lng}};
@@ -453,7 +525,9 @@
       {% endif %}
     <script src="{{ url_for('static', filename='dist/js/map.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/stats.min.js').lstrip('/') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/weather.min.js').lstrip('/') }}"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&amp;callback=initMap&amp;libraries=places,geometry"></script>
+    <script defer src="{{ url_for('static', filename='dist/js/label.min.js').lstrip('/') }}"></script>
     <script async src='https://www.google-analytics.com/analytics.js'></script>
   </body>
 </html>

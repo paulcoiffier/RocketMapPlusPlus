@@ -17,7 +17,10 @@ module.exports = function (grunt) {
                     'static/dist/css/app.built.css': 'static/sass/main.scss',
                     'static/dist/css/mobile.built.css': 'static/sass/mobile.scss',
                     'static/dist/css/statistics.built.css': 'static/sass/statistics.scss',
-                    'static/dist/css/status.built.css': 'static/sass/status.scss'
+                    'static/dist/css/status.built.css': 'static/sass/status.scss',
+                    'static/dist/css/raids.built.css': 'static/sass/raids.scss',
+                    'static/dist/css/devices.built.css': 'static/sass/devices.scss',
+                    'static/dist/css/quests.built.css': 'static/sass/quests.scss'
                 }
             }
         },
@@ -40,13 +43,18 @@ module.exports = function (grunt) {
                     'static/dist/js/app.built.js': 'static/js/app.js',
                     'static/dist/js/map.built.js': 'static/js/map.js',
                     'static/dist/js/map.common.built.js': 'static/js/map.common.js',
+                    'static/dist/js/label.built.js': 'static/js/label.js',
                     'static/dist/js/mobile.built.js': 'static/js/mobile.js',
                     'static/dist/js/stats.built.js': 'static/js/stats.js',
                     'static/dist/js/statistics.built.js': 'static/js/statistics.js',
                     'static/dist/js/status.built.js': 'static/js/status.js',
                     'static/dist/js/custom.built.js': 'static/js/custom.js',
                     'static/dist/js/vendor/markerclusterer.built.js': 'static/js/vendor/markerclusterer.js',
-                    'static/dist/js/serviceWorker.built.js': 'static/js/serviceWorker.js'
+                    'static/dist/js/serviceWorker.built.js': 'static/js/serviceWorker.js',
+                    'static/dist/js/weather.built.js': 'static/js/weather.js',
+                    'static/dist/js/raids.built.js': 'static/js/raids.js',
+                    'static/dist/js/devices.built.js': 'static/js/devices.js',
+                    'static/dist/js/quests.built.js': 'static/js/quests.js'
                 }
             }
         },
@@ -63,13 +71,18 @@ module.exports = function (grunt) {
                     'static/dist/js/app.min.js': 'static/dist/js/app.built.js',
                     'static/dist/js/map.min.js': 'static/dist/js/map.built.js',
                     'static/dist/js/map.common.min.js': 'static/dist/js/map.common.built.js',
+                    'static/dist/js/label.min.js': 'static/dist/js/label.built.js',
                     'static/dist/js/mobile.min.js': 'static/dist/js/mobile.built.js',
                     'static/dist/js/stats.min.js': 'static/dist/js/stats.built.js',
                     'static/dist/js/statistics.min.js': 'static/dist/js/statistics.built.js',
                     'static/dist/js/status.min.js': 'static/dist/js/status.built.js',
                     'static/dist/js/custom.min.js': 'static/dist/js/custom.built.js',
                     'static/dist/js/vendor/markerclusterer.min.js': 'static/dist/js/vendor/markerclusterer.built.js',
-                    'static/dist/js/serviceWorker.min.js': 'static/dist/js/serviceWorker.built.js'
+                    'static/dist/js/serviceWorker.min.js': 'static/dist/js/serviceWorker.built.js',
+                    'static/dist/js/weather.min.js': 'static/dist/js/weather.built.js',
+                    'static/dist/js/raids.min.js': 'static/dist/js/raids.built.js',
+                    'static/dist/js/devices.min.js': 'static/dist/js/devices.built.js',
+                    'static/dist/js/quests.min.js': 'static/dist/js/quests.built.js'
                 }
             }
         },
@@ -128,7 +141,10 @@ module.exports = function (grunt) {
                     'static/dist/css/app.min.css': 'static/dist/css/app.built.css',
                     'static/dist/css/mobile.min.css': 'static/dist/css/mobile.built.css',
                     'static/dist/css/statistics.min.css': 'static/dist/css/statistics.built.css',
-                    'static/dist/css/status.min.css': 'static/dist/css/status.built.css'
+                    'static/dist/css/status.min.css': 'static/dist/css/status.built.css',
+                    'static/dist/css/raids.min.css': 'static/dist/css/raids.built.css',
+                    'static/dist/css/devices.min.css': 'static/dist/css/devices.built.css',
+                    'static/dist/css/quests.min.css': 'static/dist/css/quests.built.css'
                 }
             }
         },

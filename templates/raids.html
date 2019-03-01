@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{mapname}} - Raids</title>
+
+    <!-- Fav- & Apple-Touch-Icons -->
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/appicons/favicon.ico').lstrip('/') }}" type="image/x-icon">
+    <!-- non-retina iPhone pre iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/114x114.png').lstrip('/') }}" sizes="57x57">
+    <!-- non-retina iPad pre iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/144x144.png').lstrip('/') }}" sizes="72x72">
+    <!-- non-retina iPad iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/152x152.png').lstrip('/') }}" sizes="76x76">
+    <!-- retina iPhone pre iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/114x114.png').lstrip('/') }}" sizes="114x114">
+    <!-- retina iPhone iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/120x120.png').lstrip('/') }}" sizes="120x120">
+    <!-- retina iPad pre iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/144x144.png').lstrip('/') }}" sizes="144x144">
+    <!-- retina iPad iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/152x152.png').lstrip('/') }}" sizes="152x152">
+    <!-- retina iPhone 6 iOS 7 -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/180x180.png').lstrip('/') }}" sizes="180x180">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/raids.min.css').lstrip('/') }}">
+</head>
+<body class="raidsPage" onload="start()">
+    <div align="center">
+        <button id="1" name="level" class="level inactive" onclick="changeClass(this)">Level 1</button>
+        <button id="2" name="level" class="level inactive" onclick="changeClass(this)">Level 2</button>
+        <button id="3" name="level" class="level inactive" onclick="changeClass(this)">Level 3</button>
+        <button id="4" name="level" class="level inactive" onclick="changeClass(this)">Level 4</button>
+        <button id="5" name="level" class="level inactive" onclick="changeClass(this)">Level 5</button>
+        <button id="exraid" name="exraid" class="exraid inactive" onclick="changeClass(this)">EX-Raids</button>
+    </div>
+    <table id="myTable">
+        <thead>
+            <tr class="header">
+                 <th>Start</th>
+                 <th>Pokemon</th>
+                 <th>Gym</th>
+             </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <!-- Load JS libs before custom scripts. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+    <script src="{{ url_for('static', filename='dist/js/raids.min.js').lstrip('/') }}"></script>
+    <form name="FilterForm" id="FilterForm" action="" method="">
+        <input type="checkbox" id="filter_1" name="filterLevel" value="1" />
+        <input type="checkbox" id="filter_2" name="filterLevel" value="2" />
+        <input type="checkbox" id="filter_3" name="filterLevel" value="3" />
+        <input type="checkbox" id="filter_4" name="filterLevel" value="4" />
+        <input type="checkbox" id="filter_5" name="filterLevel" value="5" />
+    </form>
+</body>
+</html>

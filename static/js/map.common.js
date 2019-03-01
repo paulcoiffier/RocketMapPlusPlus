@@ -4,11 +4,13 @@ const genderSpecificSprites = [
     449, 450
 ]
 const possibleShinySprites = [
-    1, 4, 7, 10, 25, 29, 30, 31, 77, 81, 90, 92, 96, 98,
-    104, 127, 129, 133, 138, 140, 142, 147, 152, 155,
-    177, 179, 191, 198, 204, 209, 228, 246, 261, 278,
-    296, 302, 304, 307, 311, 312, 315, 320, 333, 353,
-    355, 361, 370, 374, 425
+    1, 4, 7, 10, 25, 27, 29, 30, 31, 54,
+    58, 74, 77, 81, 88, 90, 92, 96, 98, 104,
+    127, 129, 133, 138, 140, 142, 147, 152, 155, 158,
+    177, 179, 191, 198, 200, 204, 209, 220, 225, 228,
+    246, 261, 263, 276, 278, 296, 302, 304, 307, 311,
+    312, 315, 320, 325, 333, 349, 353, 355, 361, 370,
+    374, 425
 ]
 
 var noLabelsStyle = [{
@@ -909,6 +911,14 @@ var StoreOptions = {
         default: 5,
         type: StoreTypes.Number
     },
+    'showRaidTimers': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showRaidTimersAtZoomLevel': {
+        default: 12,
+        type: StoreTypes.Number
+    },
     'showGyms': {
         default: false,
         type: StoreTypes.Boolean
@@ -953,9 +963,13 @@ var StoreOptions = {
         default: true,
         type: StoreTypes.Boolean
     },
-    'showLuredPokestopsOnly': {
+    'showPokestopsWithQuestStatus': {
         default: 0,
         type: StoreTypes.Number
+    },
+    'showLuredPokestopsOnly': {
+        default: false,
+        type: StoreTypes.Boolean
     },
     'usePokestopSidebar': {
         default: false,
@@ -965,12 +979,32 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showDevices': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
+    'showRoutes': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showSpawnpoints': {
         default: false,
         type: StoreTypes.Boolean
     },
     'showRanges': {
         default: false,
+        type: StoreTypes.Boolean
+    },
+    'showWeatherCells': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showS2Cells': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
+    'showWeatherAlerts': {
+        default: true,
         type: StoreTypes.Boolean
     },
     'playSound': {
@@ -1126,7 +1160,10 @@ var mapData = {
     pokestops: {},
     lurePokemons: {},
     scanned: {},
-    spawnpoints: {}
+    spawnpoints: {},
+    weather: {},
+    s2cells: {},
+    weatherAlerts: {}
 }
 
 // Populated by a JSON request.
@@ -1222,19 +1259,30 @@ function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true, i
     })
 
     var iconname = item['pokemon_id']
-    if (item['form'] > 0) {
-        if (item['form'] < 37) {
-            iconname += item['form']
-        } else {
-            if (item['form'] % 2 == 0) {
-                iconname += `_A`
+    if (item['form'] > 0)
+    {
+        if (item['form'] >= 45 && item['form'] <= 80)
+        {
+            if (item['form'] % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
-            if (item['gender'] == 1) {
+        else
+        {
+            iconname += `_${item['form']}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            if (item['gender'] == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }
@@ -1262,19 +1310,30 @@ function updatePokemonMarker(item, map, scaleByRarity = true, isNotifyPkmn = fal
     marker.setIcon(icon)
 
     var iconname = item['pokemon_id']
-    if (item['form'] > 0) {
-        if (item['form'] < 37) {
-            iconname += item['form']
-        } else {
-            if (item['form'] % 2 == 0) {
-                iconname += `_A`
+    if (item['form'] > 0)
+    {
+        if (item['form'] >= 45 && item['form'] <= 80)
+        {
+            if (item['form'] % 2 == 0)
+            {
+                iconname += '_A'
             }
         }
-    } else {
-        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1) {
-            if (item['gender'] == 1) {
+        else
+        {
+            iconname += `_${item['form']}`
+        }
+    }
+    else
+    {
+        if (genderSpecificSprites.indexOf(item['pokemon_id']) !== -1)
+        {
+            if (item['gender'] == 1)
+            {
                 iconname += '_M'
-            } else {
+            }
+            else
+            {
                 iconname += '_F'
             }
         }

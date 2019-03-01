@@ -25,11 +25,12 @@ from cHaversine import haversine
 from pprint import pformat
 from time import strftime
 from timeit import default_timer
+from timezonefinder import TimezoneFinder
 
 from protos.pogoprotos.enums.pokemon_id_pb2 import _POKEMONID
 
 log = logging.getLogger(__name__)
-
+tf = TimezoneFinder()
 
 def parse_unicode(bytestring):
     decoded_string = bytestring.decode(sys.getfilesystemencoding())
@@ -191,6 +192,9 @@ def get_args():
                         help=('Disables PokeStops from the map (including ' +
                               'parsing them into local db).'),
                         action='store_true', default=False)
+    parser.add_argument('-nd', '--no-devices',
+                        help=('Disables Devices from the map.'),
+                        action='store_true', default=False)
     parser.add_argument('-ssct', '--ss-cluster-time',
                         help=('Time threshold in seconds for spawn point ' +
                               'clustering (0 to disable).'),
@@ -250,12 +254,48 @@ def get_args():
     parser.add_argument('-tf', '--teleport-factor',
                         help=('Teleport factor for the stepsize'),
                         type=float, default=10)
+    parser.add_argument('-twgop', '--teleport-wait-gyms-or-pokestops',
+                        help=('Wait for gym or pokestop data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twg', '--teleport-wait-gyms',
+                        help=('Wait for gym data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twp', '--teleport-wait-pokestops',
+                        help=('Wait for pokestop data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twnowp', '--teleport-wait-nearby-or-wild-pokemon',
+                        help=('Wait for nearby or wild pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twnp', '--teleport-wait-nearby-pokemon',
+                        help=('Wait for nearby pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twwp', '--teleport-wait-wild-pokemon',
+                        help=('Wait for wild pokemon data before teleporting again'),
+                        action='store_true', default=False)
+    parser.add_argument('-twti', '--teleport-wait-teleport-interval',
+                        help=('Wait for teleport interval to expire before teleporting again'),
+                        action='store_true', default=True)
+    parser.add_argument('-twt', '--teleport-wait-timeout',
+                        help=('Maximum time between teleports in seconds'),
+                        type=int, default=120)
     parser.add_argument('-ti', '--teleport-interval',
                         help=('Time between teleports in seconds'),
                         type=int, default=60)
     parser.add_argument('-tig', '--teleport-ignore',
                         help=('Ignore coordinates inside this radius for teleport scheduling'),
                         type=int, default=300)
+    parser.add_argument('-s', '--speed',
+                        help=('Speed in km/h for walking endpoints'),
+                        type=int, default=10)
+    parser.add_argument('-ar', '--arrived-range',
+                        help=('Range in which walking endpoints consider your device as arrived at next location (in metres)'),
+                        type=int, default=40)
+    parser.add_argument('-qed', '--quest-expiration-days',
+                        help=('Number of days before quest info expires (use 0 for no expiration)'),
+                        type=int, default=1)
+    parser.add_argument('-qto', '--quest-timezone-offset',
+                        help=('Minutes between localtime and UTC of the area being scanned'),
+                        type=int, default=0)
     parser.add_argument('-jit', '--jitter',
                         help=('Apply jitter to coordinates for teleport scheduling'),
                         action='store_true', default=True)
@@ -264,6 +304,9 @@ def get_args():
                         type=str, default='RocketMapPlusPlus')
     parser.add_argument('-df', '--devices-file',
                         help=('Device file with trusted devices'),
+                        default='')
+    parser.add_argument('-du', '--devices-page-accounts',
+                        help=('File with trusted device users'),
                         default='')
     group = parser.add_argument_group('Database')
     group.add_argument(
@@ -497,31 +540,31 @@ def get_args():
     args.log_filename = strftime(args.log_filename)
     args.log_filename = args.log_filename.replace('<sn>', '<SN>')
     args.log_filename = args.log_filename.replace('<SN>', args.status_name)
-    
+
     if args.user_auth:
         if not args.user_auth_secret_key:
             print(sys.argv[0] +
                   ": error: arguments -UAs/--user-auth-secret is required.")
             sys.exit(1)
-            
+
         if not args.user_auth_bot_token:
             print(sys.argv[0] +
                   ": error: arguments -UAbt/--user-auth-bot-token is " +
                   "required for fetching user roles from Discord.")
             sys.exit(1)
-            
+
         if args.user_auth_guild_required and not args.user_auth_guild_invite:
             print(sys.argv[0] +
                   ": error: arguments -UAgi/--user-auth-guild-invite is " +
                   "required when using -UAgr/--user-auth-guild-required.")
             sys.exit(1)
-            
+
         if args.user_auth_role_required and not args.user_auth_guild_required:
             print(sys.argv[0] +
                   ": error: arguments -UAgr/--user-auth-guild-required is " +
                   "required when using -UArr/--user-auth-role-required.")
             sys.exit(1)
-            
+
         if args.user_auth_role_required and not args.user_auth_role_invite:
             args.user_auth_role_invite = args.user_auth_guild_invite
 
@@ -570,11 +613,72 @@ def cellid(loc):
 def distance(pos1, pos2):
     return haversine((tuple(pos1))[0:2], (tuple(pos2))[0:2])
 
+def degrees_to_cardinal(d):
+    dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    ix = int((d + 11.25)/22.5 - 0.02)
+    return dirs[ix % 16]
 
 # Return True if distance between two locs is less than distance in meters.
 def in_radius(loc1, loc2, radius):
     return distance(loc1, loc2) < radius
 
+def get_timezone_offset(lat, lng):
+    args = get_args()
+
+    (timezone_offset, status) = get_timezonefinder_timezone_offset(lat, lng)
+    if status != "OK":
+        (timezone_offset, status) = get_gmaps_timezone_offset(lat, lng, args.gmaps_key)
+        if status != "OK":
+            timezone_offset = args.quest_timezone_offset
+
+    return timezone_offset
+
+def get_timezonefinder_timezone_offset(lat, lng):
+    from pytz import timezone
+    import pytz
+
+    utc = pytz.utc
+
+    try:
+        today = datetime.now()
+
+        tz_target = timezone(tf.certain_timezone_at(lat=lat, lng=lng))
+        if tz_target is None:
+            tz_target = timezone(tf.timezone_at(lat=lat, lng=lng))
+            if tz_target is None:
+                tz_target = timezone(tf.closest_timezone_at(lat=lat, lng=lng))
+        if tz_target is None:
+            return (0, "UNKNOWNN_TIMEZONE")
+
+        today_target = tz_target.localize(today)
+        today_utc = utc.localize(today)
+
+        status = "OK"
+        timezone_offset = int((today_utc - today_target).total_seconds() / 60)
+    except Exception as e:
+        log.exception('Unable to retrieve timezone from timezonefinder: %s.', e)
+        status = 'UNKNOWN_ERROR'
+        timezone_offset = None
+
+    return (timezone_offset, status)
+
+def get_gmaps_timezone_offset(lat, lng, gmaps_key):
+    try:
+        r_session = requests.Session()
+        response = r_session.get((
+            'https://maps.googleapis.com/maps/api/timezone/json?' +
+            'location={},{}&timestamp={}&key={}').format(lat, lng, time.time(), gmaps_key),
+            timeout=5)
+        response = response.json()
+        status = response['status']
+        timezone_offset = response.get('rawOffset', 0) + response.get('dstOffset', 0)
+    except Exception as e:
+        log.exception('Unable to retrieve timezone from Google APIs: %s.', e)
+        status = 'UNKNOWN_ERROR'
+        timezone_offset = None
+
+    return (timezone_offset, status)
 
 def i8ln(word):
     if not hasattr(i8ln, 'dictionary'):
@@ -754,7 +858,7 @@ def get_quest_quest_text(quest_json):
     elif quest_type == "QUEST_COMPLETE_GYM_BATTLE":
         NeedToWin = False
         SuperEffecitveCharge = False
-        
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
             if quest_goal_condition_type == "WITH_WIN_GYM_BATTLE_STATUS":
@@ -778,12 +882,12 @@ def get_quest_quest_text(quest_json):
                 quest_text = "Win {} Gym battles".format(quest_goal_target)
             else:
                 quest_text = "Battle in a Gym {} times".format(quest_goal_target)
-      
+
     elif quest_type == "QUEST_COMPLETE_RAID_BATTLE":
         NeedToWin = False
         raid_levels = []
         raid_level_text = ""
-        
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
             if quest_goal_condition_type == "WITH_WIN_RAID_STATUS":
@@ -793,7 +897,7 @@ def get_quest_quest_text(quest_json):
                 raid_levels = quest_goal_condition_with_raid_level.get('raidLevel', [])
             else:
                 return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
-                    
+
         if len(raid_levels) == 0 or len(raid_levels) == 5:
             raid_level_text = ""
         elif len(raid_levels) == 1:
@@ -827,14 +931,40 @@ def get_quest_quest_text(quest_json):
     elif quest_type == "QUEST_AUTOCOMPLETE":
         return "Quest Not Supported! - {}".format(quest_type)
     elif quest_type == "QUEST_USE_BERRY_IN_ENCOUNTER":
+        berry_text = ""
+        catch_text = "to help catch"
+
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
-            return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
+            if quest_goal_condition_type == "WITH_ITEM":
+                withItem = quest_goal_condition.get('withItem', {})
+                item = withItem.get('item', "")
+                if item == "ITEM_RAZZ_BERRY":
+                    berry_text = " Razz"
+                elif item == "ITEM_BLUK_BERRY":
+                    berry_text = " Bluk"
+                elif item == "ITEM_NANAB_BERRY":
+                    berry_text = " Nanab"
+                elif item == "ITEM_WEPAR_BERRY":
+                    berry_text = " Wepar"
+                elif item == "ITEM_PINAP_BERRY":
+                    berry_text = " Pinap"
+                    catch_text = "while catching"
+                elif item == "ITEM_GOLDEN_RAZZ_BERRY":
+                    berry_text = " Golden Razz"
+                elif item == "ITEM_GOLDEN_NANAB_BERRY":
+                    berry_text = " Golden Nanab"
+                elif item == "ITEM_GOLDEN_PINAP_BERRY":
+                    berry_text = " Silver Pinap"
+                else:
+                    return "Item Not Supported! - {} -> {} -> {}".format(quest_type, quest_goal_condition_type, item)
+            else:
+                return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
 
         if quest_goal_target == 1:
-            quest_text = u"Use a Berry to help catch Pok\u00E9mon"
+            quest_text = u"Use a{} Berry {} Pok\u00E9mon".format(berry_text, catch_text)
         else:
-            quest_text = u"Use {} Berries to help catch Pok\u00E9mon".format(quest_goal_target)
+            quest_text = u"Use {}{} Berries {} Pok\u00E9mon".format(quest_goal_target, berry_text, catch_text)
     elif quest_type == "QUEST_UPGRADE_POKEMON":
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
@@ -845,6 +975,7 @@ def get_quest_quest_text(quest_json):
         else:
             quest_text = u"Power up Pok\u00E9mon {} times".format(quest_goal_target)
     elif quest_type == "QUEST_EVOLVE_POKEMON":
+        evolve_text = "Evolve"
         pokemon_type_text = ""
         pokemon_category_text = ""
 
@@ -878,16 +1009,18 @@ def get_quest_quest_text(quest_json):
                     else:
                         pokemon_category_text += ", "
                     pokemon_category_text += pokemon_id.title()
+            elif quest_goal_condition_type == "WITH_ITEM":
+                evolve_text = "Use an item to evolve"
             else:
                 return "Condition Not Supported! - {} -> {}".format(quest_type, quest_goal_condition_type)
-                  
+
         if len(pokemon_category_text) == 0:
             pokemon_category_text = u" Pok\u00E9mon"
 
         if quest_goal_target == 1:
-            quest_text = u"Evolve a{}{}".format(pokemon_type_text, pokemon_category_text)
+            quest_text = u"{} a{}{}".format(evolve_text, pokemon_type_text, pokemon_category_text)
         else:
-            quest_text = u"Evolve {}{}{}".format(quest_goal_target, pokemon_type_text, pokemon_category_text)
+            quest_text = u"{} {}{}{}".format(evolve_text, quest_goal_target, pokemon_type_text, pokemon_category_text)
     elif quest_type == "QUEST_LAND_THROW":
         NiceThrow = False
         GreatThrow = False
@@ -936,12 +1069,12 @@ def get_quest_quest_text(quest_json):
             curveball_text = " Curveball"
         if InARow:
             in_a_row_text = " in a row"
-            
+
         if quest_goal_target == 1:
            quest_text = "Make a{}{}{} Throw".format(n_text, throw_type_text, curveball_text)
         else:
            quest_text = "Make {}{}{} Throws{}".format(quest_goal_target, throw_type_text, curveball_text, in_a_row_text)
-           
+
     elif quest_type == "QUEST_GET_BUDDY_CANDY":
         for quest_goal_condition in quest_goal_conditions:
             quest_goal_condition_type = quest_goal_condition.get('type', "")
@@ -983,10 +1116,10 @@ def get_quest_quest_text(quest_json):
         return "Quest Not Supported! - {}".format(quest_type)
     else:
         return "Quest Not Supported! - {}".format(quest_type)
-        
+
     if quest_text == "":
         quest_text = "Not Supported"
-        
+
     return quest_text
 
 def get_quest_reward_text(quest_json):
@@ -999,7 +1132,7 @@ def get_quest_reward_text(quest_json):
 
     for quest_reward in quest_rewards:
         reward_type = quest_reward.get('type', "")
-        
+
         if reward_type == "UNSET":
             return "Reward Not Supported! - {}".format(reward_type)
         elif reward_type == "EXPERIENCE":
@@ -1051,7 +1184,7 @@ def get_quest_reward_text(quest_json):
                 reward_text = "{} Rare {}".format(reward_item_amount, "Candy" if reward_item_amount == 1 else "Candies")
             else:
                 return "Reward Item Not Supported! - {} -> {} ({})".format(reward_type, reward_item_item, reward_item_amount)
-              
+
         elif reward_type == "STARDUST":
             reward_amount = quest_reward.get('stardust', 0)
             reward_text = "{} Stardust".format(reward_amount)
@@ -1072,7 +1205,7 @@ def get_quest_reward_text(quest_json):
         reward_text = "Not Supported"
 
     return reward_text
-    
+
 def get_pokemon_types(pokemon_id):
     pokemon_types = get_pokemon_data(pokemon_id)['types']
     return map(lambda x: {"type": i8ln(x['type']), "color": x['color']},
@@ -1510,6 +1643,15 @@ def get_debug_dump_link():
     return upload_to_hastebin(result)
 
 
+def point_is_scheduled(key, scheduled_points):
+    found = False
+    for point in scheduled_points:
+        if key == point[2]:
+            found = True
+            break
+    return found
+
+
 def get_pokemon_rarity(total_spawns_all, total_spawns_pokemon):
     spawn_group = 'Common'
 
@@ -1544,49 +1686,55 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
 
         for worker in deviceworkers:
             needtosend = False
+            message = ""
             if worker['deviceid'] not in workers:
                 needtosend = True
-                log.info("New device found: " + worker['deviceid'])
+                message += "New device found: " + worker['deviceid'] + ". "
             else:
                 last_updated = worker['last_updated']
                 difference = (datetime.utcnow() - last_updated).total_seconds()
-                if difference > 300 and worker['fetch'] != 'IDLE':
-                    worker['fetch'] = 'IDLE'
+                if difference > 300 and worker['fetching'] != 'IDLE':
+                    worker['fetching'] = 'IDLE'
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
-                    log.info("Device stopped fetching: " + worker['deviceid'])
+                    message += "Device stopped fetching: " + worker['deviceid'] + ". "
                 last_scanned = worker['last_scanned']
                 if last_scanned is None and worker['scanning'] != -1:
                     worker['scanning'] = -1
                     updateworkers[worker['deviceid']] = worker
                     needtosend = True
-                    log.info("Device has never scanned " + worker['deviceid'])
+                    message += "Device has never scanned " + worker['deviceid'] + ". "
                 else:
                     difference = (datetime.utcnow() - last_scanned).total_seconds()
                     if difference < 60 and worker['scanning'] == 0:
                         worker['scanning'] = 1
                         updateworkers[worker['deviceid']] = worker
                         needtosend = True
-                        log.info("Device is scanning " + worker['deviceid'])
+                        message += "Device is scanning " + worker['deviceid'] + ". "
                     elif difference > 60 and worker['scanning'] == 1:
                         worker['scanning'] = 0
                         updateworkers[worker['deviceid']] = worker
                         needtosend = True
-                        log.info("Device went idle " + worker['deviceid'])
-                    if worker['fetch'] != workers[worker['deviceid']]['fetch']:
+                        message += "Device went idle " + worker['deviceid'] + ". "
+                    if worker['fetching'] != workers[worker['deviceid']]['fetching']:
                         needtosend = True
-                        log.info("Device changed fetching endpoint: " + worker['deviceid'])
+                        message += "Device changed fetching endpoint: " + worker['deviceid'] + ". "
                     if worker['scanning'] != workers[worker['deviceid']]['scanning']:
                         needtosend = True
-                        log.info("Device changed scanning status: " + worker['deviceid'])
+                        message += "Device changed scanning status: " + worker['deviceid'] + ". "
+
+            if message != "":
+                log.info(message)
             workers[worker['deviceid']] = worker.copy()
 
             if needtosend and 'devices' in args.wh_types:
                 wh_worker = {
                     'uuid': worker['deviceid'],
                     'name': worker['name'],
-                    'fetch': worker['fetch'],
-                    'scanning': worker['scanning']
+                    'fetch': worker['fetching'],
+                    'scanning': worker['scanning'],
+                    'type': 'status_update',
+                    'message': message
                 }
                 wh_update_queue.put(('devices', wh_worker))
 

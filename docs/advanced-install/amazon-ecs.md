@@ -2,7 +2,7 @@
 
 > **Warning** -- Most cloud providers have been IP blocked from accessing the API
 
-Amazon ECS is essentially managed docker allowed you to run multi-container environments easily with minimal configuration. In this guide we'll create an ECS Task that will run a single RocketMap container with a MariaDB container for persisting the data
+Amazon ECS is essentially managed docker allowed you to run multi-container environments easily with minimal configuration. In this guide we'll create an ECS Task that will run a single RocketMapPlusPlus container with a MariaDB container for persisting the data
 
 ## Requirements
 
@@ -14,9 +14,6 @@ Amazon ECS is essentially managed docker allowed you to run multi-container envi
 
 In the AWS ECS console create a Task Definition with the JSON below. You will need to set the following values:
 
-* `POGOM_USERNAME` - username for pokemongo
-* `POGOM_PASSWORD` - password for pokemongo
-* `POGOM_AUTH_SERVICE` - Define if you are using google or ptc auth
 * `POGOM_LOCATION` - Location to search
 * `POGOM_DB_USER` - Database user for MariaDB
 * `POGOM_DB_PASS` - Database password for MariaDB
