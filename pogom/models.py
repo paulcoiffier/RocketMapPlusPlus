@@ -3770,7 +3770,15 @@ def bulk_upsert(cls, data, db):
 
     if db.is_closed():
         log.execution("Database connection is closed, connect again")
-        db.connect()
+        db = MyRetryDB(
+            args.db_name,
+            user=args.db_user,
+            password=args.db_pass,
+            host=args.db_host,
+            port=args.db_port,
+            stale_timeout=30,
+            max_connections=None,
+            charset='utf8mb4')
 
     # Prepare for our query.
     conn = db.get_conn()
