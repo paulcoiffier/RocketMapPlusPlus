@@ -66,6 +66,8 @@ class Geofences:
     def get_geofenced_results(self, list_to_check, name=""):
         log.info('Using matplotlib: %s.', self.use_matplotlib)
         log.info('Found %d coordinates to geofence.', len(list_to_check))
+        geofences_to_search_for = name.lower().split(",")
+        log.info('Requested number of geofences: %d, "%s"', len(geofences_to_search_for),name)
 
         if isinstance(list_to_check, dict):
             geofenced_coordinates = {}
@@ -79,7 +81,7 @@ class Geofences:
                 # Coordinate is geofenced if in one geofenced area.
                 if self.geofenced_areas:
                     for va in self.geofenced_areas:
-                        if (name == "" or name == va["name"]) and self._in_area(c, va):
+                        if (name == "" or va["name"].lower() in geofences_to_search_for) and self._in_area(c, va):
                             geofenced_coordinates[key] = item
                             break
                 else:
@@ -96,7 +98,7 @@ class Geofences:
                 # Coordinate is geofenced if in one geofenced area.
                 if self.geofenced_areas:
                     for va in self.geofenced_areas:
-                        if (name == "" or name == va["name"]) and self._in_area(c, va):
+                        if (name == "" or va["name"].lower() in geofences_to_search_for) and self._in_area(c, va):
                             geofenced_coordinates.append(item)
                             break
                 else:

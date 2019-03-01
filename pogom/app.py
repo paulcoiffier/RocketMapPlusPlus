@@ -3762,6 +3762,13 @@ class Pogom(Flask):
         args = get_args()
 
         deviceworker = self.get_device(uuid, latitude, longitude)
+        #Update the username of the device is sent along and incorrect in database
+        username = request_json.get('username','')
+        if username != "" and username != deviceworker['username']:
+            log.info('Updateing username: %s, for UUID:%s', username,uuid)
+            deviceworker['username'] = username
+            self.save_device(deviceworker, True)
+
         endpoint = str(deviceworker.get('endpoint', ''))
         if endpoint == "":
             endpoint = 'scan_loc'
