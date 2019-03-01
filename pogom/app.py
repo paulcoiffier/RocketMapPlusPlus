@@ -883,10 +883,12 @@ class Pogom(Flask):
                                 # Keep a list of sp_ids to return.
                                 sp_id_list.append(spawn_id)
 
+                                expirationTimestampMs = float(p.get('expirationTimestampMs', -1))
+
                                 # time_till_hidden_ms was overflowing causing a negative integer.
                                 # It was also returning a value above 3.6M ms.
-                                if float(p['expirationTimestampMs']) > 0:
-                                    d_t_secs = date_secs(datetime.utcfromtimestamp(float(p['expirationTimestampMs']) / 1000.0))
+                                if expirationTimestampMs > 0:
+                                    d_t_secs = date_secs(datetime.utcfromtimestamp(expirationTimestampMs / 1000.0))
 
                                     # Cover all bases, make sure we're using values < 3600.
                                     # Warning: python uses modulo as the least residue, not as
@@ -974,7 +976,7 @@ class Pogom(Flask):
                                             'disappear_time': calendar.timegm(
                                                 disappear_time.timetuple()),
                                             'last_modified_time': now(),
-                                            'time_until_hidden_ms': float(p['expirationTimestampMs']),
+                                            'time_until_hidden_ms': expirationTimestampMs,
                                             'verified': SpawnPoint.tth_found(sp),
                                             'seconds_until_despawn': seconds_until_despawn,
                                             'spawn_start': start_end[0],

@@ -1715,13 +1715,13 @@ def device_worker_refresher(db_update_queue, wh_update_queue, args):
                         worker['scanning'] = 0
                         updateworkers[worker['deviceid']] = worker
                         needtosend = True
-                        log.info("Device %s went idle",worker['deviceid'])
+                        log.info("Device {} went idle".format(worker['deviceid']))
                     if worker['fetching'] != workers[worker['deviceid']]['fetching']:
                         needtosend = True
-                        log.info("Device {} changed change fetchings endpoint: %s=>%s",worker['deviceid'],worker['fetching'],workers[worker['deviceid']]['fetching'])
+                        log.info("Device {} changed change fetchings endpoint: {}=>{}".format(worker['deviceid'], worker['fetching'], workers[worker['deviceid']]['fetching']))
                     if worker['scanning'] != workers[worker['deviceid']]['scanning']:
                         needtosend = True
-                        log.info("Device {} changed scanning status: %s=>%s",worker['deviceid'],worker['scanning'],workers[worker['deviceid']]['scanning'])
+                        log.info("Device {} changed scanning status: {}=>{}".format(worker['deviceid'], worker['scanning'], workers[worker['deviceid']]['scanning']))
 
             if message != "":
                 log.info(message)
