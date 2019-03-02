@@ -84,7 +84,7 @@ function changeEndpoint(obj) {
     console.log($(this));
     var newendpoint = $(this).val();
     newendpoint = newendpoint.replace("?", "||");
-    newendpoint = newendpoint.replace("&", "|");
+    newendpoint = newendpoint.replace(/&/g, "|");
     console.log(newendpoint);
     $.post('new_endpoint?uuid=' + uuid + '&endpoint=' + newendpoint)
   });
