@@ -198,6 +198,15 @@ def get_args():
     parser.add_argument('-ngeo', '--no-geofences',
                         help=('Disables Geofences from the map.'),
                         action='store_true', default=False)
+    parser.add_argument('-ndp', '--no-devices-page',
+                        help=('Disables Devices Page from the map.'),
+                        action='store_true', default=False)
+    parser.add_argument('-nrp', '--no-raids-page',
+                        help=('Disables Raids Page from the map.'),
+                        action='store_true', default=False)
+    parser.add_argument('-nqp', '--no-quests-page',
+                        help=('Disables Quests Page from the map.'),
+                        action='store_true', default=False)
     parser.add_argument('-dog', '--data-outside-geofences',
                         help=('Show data from outside of Geofences on the map.'),
                         action='store_true', default=False)

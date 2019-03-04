@@ -2070,6 +2070,9 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
+        if args.no_raids_page:
+            abort(404)
+
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
         return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
@@ -2079,6 +2082,9 @@ class Pogom(Flask):
         args = get_args()
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
+
+        if args.no_devices_page:
+            abort(404)
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
@@ -2092,6 +2098,9 @@ class Pogom(Flask):
         args = get_args()
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
+
+        if args.no_quests_page:
+            abort(404)
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
