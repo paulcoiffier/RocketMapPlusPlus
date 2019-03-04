@@ -4064,6 +4064,7 @@ class Pogom(Flask):
 
             deviceworker = self.get_device(uuid, map_lat, map_lng)
             deviceworker['endpoint'] = endpoint
+            log.info("Device {} change endpoint: {} => {}".format(uuid, deviceworker['endpoint'], endpoint))
 
             return self.save_device(deviceworker, True)
 
