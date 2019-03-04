@@ -195,6 +195,12 @@ def get_args():
     parser.add_argument('-nd', '--no-devices',
                         help=('Disables Devices from the map.'),
                         action='store_true', default=False)
+    parser.add_argument('-ngeo', '--no-geofences',
+                        help=('Disables Geofences from the map.'),
+                        action='store_true', default=False)
+    parser.add_argument('-dog', '--data-outside-geofences',
+                        help=('Show data from outside of Geofences on the map.'),
+                        action='store_true', default=False)
     parser.add_argument('-ssct', '--ss-cluster-time',
                         help=('Time threshold in seconds for spawn point ' +
                               'clustering (0 to disable).'),

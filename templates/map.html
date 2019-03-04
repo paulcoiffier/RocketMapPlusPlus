@@ -45,8 +45,12 @@
       <header id="header">
         <a href="#nav"><span class="label">Options</span></a>
         <h1><a href="./">{{mapname}}<img class='rocket icon' src='static/images/rocket.png'></a></h1>
-        <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
-        <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
+        {% if show.pokemons %}
+          <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
+        {% endif %}
+        {% if show.show_auth %}
+          <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
+        {% endif %}
         <span id="weatherInfo" style="float: right; vertical-align: middle;"></span>
       </header>
       <!-- NAV -->
@@ -220,6 +224,7 @@
               </div>
             </div>
               {% endif %}
+              {% if show.devices %}
             <div class="form-control switch-container">
               <h3>Scanned Locations</h3>
               <div class="onoffswitch">
@@ -230,7 +235,6 @@
                 </label>
               </div>
             </div>
-              {% if show.devices %}
             <div class="form-control switch-container">
               <h3>Show Devices</h3>
               <div class="onoffswitch">
