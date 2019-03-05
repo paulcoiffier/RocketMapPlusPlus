@@ -816,6 +816,16 @@ class Pokestop(LatLongModel):
                         }
             orderedpokestops = OrderedDict(sorted(pokestops.items(), key=lambda x: x[1]['distance']))
 
+            maxlength = len(orderedpokestops)
+            if (not isinstance(questless, (bool)) and maxlength > questless):
+                maxlength = questless
+
+            if (not isinstance(maxpoints, (bool)) and maxlength > maxpoints):
+                maxlength = maxpoints
+
+            while len(orderedpokestops) > maxlength:
+                orderedpokestops.popitem()
+
             result = []
             while len(orderedpokestops) > 0:
                 value = orderedpokestops.items()[0][1]
@@ -824,8 +834,6 @@ class Pokestop(LatLongModel):
                 newlong = value['longitude']
                 orderedpokestops.popitem(last=False)
                 orderedpokestops = OrderedDict(sorted(orderedpokestops.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (not isinstance(questless, (bool)) and len(result) == questless) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
-                    break
 
         return result
 
@@ -1174,6 +1182,16 @@ class Gym(LatLongModel):
             newlat = 0
             newlong = 0
 
+            maxlength = len(orderedgyms)
+            if (not isinstance(raidless, (bool)) and maxlength > raidless):
+                maxlength = raidless
+
+            if (not isinstance(maxpoints, (bool)) and maxlength > maxpoints):
+                maxlength = maxpoints
+
+            while len(orderedgyms) > maxlength:
+                orderedgyms.popitem()
+
             result = []
             while len(orderedgyms) > 0:
                 value = orderedgyms.items()[0][1]
@@ -1183,8 +1201,6 @@ class Gym(LatLongModel):
                     newlat = value['latitude']
                     newlong = value['longitude']
                 orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (not isinstance(raidless, (bool)) and len(result) == raidless) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
-                    break
 
         return result
 
@@ -2034,6 +2050,16 @@ class SpawnPoint(LatLongModel):
                         }
             orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
 
+            maxlength = len(orderedspawnpoints)
+            if (not isinstance(unknown_tth, (bool)) and maxlength > unknown_tth):
+                maxlength = unknown_tth
+
+            if (not isinstance(maxpoints, (bool)) and maxlength > maxpoints):
+                maxlength = maxpoints
+
+            while len(orderedspawnpoints) > maxlength:
+                orderedspawnpoints.popitem()
+
             result = []
             while len(orderedspawnpoints) > 0:
                 value = orderedspawnpoints.items()[0][1]
@@ -2042,8 +2068,6 @@ class SpawnPoint(LatLongModel):
                 newlong = value['longitude']
                 orderedspawnpoints.popitem(last=False)
                 orderedspawnpoints = OrderedDict(sorted(orderedspawnpoints.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
-                if (not isinstance(unknown_tth, (bool)) and len(result) == unknown_tth) or (not isinstance(maxpoints, (bool)) and len(result) == maxpoints):
-                    break
 
         return result
 
