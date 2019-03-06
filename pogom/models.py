@@ -776,6 +776,11 @@ class Pokestop(LatLongModel):
 
             queryDict = query.dicts()
 
+            if len(scheduled_points) > 0:
+                query = (query
+                         .where(Pokestop.pokestop_id.not_in(scheduled_points))
+                         .dicts())
+
             pokestop_quest_ids = []
 
             if questless:
@@ -807,13 +812,12 @@ class Pokestop(LatLongModel):
                 longitude = round(p['longitude'], 5)
                 distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                 if (not questless or p['pokestop_id'] not in pokestop_quest_ids) and (dist == 0 or distance <= dist):
-                    if not point_is_scheduled(key, scheduled_points):
-                        pokestops[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance,
-                            'key': key
-                        }
+                    pokestops[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance,
+                        'key': key
+                    }
             orderedpokestops = OrderedDict(sorted(pokestops.items(), key=lambda x: x[1]['distance']))
 
             maxlength = len(orderedpokestops)
@@ -1136,6 +1140,11 @@ class Gym(LatLongModel):
             else:
                 query = (query.where(Gym.last_scanned < datetime.utcnow() - timedelta(seconds=60)).dicts())
 
+            if len(scheduled_points) > 0:
+                query = (query
+                         .where(Gym.gym_id.not_in(scheduled_points))
+                         .dicts())
+
             queryDict = query.dicts()
 
             gym_ids = []
@@ -1170,13 +1179,12 @@ class Gym(LatLongModel):
                 longitude = round(g['longitude'], 5)
                 distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                 if g['gym_id'] in gym_ids and (dist == 0 or distance <= dist):
-                    if not point_is_scheduled(key, scheduled_points):
-                        gyms[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance,
-                            'key': key
-                        }
+                    gyms[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance,
+                        'key': key
+                    }
             orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
 
             newlat = 0
@@ -2030,6 +2038,11 @@ class SpawnPoint(LatLongModel):
                                   (SpawnPoint.longitude <= maxlng))))
                          .dicts())
 
+            if len(scheduled_points) > 0:
+                query = (query
+                         .where(SpawnPoint.id.not_in(scheduled_points))
+                         .dicts())
+
             queryDict = query.dicts()
 
             if len(queryDict) > 0 and geofences.is_enabled():
@@ -2041,13 +2054,12 @@ class SpawnPoint(LatLongModel):
                 longitude = round(sp['longitude'], 5)
                 distance = geopy.distance.vincenty((lat, lng), (latitude, longitude)).km
                 if (not unknown_tth or SpawnPoint.tth_found(sp)) and (dist == 0 or distance <= dist):
-                    if not point_is_scheduled(key, scheduled_points):
-                        spawnpoints[key] = {
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'distance': distance,
-                            'key': key
-                        }
+                    spawnpoints[key] = {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'distance': distance,
+                        'key': key
+                    }
             orderedspawnpoints = OrderedDict(sorted(spawnpoints.items(), key=lambda x: x[1]['distance']))
 
             maxlength = len(orderedspawnpoints)

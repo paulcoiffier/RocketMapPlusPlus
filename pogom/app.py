@@ -2761,13 +2761,19 @@ class Pogom(Flask):
                     del self.deviceschedules[uuid][0]
 
         if len(self.deviceschedules[uuid]) == 0:
-            self.devicesscheduling.append(uuid)
-
             scheduled_points = []
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_spawnpoint':
-                        scheduled_points += self.deviceschedules[dev['deviceid']]
+                        if dev['deviceid'] in self.devicesscheduling:
+                            d = {}
+                            d['latitude'] = deviceworker['latitude']
+                            d['longitude'] = deviceworker['longitude']
+                            return jsonify(d)
+
+                        scheduled_points += [item[2] for item in self.deviceschedules[dev['deviceid']]]
+
+            self.devicesscheduling.append(uuid)
 
             if not self.geofences:
                 from .geofence import Geofences
@@ -3212,13 +3218,19 @@ class Pogom(Flask):
                     del self.deviceschedules[uuid][0]
 
         if len(self.deviceschedules[uuid]) == 0:
-            self.devicesscheduling.append(uuid)
-
             scheduled_points = []
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'walk_pokestop':
-                        scheduled_points += self.deviceschedules[dev['deviceid']]
+                        if dev['deviceid'] in self.devicesscheduling:
+                            d = {}
+                            d['latitude'] = deviceworker['latitude']
+                            d['longitude'] = deviceworker['longitude']
+                            return jsonify(d)
+
+                        scheduled_points += [item[2] for item in self.deviceschedules[dev['deviceid']]]
+
+            self.devicesscheduling.append(uuid)
 
             if not self.geofences:
                 from .geofence import Geofences
@@ -3482,13 +3494,19 @@ class Pogom(Flask):
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
-            self.devicesscheduling.append(uuid)
-
             scheduled_points = []
             if no_overlap:
                 for dev in self.get_active_devices():
                     if dev.get('no_overlap') and dev['fetching'] == 'teleport_gym':
-                        scheduled_points += self.deviceschedules[dev['deviceid']]
+                        if dev['deviceid'] in self.devicesscheduling:
+                            d = {}
+                            d['latitude'] = deviceworker['latitude']
+                            d['longitude'] = deviceworker['longitude']
+                            return jsonify(d)
+
+                        scheduled_points += [item[2] for item in self.deviceschedules[dev['deviceid']]]
+
+            self.devicesscheduling.append(uuid)
 
             if not self.geofences:
                 from .geofence import Geofences
