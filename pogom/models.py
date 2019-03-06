@@ -774,12 +774,12 @@ class Pokestop(LatLongModel):
                                   (Pokestop.longitude <= maxlng))))
                          .dicts())
 
-            queryDict = query.dicts()
-
             if len(scheduled_points) > 0:
                 query = (query
                          .where(Pokestop.pokestop_id.not_in(scheduled_points))
                          .dicts())
+
+            queryDict = query.dicts()
 
             pokestop_quest_ids = []
 
