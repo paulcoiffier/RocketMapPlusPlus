@@ -37,6 +37,7 @@ from .transform import transform_from_wgs_to_gcj
 from .blacklist import fingerprints, get_ip_blacklist
 from .customLog import printPokemon
 import re
+import json
 from werkzeug.datastructures import MultiDict
 
 import geopy
@@ -139,11 +140,11 @@ class Pogom(Flask):
         self.route("/raw_quests", methods=['GET'])(self.raw_quests)
 
         self.route("/loc", methods=['GET'])(self.loc)
-        self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.walk_spawnpoint)
-        self.route("/walk_gpx", methods=['GET', 'POST'])(self.walk_gpx)
-        self.route("/walk_pokestop", methods=['GET', 'POST'])(self.walk_pokestop)
+        self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.old_walk_spawnpoint)
+        self.route("/walk_gpx", methods=['GET', 'POST'])(self.old_walk_gpx)
+        self.route("/walk_pokestop", methods=['GET', 'POST'])(self.old_walk_pokestop)
         self.route("/teleport_gym", methods=['GET', 'POST'])(self.old_teleport_gym)
-        self.route("/teleport_gpx", methods=['GET', 'POST'])(self.teleport_gpx)
+        self.route("/teleport_gpx", methods=['GET', 'POST'])(self.old_teleport_gpx)
         self.route("/scan_loc", methods=['GET', 'POST'])(self.old_scan_loc)
         self.route("/mapcontrolled", methods=['GET', 'POST'])(self.old_mapcontrolled)
         self.route("/loc/<endpoint>", methods=['GET', 'POST'])(self.unifiedEndpoints)
@@ -2584,38 +2585,8 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def walk_spawnpoint(self):
-        if request.method == "GET":
-            request_json = request.args
-        else:
-            request_json = request.get_json()
-
-        map_lat = self.current_location[0]
-        map_lng = self.current_location[1]
-
-        uuid = request_json.get('uuid', '')
-        if uuid == "":
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
-        canusedevice, devicename = self.trusted_device(uuid)
-        if not canusedevice:
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
+    def walk_spawnpoint(self, mapcontrolled, uuid, latitude, longitude, request_json):
         args = get_args()
-
-        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
-        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
-
-        latitude = round(lat, 5)
-        longitude = round(lng, 5)
 
         if latitude == 0 and longitude == 0:
             latitude = map_lat
@@ -2830,38 +2801,8 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def walk_gpx(self):
-        if request.method == "GET":
-            request_json = request.args
-        else:
-            request_json = request.get_json()
-
-        map_lat = self.current_location[0]
-        map_lng = self.current_location[1]
-
-        uuid = request_json.get('uuid', '')
-        if uuid == "":
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
-        canusedevice, devicename = self.trusted_device(uuid)
-        if not canusedevice:
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
+    def walk_gpx(self, mapcontrolled, uuid, latitude, longitude, request_json):
         args = get_args()
-
-        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
-        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
-
-        latitude = round(lat, 5)
-        longitude = round(lng, 5)
 
         if latitude == 0 and longitude == 0:
             latitude = map_lat
@@ -3036,38 +2977,8 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def walk_pokestop(self):
-        if request.method == "GET":
-            request_json = request.args
-        else:
-            request_json = request.get_json()
-
-        map_lat = self.current_location[0]
-        map_lng = self.current_location[1]
-
-        uuid = request_json.get('uuid', '')
-        if uuid == "":
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
-        canusedevice, devicename = self.trusted_device(uuid)
-        if not canusedevice:
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
+    def walk_pokestop(self, mapcontrolled, uuid, latitude, longitude, request_json):
         args = get_args()
-
-        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
-        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
-
-        latitude = round(lat, 5)
-        longitude = round(lng, 5)
 
         if latitude == 0 and longitude == 0:
             latitude = map_lat
@@ -3294,9 +3205,6 @@ class Pogom(Flask):
             deviceworker['last_updated'] = dt_now
             deviceworker['fetching'] = "teleport_gym"
 
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-
             self.save_device(deviceworker)
 
             d = {}
@@ -3441,6 +3349,8 @@ class Pogom(Flask):
                 from .geofence import Geofences
                 self.geofences = Geofences()
 
+            log.warning("Geofences: ".format(geofence))
+
             self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences)
             if raidless and len(self.deviceschedules[uuid]) == 0:
                 self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences)
@@ -3472,39 +3382,9 @@ class Pogom(Flask):
 
         return jsonify(d)
 
-    def teleport_gpx(self):
-        if request.method == "GET":
-            request_json = request.args
-        else:
-            request_json = request.get_json()
-
-        map_lat = self.current_location[0]
-        map_lng = self.current_location[1]
-
-        uuid = request_json.get('uuid', '')
-        if uuid == "":
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
-        canusedevice, devicename = self.trusted_device(uuid)
-        if not canusedevice:
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
-
+    def teleport_gpx(self, mapcontrolled, uuid, latitude, longitude, request_json):
         args = get_args()
         dt_now = datetime.utcnow()
-
-        lat = float(request_json.get('latitude', request_json.get('latitude:', 0)))
-        lng = float(request_json.get('longitude', request_json.get('longitude:', 0)))
-
-        latitude = round(lat, 5)
-        longitude = round(lng, 5)
 
         if latitude == 0 and longitude == 0:
             latitude = map_lat
@@ -3677,6 +3557,18 @@ class Pogom(Flask):
 
         return jsonify(d)
 
+    def old_teleport_gpx(self):
+        return self.unifiedEndpoints('teleport_gpx')
+
+    def old_walk_pokestop(self):
+        return self.unifiedEndpoints('walk_pokestop')
+
+    def old_walk_gpx(self):
+        return self.unifiedEndpoints('walk_gpx')
+
+    def old_walk_spawnpoint(self):
+        return self.unifiedEndpoints('walk_spawnpoint')
+
     def old_mapcontrolled(self):
         return self.unifiedEndpoints('mapcontrolled')
 
@@ -3732,25 +3624,42 @@ class Pogom(Flask):
         if devicename != "" and devicename != deviceworker['name']:
             deviceworker['name'] = devicename
             self.save_device(deviceworker, True)
-
+#MapControlled section
         if (endpoint.lower() == "mapcontrolled"):
             endpoint_re = "(http[s]?://[^/]*/|/|)(?P<endpoint>[^\?]*)\??(?P<attributes>.*)"
             endpointMC = str(deviceworker.get('endpoint', ''))
-            endpoint_base = re.sub(endpoint_re, '\g<endpoint>',  endpointMC)
-            endpoint_attribArray = re.split('&', re.sub(endpoint_re, '\g<attributes>',  endpointMC)) 
-            endpoint_attribMD = MultiDict()
-            for pair in endpoint_attribArray:
-                endpoint_attribMD.add(re.sub("=.*","", pair),re.sub(".*=",'',pair))
-            if endpoint_base == "":
-                return self.scan_loc(True, uuid, latitude, longitude, endpoint_attribMD)
-            elif (endpoint_base == "teleport_gym"):
-                return self.teleport_gym(True, uuid, latitude, longitude, endpoint_attribMD)
+            endpointMC_base = re.sub(endpoint_re, '\g<endpoint>',  endpointMC)
+            endpointMC_attribArray = re.split('&', re.sub(endpoint_re, '\g<attributes>',  endpointMC)) 
+            endpointMC_attribMD = MultiDict()
+            for pair in endpointMC_attribArray:
+                endpointMC_attribMD.add(re.sub("=.*","", pair),re.sub(".*=",'',pair))
+            if (endpointMC_base == "" or endpointMC.lower() == "scan_loc"):
+                return self.scan_loc(True, uuid, latitude, longitude, endpointMC_attribMD)
+            elif (endpointMC_base == "teleport_gym"):
+                return self.teleport_gym(True, uuid, latitude, longitude, endpointMC_attribMD)
+            elif (endpointMC_base.lower() == "teleport_gpx"):
+                return self.teleport_gpx(True, uuid, latitude, longitude, endpointMC_attribMD)
+            elif (endpointMC_base.lower() == "walk_pokestop"):
+                return self.walk_pokestop(True, uuid, latitude, longitude, endpointMC_attribMD)
+            elif (endpointMC_base.lower() == "walk_gpx"):
+                return self.walk_gpx(True, uuid, latitude, longitude, endpointMC_attribMD)
+            elif (endpointMC_base.lower() == "walk_spawnpoint"):
+                return self.walk_spawnpoint(True, uuid, latitude, longitude, endpointMC_attribMD)
             return "Endpoint {} (mapcontrolled) not converted ".format(endpoint)
 
+#Device requiested endpoints
         elif (endpoint.lower() == "teleport_gym"):
             return self.teleport_gym(False, uuid, latitude, longitude, request_json)
         elif (endpoint.lower() == "scan_loc"):
             return self.scan_loc(False, uuid, latitude, longitude, request_json)
+        elif (endpoint.lower() == "teleport_gpx"):
+            return self.teleport_gpx(False, uuid, latitude, longitude, request_json)
+        elif (endpoint.lower() == "walk_pokestop"):
+            return self.walk_pokestop(False, uuid, latitude, longitude, request_json)
+        elif (endpoint.lower() == "walk_gpx"):
+            return self.walk_gpx(False, uuid, latitude, longitude, request_json)
+        elif (endpoint.lower() == "walk_spawnpoint"):
+            return self.walk_spawnpoint(False, uuid, latitude, longitude, request_json)
         elif (endpoint.lower() == "dummy"):
             return "Dummmy :D"
         return "Endpoint {} not converted.".format(endpoint)
@@ -3998,8 +3907,8 @@ class Pogom(Flask):
             endpoint = endpoint.replace('|', '&')
 
             deviceworker = self.get_device(uuid, map_lat, map_lng)
-            deviceworker['endpoint'] = endpoint
             log.info("Device {} change endpoint: {} => {}".format(uuid, deviceworker['endpoint'], endpoint))
+            deviceworker['endpoint'] = endpoint
 
             return self.save_device(deviceworker, True)
 
