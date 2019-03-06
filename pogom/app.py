@@ -2599,9 +2599,6 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetching'] = "walk_spawnpoint"
 
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-
             self.save_device(deviceworker)
 
             d = {}
@@ -2623,38 +2620,15 @@ class Pogom(Flask):
         last_updated = deviceworker['last_updated']
         difference = (datetime.utcnow() - last_updated).total_seconds()
 
-        scheduletimeout = args.scheduletimeout
-        maxradius = args.maxradius
-        stepsize = args.stepsize
-        unknown_tth = False
-        maxpoints = False
-        geofence = ""
-        no_overlap = False
-        mapcontrolled = False
-        speed = args.speed
-        arrived_range = args.arrived_range
-        if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
-            maxradius = request.args.get('maxradius', maxradius)
-            stepsize = request.args.get('stepsize', stepsize)
-            unknown_tth = request.args.get('unknown_tth', unknown_tth)
-            maxpoints = request.args.get('maxpoints', maxpoints)
-            geofence = request.args.get('geofence', geofence)
-            no_overlap = request.args.get('no_overlap', no_overlap)
-            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
-            speed = request.args.get('speed', speed)
-            arrived_range = request.args.get('arrived_range', arrived_range)
-        if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
-            maxradius = request.form.get('maxradius', maxradius)
-            stepsize = request.form.get('stepsize', stepsize)
-            unknown_tth = request.form.get('unknown_tth', unknown_tth)
-            maxpoints = request.form.get('maxpoints', maxpoints)
-            geofence = request.form.get('geofence', geofence)
-            no_overlap = request.form.get('no_overlap', no_overlap)
-            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
-            speed = request.form.get('speed', speed)
-            arrived_range = request.form.get('arrived_range', arrived_range)
+        scheduletimeout = request_json.get('scheduletimeout', args.scheduletimeout)
+        maxradius = request_json.get('maxradius', args.maxradius)
+        stepsize = request_json.get('stepsize', args.stepsize)
+        unknown_tth = request_json.get('unknown_tth', False)
+        maxpoints = request_json.get('maxpoints', False)
+        geofence = request_json.get('geofence', "")
+        no_overlap = request_json.get('no_overlap', False)
+        speed = request_json.get('speed', args.speed)
+        arrived_range = request_json.get('arrived_range', args.arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2794,9 +2768,6 @@ class Pogom(Flask):
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetching'] = "walk_spawnpoint"
 
-        if devicename != "" and devicename != deviceworker['name']:
-            deviceworker['name'] = devicename
-
         self.save_device(deviceworker)
 
         d = {}
@@ -2820,9 +2791,6 @@ class Pogom(Flask):
         if deviceworker['fetching'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetching'] = "walk_gpx"
-
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2976,9 +2944,6 @@ class Pogom(Flask):
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetching'] = "walk_pokestop"
 
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-
             self.save_device(deviceworker)
 
             d = {}
@@ -2998,7 +2963,7 @@ class Pogom(Flask):
                 self.devicesscheduling.remove(uuid)
 
         scheduletimeout = request_json.get('scheduletimeout', args.scheduletimeout)
-        maxradius = request_json.get('maxradius', args.smaxradius)
+        maxradius = request_json.get('maxradius', args.maxradius)
         stepsize = request_json.get('stepsize', args.stepsize)
         questless = request_json.get('questless', False)
         maxpoints = request_json.get('maxpoints', False)
@@ -3147,9 +3112,6 @@ class Pogom(Flask):
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetching'] = "walk_pokestop"
-
-        if devicename != "" and devicename != deviceworker['name']:
-            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 
