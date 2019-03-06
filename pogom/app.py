@@ -619,8 +619,6 @@ class Pogom(Flask):
             if deviceworker['fetching'] == 'IDLE':
                 deviceworker['latitude'] = lat
                 deviceworker['longitude'] = lng
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
 
             self.save_device(deviceworker)
 
@@ -2760,7 +2758,7 @@ class Pogom(Flask):
             if unknown_tth and len(self.deviceschedules[uuid]) == 0:
                 self.deviceschedules[uuid] = SpawnPoint.get_nearby_spawnpoints(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
@@ -2844,23 +2842,10 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
-        scheduletimeout = args.scheduletimeout
-        stepsize = args.stepsize
-        mapcontrolled = False
-        speed = args.speed
-        arrived_range = args.arrived_range
-        if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
-            stepsize = request.args.get('stepsize', stepsize)
-            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
-            speed = request.args.get('speed', speed)
-            arrived_range = request.args.get('arrived_range', arrived_range)
-        if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
-            stepsize = request.form.get('stepsize', stepsize)
-            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
-            speed = request.form.get('speed', speed)
-            arrived_range = request.form.get('arrived_range', arrived_range)
+        scheduletimeout = request_json.get('scheduletimeout', args.scheduletimeout)
+        stepsize = request_json.get('stepsize', args.stepsize)
+        speed = request_json.get('speed', args.speed)
+        arrived_range = request_json.get('arrived_range', args.arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -2899,11 +2884,7 @@ class Pogom(Flask):
         if (deviceworker['fetching'] == 'IDLE' and difference > scheduletimeout * 60) or (deviceworker['fetching'] != 'IDLE' and deviceworker['fetching'] != "walk_gpx"):
             self.deviceschedules[uuid] = []
 
-        routename = ""
-        if request.args:
-            routename = request.args.get('route', "", type=str)
-        if request.form:
-            routename = request.form.get('route', "", type=str)
+        routename = request_json.get('route', "", type=str)
         if routename is None or routename == "":
             routename = uuid
 
@@ -2927,15 +2908,14 @@ class Pogom(Flask):
                     'gpx',
                     routename + ".gpx")
             if gpxfilename == "" or not os.path.isfile(gpxfilename):
-                return self.scan_loc()
+                log.warning("No or incorrect GPX supplied: {}".format(gpxfilename))
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
 
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
             if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
             deviceworker['route'] = routename
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
             self.save_device(deviceworker)
 
         nextlatitude = deviceworker['latitude']
@@ -2971,9 +2951,6 @@ class Pogom(Flask):
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = datetime.utcnow()
         deviceworker['fetching'] = "walk_gpx"
-
-        if devicename != "" and devicename != deviceworker['name']:
-            deviceworker['name'] = devicename
 
         self.save_device(deviceworker)
 
@@ -3020,38 +2997,16 @@ class Pogom(Flask):
             else:
                 self.devicesscheduling.remove(uuid)
 
-        scheduletimeout = args.scheduletimeout
-        maxradius = args.maxradius
-        stepsize = args.stepsize
-        questless = False
-        maxpoints = False
-        geofence = ""
-        no_overlap = False
-        mapcontrolled = False
-        speed = args.speed
-        arrived_range = args.arrived_range
-        if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
-            maxradius = request.args.get('maxradius', maxradius)
-            stepsize = request.args.get('stepsize', stepsize)
-            questless = request.args.get('questless', questless)
-            maxpoints = request.args.get('maxpoints', maxpoints)
-            geofence = request.args.get('geofence', geofence)
-            no_overlap = request.args.get('no_overlap', no_overlap)
-            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
-            speed = request.args.get('speed', speed)
-            arrived_range = request.args.get('arrived_range', arrived_range)
-        if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
-            maxradius = request.form.get('maxradius', maxradius)
-            stepsize = request.form.get('stepsize', stepsize)
-            questless = request.form.get('questless', questless)
-            maxpoints = request.form.get('maxpoints', maxpoints)
-            geofence = request.form.get('geofence', geofence)
-            no_overlap = request.form.get('no_overlap', no_overlap)
-            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
-            speed = request.form.get('speed', speed)
-            arrived_range = request.form.get('arrived_range', arrived_range)
+        scheduletimeout = request_json.get('scheduletimeout', args.scheduletimeout)
+        maxradius = request_json.get('maxradius', args.smaxradius)
+        stepsize = request_json.get('stepsize', args.stepsize)
+        questless = request_json.get('questless', False)
+        maxpoints = request_json.get('maxpoints', False)
+        geofence = request_json.get('geofence', "")
+        no_overlap = request_json.get('no_overlap', False)
+        mapcontrolled = request_json.get('mapcontrolled', False)
+        speed = request_json.get('speed', args.speed)
+        arrived_range = request_json.get('arrived_range', args.arrived_range)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3157,7 +3112,7 @@ class Pogom(Flask):
             if questless and len(self.deviceschedules[uuid]) == 0:
                 self.deviceschedules[uuid] = Pokestop.get_nearby_pokestops(latitude, longitude, maxradius, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
         else:
             nextlatitude = deviceworker['latitude']
             nextlongitude = deviceworker['longitude']
@@ -3373,7 +3328,7 @@ class Pogom(Flask):
             if raidless and len(self.deviceschedules[uuid]) == 0:
                 self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences)
             if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
             self.devices_last_teleport_time[uuid] = dt_now
             self.save_device(deviceworker)
 
@@ -3417,9 +3372,6 @@ class Pogom(Flask):
             deviceworker['last_updated'] = dt_now
             deviceworker['fetching'] = "teleport_gpx"
 
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-
             self.save_device(deviceworker)
 
             d = {}
@@ -3440,15 +3392,8 @@ class Pogom(Flask):
 
         scheduletimeout = args.scheduletimeout
         teleport_interval = args.teleport_interval
-        mapcontrolled = False
-        if request.args:
-            scheduletimeout = request.args.get('scheduletimeout', scheduletimeout)
-            teleport_interval = request.args.get('teleport_interval', teleport_interval)
-            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
-        if request.form:
-            scheduletimeout = request.form.get('scheduletimeout', scheduletimeout)
-            teleport_interval = request.form.get('teleport_interval', teleport_interval)
-            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
+        scheduletimeout = request_json.get('scheduletimeout', scheduletimeout)
+        teleport_interval = request_json.get('teleport_interval', teleport_interval)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3478,10 +3423,7 @@ class Pogom(Flask):
             self.deviceschedules[uuid] = []
 
         routename = ""
-        if request.args:
-            routename = request.args.get('route', "", type=str)
-        if request.form:
-            routename = request.form.get('route', "", type=str)
+        routename = request_json.get('route', "", type=str)
         if routename is None or routename == "":
             routename = uuid
 
@@ -3525,8 +3467,6 @@ class Pogom(Flask):
             if len(self.deviceschedules[uuid]) > 0:
                 del self.deviceschedules[uuid][0]
             self.devices_last_teleport_time[uuid] = dt_now
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
             self.save_device(deviceworker)
 
         if len(self.deviceschedules[uuid]) == 0:
@@ -3537,15 +3477,14 @@ class Pogom(Flask):
                     'gpx',
                     routename + ".gpx")
             if gpxfilename == "" or not os.path.isfile(gpxfilename):
-                return self.scan_loc()
+                log.warning("No or incorrect GPX supplied: {}".format(gpxfilename))
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
 
             self.devicesscheduling.append(uuid)
             self.deviceschedules[uuid] = self.get_gpx_route(gpxfilename)
             if len(self.deviceschedules[uuid]) == 0:
-                return self.scan_loc()
+                return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
             self.devices_last_teleport_time[uuid] = dt_now
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
             deviceworker['route'] = routename
             self.save_device(deviceworker)
 
@@ -3564,9 +3503,6 @@ class Pogom(Flask):
         deviceworker['longitude'] = round(nextlongitude, 5)
         deviceworker['last_updated'] = dt_now
         deviceworker['fetching'] = "teleport_gpx"
-        if devicename != "" and devicename != deviceworker['name']:
-            deviceworker['name'] = devicename
-
         self.save_device(deviceworker)
 
         d = {}
@@ -3683,6 +3619,7 @@ class Pogom(Flask):
         return "Endpoint {} not converted.".format(endpoint)
 
     def scan_loc(self, mapcontrolled, uuid, latitude, longitude, request_json):
+        args = get_args()
         deviceworker = self.get_device(uuid, latitude, longitude)
         if not deviceworker['last_scanned']:
             d = {}
@@ -3694,9 +3631,6 @@ class Pogom(Flask):
         if deviceworker['fetching'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
             deviceworker['fetching'] = "scan_loc"
-            if devicename != "" and devicename != deviceworker['name']:
-                deviceworker['name'] = devicename
-
             self.save_device(deviceworker)
 
             d = {}
@@ -3704,12 +3638,6 @@ class Pogom(Flask):
             d['longitude'] = deviceworker['longitude']
 
             return jsonify(d)
-
-        mapcontrolled = False
-        if request.args:
-            mapcontrolled = request.args.get('mapcontrolled', mapcontrolled)
-        if request.form:
-            mapcontrolled = request.form.get('mapcontrolled', mapcontrolled)
 
         if not isinstance(mapcontrolled, bool):
             try:
@@ -3731,17 +3659,9 @@ class Pogom(Flask):
         step = deviceworker['step']
         direction = deviceworker['direction']
 
-        maxradius = args.maxradius
-        stepsize = args.stepsize
-        teleport_factor = args.teleport_factor
-        if request.args:
-            maxradius = request.args.get('maxradius', maxradius)
-            stepsize = request.args.get('stepsize', stepsize)
-            teleport_factor = request.args.get('teleport_factor', teleport_factor)
-        if request.form:
-            maxradius = request.form.get('maxradius', maxradius)
-            stepsize = request.form.get('stepsize', stepsize)
-            teleport_factor = request.form.get('teleport_factor', teleport_factor)
+        maxradius = request_json.get('maxradius', args.maxradius)
+        stepsize = request_json.get('stepsize', args.stepsize)
+        teleport_factor = request_json.get('teleport_factor', args.teleport_factor)
 
         if latitude != 0 and longitude != 0 and (abs(latitude - currentlatitude) > (radius + teleport_factor) * stepsize or abs(longitude - currentlongitude) > (radius + teleport_factor) * stepsize):
             centerlatitude = latitude
