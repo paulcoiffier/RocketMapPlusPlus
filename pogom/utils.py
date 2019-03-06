@@ -1197,6 +1197,10 @@ def get_quest_reward_text(quest_json):
                 reward_text = "{} Silver Pinap {}".format(reward_item_amount, "Berry" if reward_item_amount == 1 else "Berries")
             elif reward_item_item == "ITEM_RARE_CANDY":
                 reward_text = "{} Rare {}".format(reward_item_amount, "Candy" if reward_item_amount == 1 else "Candies")
+            elif reward_item_item == "ITEM_MOVE_REROLL_FAST_ATTACK":
+                reward_text = "{} Fast {}".format(reward_item_amount, "TM" if reward_item_amount == 1 else "TMs")
+            elif reward_item_item == "ITEM_MOVE_REROLL_SPECIAL_ATTACK":
+                reward_text = "{} Charged {}".format(reward_item_amount, "TM" if reward_item_amount == 1 else "TMs")
             else:
                 return "Reward Item Not Supported! - {} -> {} ({})".format(reward_type, reward_item_item, reward_item_amount)
 
