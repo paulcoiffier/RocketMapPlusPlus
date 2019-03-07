@@ -2054,5 +2054,13 @@
         "duration": 1300,
         "energy": 20,
         "dps": 3.8
+    },
+    "319": {
+        "name": "Power Up Punch",
+        "type": "Fighting",
+        "damage": 50,
+        "duration": 2000,
+        "energy": 33,
+        "dps": 25
     }
 }
