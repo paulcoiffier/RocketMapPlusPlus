@@ -50,17 +50,28 @@ class Geofences:
 
         for va in self.geofenced_areas:
             if (name == "" or name == va["name"]):
-                neLat = va['polygon'][0]['lat']
-                swLat = va['polygon'][0]['lat']
-                neLng = va['polygon'][0]['lon']
-                swLng = va['polygon'][0]['lon']
+                va_swLat = va['polygon'][0]['lat']
+                va_swLng = va['polygon'][0]['lon']
+                va_neLat = va['polygon'][0]['lat']
+                va_neLng = va['polygon'][0]['lon']
 
                 for coords in va['polygon']:
-                    neLat = max(coords['lat'], neLat)
-                    swLat = min(coords['lat'], swLat)
-                    neLng = max(coords['lon'], neLng)
-                    swLng = min(coords['lon'], swLng)
-
+                    va_swLat = min(coords['lat'], va_swLat)
+                    va_swLng = min(coords['lon'], va_swLng)
+                    va_neLat = max(coords['lat'], va_neLat)
+                    va_neLng = max(coords['lon'], va_neLng)
+                    
+                if swLat is None:
+                    swLat = va_swLat
+                    swLng = va_swLng
+                    neLat = va_neLat
+                    neLng = va_neLng
+                else:
+                    swLat = min(swLat, va_swLat)
+                    swLng = min(swLng, va_swLng)
+                    neLat = max(neLat, va_neLat)
+                    neLng = max(neLng, va_neLng)
+                
         return swLat, swLng, neLat, neLng
 
     def get_geofenced_results(self, list_to_check, name=""):
