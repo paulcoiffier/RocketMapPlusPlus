@@ -48,6 +48,7 @@ from protos.pogoprotos.networking.responses.encounter_response_pb2 import Encoun
 from protos.pogoprotos.networking.responses.get_map_objects_response_pb2 import GetMapObjectsResponse, _GETMAPOBJECTSRESPONSE_TIMEOFDAY
 from protos.pogoprotos.networking.responses.gym_get_info_response_pb2 import GymGetInfoResponse
 from protos.pogoprotos.networking.responses.fort_details_response_pb2 import FortDetailsResponse
+from protos.pogoprotos.networking.responses.get_player_response_pb2 import GetPlayerResponse
 from protos.pogoprotos.map.weather.display_weather_pb2 import _DISPLAYWEATHER_DISPLAYLEVEL
 from protos.pogoprotos.map.weather.gameplay_weather_pb2 import _GAMEPLAYWEATHER_WEATHERCONDITION
 from protos.pogoprotos.map.weather.weather_alert_pb2 import _WEATHERALERT_SEVERITY
@@ -1376,6 +1377,22 @@ class Pogom(Flask):
                             })
 
         for proto in protos_dict:
+            if "GetPlayerResponse" in proto:
+                get_player_response_string = b64decode(proto["GetPlayerResponse"])
+
+                gpr = GetPlayerResponse()
+
+                try:
+                    gpr.ParseFromString(get_player_response_string)
+                    get_player_response_json = json.loads(MessageToJson(gpr))
+                except:
+                    continue
+
+                playernickname = get_player_response_json.get("playerData", {}).get("username", "")
+                if playernickname != "" and playernickname != deviceworker["name"] and args.use_username:
+                    deviceworker["name"] = playernickname
+                    self.save_device(deviceworker, True)
+
             if "GymGetInfoResponse" in proto:
                 gym_get_info_response_string = b64decode(proto["GymGetInfoResponse"])
 
@@ -3536,7 +3553,7 @@ class Pogom(Flask):
         if username != "" and username != deviceworker['username']:
             log.info('Updateing username: %s, for UUID:%s', username, uuid)
             deviceworker['username'] = username
-        # Update deviceusername 
+        # Update deviceusername
         if devicename != "" and devicename != deviceworker['name']:
             deviceworker['name'] = devicename
             self.save_device(deviceworker, True)
@@ -3545,7 +3562,7 @@ class Pogom(Flask):
             endpoint_re = "(http[s]?://[^/]*/|/|)(?P<endpoint>[^\?]*)\??(?P<attributes>.*)"
             endpointMC = str(deviceworker.get('endpoint', ''))
             endpointMC_base = re.sub(endpoint_re, '\g<endpoint>',  endpointMC)
-            endpointMC_attribArray = re.split('&', re.sub(endpoint_re, '\g<attributes>',  endpointMC)) 
+            endpointMC_attribArray = re.split('&', re.sub(endpoint_re, '\g<attributes>',  endpointMC))
             endpointMC_attribMD = MultiDict()
             for pair in endpointMC_attribArray:
                 endpointMC_attribMD.add(re.sub("=.*","", pair),re.sub(".*=",'',pair))

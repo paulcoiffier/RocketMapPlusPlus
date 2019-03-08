@@ -323,6 +323,9 @@ def get_args():
     parser.add_argument('-du', '--devices-page-accounts',
                         help=('File with trusted device users'),
                         default='')
+    parser.add_argument('-uu', '--use-username',
+                        help=('Use account username as device friendly name'),
+                        action='store_true', default=True)
     group = parser.add_argument_group('Database')
     group.add_argument(
         '--db-name', help='Name of the database to be used.', required=True)
