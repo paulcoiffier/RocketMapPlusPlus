@@ -3551,8 +3551,9 @@ class Pogom(Flask):
         # Update the username of the device is sent along and incorrect in database
         username = request_json.get('username', '')
         if username != "" and username != deviceworker['username']:
-            log.info('Updateing username: %s, for UUID:%s', username, uuid)
+            log.info('Device {} updating username: {} => {}'.format(uuid, deviceworker['username'], username))
             deviceworker['username'] = username
+            self.save_device(deviceworker, True)
         # Update deviceusername
         if devicename != "" and devicename != deviceworker['name']:
             deviceworker['name'] = devicename
