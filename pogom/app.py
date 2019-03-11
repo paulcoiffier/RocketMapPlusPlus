@@ -3548,6 +3548,14 @@ class Pogom(Flask):
 
         deviceworker = self.get_device(uuid, latitude, longitude)
 
+        # Send coordinates where to start if device never have scanned before
+        if not deviceworker['last_scanned']:
+            d = {}
+            d['latitude'] = map_lat
+            d['longitude'] = map_lng
+
+            return jsonify(d)
+
         # Update the username of the device is sent along and incorrect in database
         username = request_json.get('username', '')
         if username != "" and username != deviceworker['username']:
@@ -3601,12 +3609,6 @@ class Pogom(Flask):
     def scan_loc(self, mapcontrolled, uuid, latitude, longitude, request_json):
         args = get_args()
         deviceworker = self.get_device(uuid, latitude, longitude)
-        if not deviceworker['last_scanned']:
-            d = {}
-            d['latitude'] = map_lat
-            d['longitude'] = map_lng
-
-            return jsonify(d)
 
         if deviceworker['fetching'] == "jump_now":
             deviceworker['last_updated'] = datetime.utcnow()
@@ -3618,15 +3620,6 @@ class Pogom(Flask):
             d['longitude'] = deviceworker['longitude']
 
             return jsonify(d)
-
-        if not isinstance(mapcontrolled, bool):
-            try:
-                if mapcontrolled.lower() == 'true':
-                    mapcontrolled = True
-                else:
-                    mapcontrolled = False
-            except:
-                pass
 
         deviceworker['no_overlap'] = False
         deviceworker['mapcontrolled'] = mapcontrolled
