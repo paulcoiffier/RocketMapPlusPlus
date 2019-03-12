@@ -3100,8 +3100,14 @@ function updateMap() {
         $.each(result.spawnpoints, processSpawnpoint)
         $.each(result.weather, processWeather)
         $.each(result.s2cells, processS2Cell)
-	$.each(calculateS2Cells(getMapCenter(), 14), processS2CellLv14)
-	$.each(calculateS2Cells(getMapCenter(), 17), processS2CellLv17)
+	var loadS2CellsLv14 = Store.get('showS2CellsLv14')
+	if (loadS2CellsLv14 == true) {
+            $.each(calculateS2Cells(getMapCenter(), 14), processS2CellLv14)
+        }
+	var loadS2CellsLv17 = Store.get('showS2CellsLv17')
+	if (loadS2CellsLv14 == true) {
+	    $.each(calculateS2Cells(getMapCenter(), 17), processS2CellLv17)
+        }
         processWeatherAlerts(result.weatherAlerts)
         updateMainCellWeather()
         // showInBoundsMarkers(mapData.pokemons, 'pokemon')
