@@ -220,7 +220,7 @@ function setupS2CellPolygon(item, strokeWeight = 1, strokeColor = '#000000') {
         paths: item.vertices,
         strokeColor: strokeColor,
         strokeOpacity: 0.8,
-        strokeWeight: 1,
+        strokeWeight: strokeWeight,
         fillOpacity: 0,
         fillColor: '#00ff00'
     })

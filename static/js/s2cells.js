@@ -1,28 +1,32 @@
 function calculateS2Cells(latlng, level){
-var cell = S2.S2Cell.FromLatLng(latlng, level);
-var Lv12Cells = []
-//var map = {}
-//map['vertices'] = cell.getCornerLatLngs()
-Lv12Cells.push({s2_cell_id : cell.toHilbertQuadkey(), vertices: cell.getCornerLatLngs()})
-//var Lv12NeighborsPri = cell.getNeighbors()
-//Lv12NeighborsPri.forEach(function(cellPri) {
-//  Lv12NeighborsSec = cellPri.getNeighbors()
-//  Lv12NeighborsSec.forEach(function(cellSec) {
-//    if (Lv12Cells.includes(cellSec.getCornerLatLngs()) == false) {
-//      Lv12Cells.push(cellSec.getCornerLatLngs())
-//    }
-//    console.log("Cells=" + Lv12Cells.length)
-//  });
-//});
-return Lv12Cells
+  var cell = S2.S2Cell.FromLatLng(latlng, level);
+  var Cells = []
+  var visited = []
+  var i;
+  Cells.push({s2_cell_id : cell.toHilbertQuadkey(), vertices: cell.getCornerLatLngs()})
+  visited.push(cell.toHilbertQuadkey())
+  var nextlevel = cell.getNeighbors()
+  var currentlevel;
+  for (i = 0; i < 7; i++) {
+    currentlevel = nextlevel
+    var nextlevel = []
+    currentlevel.forEach(function(cell){
+      if (visited.includes(cell.toHilbertQuadkey()) == false){
+        Cells.push({s2_cell_id : cell.toHilbertQuadkey(), vertices: cell.getCornerLatLngs()})
+        var newcells = cell.getNeighbors()
+        newcells.forEach(function(cell2){
+          if(visited.includes(cell2.toHilbertQuadkey()) == false)
+          {
+            nextlevel.push(cell2)
+          }
+        });
+        nextlevel.concat(newcells)
+        visited.push(cell.toHilbertQuadkey())
+      }
+    });
+  }
+  return Cells
 };
-
-
-//var Lv12Cells = calculateS2Cells(latlng, 12)
-//var myJSON = JSON.stringify(Lv12Cells);
-//console.log("latlng:" + myJSON);
-//console.log("lat:" + map.getcenter().lat);
-//
 
 function processS2CellLv17(i, item) {
     if (!Store.get('showS2CellsLv17')) {
