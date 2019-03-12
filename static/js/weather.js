@@ -215,10 +215,10 @@ function updateWeatherMarker(item, marker) {
  * @param item
  * @returns {google.maps.Polygon}
  */
-function setupS2CellPolygon(item) {
+function setupS2CellPolygon(item, strokeWeight = 1, strokeColor = '#000000') {
     return new google.maps.Polygon({
         paths: item.vertices,
-        strokeColor: '#000000',
+        strokeColor: strokeColor,
         strokeOpacity: 0.8,
         strokeWeight: 1,
         fillOpacity: 0,
