@@ -42,6 +42,8 @@ module.exports = function (grunt) {
                 files: {
                     'static/dist/js/app.built.js': 'static/js/app.js',
                     'static/dist/js/map.built.js': 'static/js/map.js',
+                    'static/dist/js/s2cells.built.js': 'static/js/s2cells.js',
+                    'static/dist/js/s2-geometry.built.js': 'static/js/s2-geometry.js',
                     'static/dist/js/map.common.built.js': 'static/js/map.common.js',
                     'static/dist/js/label.built.js': 'static/js/label.js',
                     'static/dist/js/mobile.built.js': 'static/js/mobile.js',
@@ -70,6 +72,8 @@ module.exports = function (grunt) {
                 files: {
                     'static/dist/js/app.min.js': 'static/dist/js/app.built.js',
                     'static/dist/js/map.min.js': 'static/dist/js/map.built.js',
+                    'static/dist/js/s2cells.min.js': 'static/dist/js/s2cells.built.js',
+                    'static/dist/js/s2-geometry.min.js': 'static/dist/js/s2-geometry.built.js',
                     'static/dist/js/map.common.min.js': 'static/dist/js/map.common.built.js',
                     'static/dist/js/label.min.js': 'static/dist/js/label.built.js',
                     'static/dist/js/mobile.min.js': 'static/dist/js/mobile.built.js',
