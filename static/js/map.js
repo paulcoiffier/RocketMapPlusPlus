@@ -4566,6 +4566,14 @@ $(function () {
         Store.set('scanHere', this.checked)
     })
 
+    if ($('#find-accordion').length) {
+        $('#find-accordion').accordion({
+            active: 0,
+            collapsible: true,
+            heightStyle: 'content'
+        })
+    }
+
     if ($('#nav-accordion').length) {
         $('#nav-accordion').accordion({
             active: 0,

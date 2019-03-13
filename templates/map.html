@@ -481,10 +481,9 @@
       </div>
       </nav>
       <nav id="find">
-        <div id="nav-accordion">
+        <div id="find-accordion">
           <h3><i class="fa fa-map-marker fa-fw"></i>Stops / Gyms</h3>
           <div>
-              {% if show.pokemons %}
             <div class="form-control switch-container">
               <h3>Pokémon</h3>
               <div class="onoffswitch">
@@ -495,9 +494,8 @@
                 </label>
               </div>
             </div>
-              {% endif %}
+          </div>
           <h3><i class="fa fa-location-arrow fa-fw"></i>Quests</h3>
-
           <div>
             <div class="form-control switch-container" >
               <h3>Start map at my position</h3>
@@ -511,9 +509,6 @@
             </div>
           </div>
         </div>
-      <div>
-        <center><button class="settings" onclick="confirm('Are you sure you want to reset settings to default values?') ? (localStorage.clear(), window.location.reload()) : false"><i class="fa fa-refresh fa-fw"></i>Reset Settings</button></center>
-      </div>
       </nav>
       <nav id="gym-details">
         <center><h1>Loading...</h1></center>
