@@ -959,6 +959,10 @@ var StoreOptions = {
         default: true,
         type: StoreTypes.Boolean
     },
+    'showFind': {
+        default: true,
+        type: StoreTypes.Boolean
+    },
     'showPokestops': {
         default: true,
         type: StoreTypes.Boolean

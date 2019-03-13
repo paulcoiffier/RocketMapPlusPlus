@@ -48,6 +48,7 @@
         {% if show.pokemons %}
           <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
         {% endif %}
+          <a href="#find" id="findToggle" class="findNav" style="float: right;"><span class="label">Find</span></a>
         {% if show.show_auth %}
           <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
         {% endif %}
@@ -478,6 +479,44 @@
       <div>
         <center><button class="settings" onclick="confirm('Are you sure you want to reset settings to default values?') ? (localStorage.clear(), window.location.reload()) : false"><i class="fa fa-refresh fa-fw"></i>Reset Settings</button></center>
       </div>
+      </nav>
+      <nav id="find">
+        <div id="nav-accordion">
+          <h3><i class="fa fa-map-marker fa-fw"></i>Stops / Gyms</h3>
+          <div>
+              {% if show.pokemons %}
+            <div class="form-control switch-container">
+              <h3>Pokémon</h3>
+              <div class="onoffswitch">
+                <input id="pokemon-switch" type="checkbox" name="pokemon-switch" class="onoffswitch-checkbox" checked>
+                <label class="onoffswitch-label" for="pokemon-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+              {% endif %}
+          <h3><i class="fa fa-location-arrow fa-fw"></i>Quests</h3>
+
+          <div>
+            <div class="form-control switch-container" >
+              <h3>Start map at my position</h3>
+              <div class="onoffswitch">
+                <input id="start-at-user-location-switch" type="checkbox" name="start-at-user-location-switch" class="onoffswitch-checkbox" checked/>
+                <label class="onoffswitch-label" for="start-at-user-location-switch">
+                <span class="switch-label" data-on="On" data-off="Off"></span>
+                <span class="switch-handle"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div>
+        <center><button class="settings" onclick="confirm('Are you sure you want to reset settings to default values?') ? (localStorage.clear(), window.location.reload()) : false"><i class="fa fa-refresh fa-fw"></i>Reset Settings</button></center>
+      </div>
+      </nav>
+      <nav id="gym-details">
+        <center><h1>Loading...</h1></center>
       </nav>
       <nav id="stats">
         <div class="switch-container">
