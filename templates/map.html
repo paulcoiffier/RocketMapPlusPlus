@@ -344,6 +344,26 @@
                 </div>
             </div>
             <div class="form-control switch-container">
+                <h3>Gym area S2Lv14</h3>
+                <div class="onoffswitch">
+                    <input id="s2cellsLv14-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="s2cellsLv14-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
+                <h3>Stop area S2Lv17</h3>
+                <div class="onoffswitch">
+                    <input id="s2cellsLv17-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="s2cellsLv17-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
                 <h3>Weather Alerts</h3>
                 <div class="onoffswitch">
                     <input id="weather-alerts-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
@@ -530,6 +550,8 @@
     <script src="{{ url_for('static', filename='dist/js/map.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/stats.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/weather.min.js').lstrip('/') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/s2-geometry.min.js').lstrip('/') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/s2cells.min.js').lstrip('/') }}"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&amp;callback=initMap&amp;libraries=places,geometry"></script>
     <script defer src="{{ url_for('static', filename='dist/js/label.min.js').lstrip('/') }}"></script>
     <script async src='https://www.google-analytics.com/analytics.js'></script>
