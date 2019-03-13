@@ -484,18 +484,11 @@
         <div id="find-accordion">
           <h3><i class="fa fa-map-marker fa-fw"></i>Stops / Gyms</h3>
           <div>
-            <div class="form-control switch-container">
-              <h3>Pokémon</h3>
-              <div class="onoffswitch">
-                <input id="pokemon-switch" type="checkbox" name="pokemon-switch" class="onoffswitch-checkbox" checked>
-                <label class="onoffswitch-label" for="pokemon-switch">
-                <span class="switch-label" data-on="On" data-off="Off"></span>
-                <span class="switch-handle"></span>
-                </label>
-              </div>
+            <div id="findStopsGyms" class="form-control switch-container">
+              <center><h1>Loading...</h1></center>
             </div>
-          </div>
-          <h3><i class="fa fa-location-arrow fa-fw"></i>Quests</h3>
+	  </div>
+          <h3><i class="fa fa-binoculars fa-fw"></i>Quests</h3>
           <div>
             <div class="form-control switch-container" >
               <h3>Start map at my position</h3>
@@ -583,6 +576,7 @@
       {% endif %}
     <script src="{{ url_for('static', filename='dist/js/map.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/stats.min.js').lstrip('/') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/find.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/weather.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/s2-geometry.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/s2cells.min.js').lstrip('/') }}"></script>

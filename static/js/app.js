@@ -101,6 +101,7 @@
         $findToggle.addEventListener('click', function (event) {
             event.preventDefault()
             event.stopPropagation()
+	    updateStopsGymsList()
             $find.classList.toggle('visible')
         })
     }
