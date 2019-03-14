@@ -136,9 +136,9 @@ class Pogom(Flask):
         self.route("/auth_callback", methods=['GET'])(self.auth_callback)
         self.route("/auth_logout", methods=['GET'])(self.auth_logout)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
-        self.route("/raw_raid", methods=['GET'])(self.raw_raid)
+        self.route("/raw_raid", methods=['POST'])(self.raw_raid)
         self.route("/raw_devices", methods=['POST'])(self.raw_devices)
-        self.route("/raw_quests", methods=['GET'])(self.raw_quests)
+        self.route("/raw_quests", methods=['POST'])(self.raw_quests)
 
         self.route("/loc", methods=['GET'])(self.loc)
 
