@@ -141,19 +141,23 @@ class Pogom(Flask):
         self.route("/raw_quests", methods=['GET'])(self.raw_quests)
 
         self.route("/loc", methods=['GET'])(self.loc)
-        self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.old_walk_spawnpoint)
-        self.route("/walk_gpx", methods=['GET', 'POST'])(self.old_walk_gpx)
-        self.route("/walk_pokestop", methods=['GET', 'POST'])(self.old_walk_pokestop)
-        self.route("/teleport_gym", methods=['GET', 'POST'])(self.old_teleport_gym)
-        self.route("/teleport_gpx", methods=['GET', 'POST'])(self.old_teleport_gpx)
-        self.route("/scan_loc", methods=['GET', 'POST'])(self.old_scan_loc)
-        self.route("/mapcontrolled", methods=['GET', 'POST'])(self.old_mapcontrolled)
-        self.route("/loc/<endpoint>", methods=['GET', 'POST'])(self.unifiedEndpoints)
 
-        self.route("/next_loc", methods=['POST'])(self.next_loc)
+        if not args.map_only:
+            self.route("/webhook", methods=['GET', 'POST'])(self.webhook)
+            self.route("/walk_spawnpoint", methods=['GET', 'POST'])(self.old_walk_spawnpoint)
+            self.route("/walk_gpx", methods=['GET', 'POST'])(self.old_walk_gpx)
+            self.route("/walk_pokestop", methods=['GET', 'POST'])(self.old_walk_pokestop)
+            self.route("/teleport_gym", methods=['GET', 'POST'])(self.old_teleport_gym)
+            self.route("/teleport_gpx", methods=['GET', 'POST'])(self.old_teleport_gpx)
+            self.route("/scan_loc", methods=['GET', 'POST'])(self.old_scan_loc)
+            self.route("/mapcontrolled", methods=['GET', 'POST'])(self.old_mapcontrolled)
+            self.route("/loc/<endpoint>", methods=['GET', 'POST'])(self.unifiedEndpoints)
+            self.route("/next_loc", methods=['POST'])(self.next_loc)
+            self.route("/new_endpoint", methods=['POST'])(self.new_endpoint)
+
         self.route("/new_name", methods=['POST'])(self.new_name)
         self.route("/new_username", methods=['POST'])(self.new_username)
-        self.route("/new_endpoint", methods=['POST'])(self.new_endpoint)
+
         self.route("/mobile", methods=['GET'])(self.list_pokemon)
         self.route("/search_control", methods=['GET'])(self.get_search_control)
         self.route("/search_control", methods=['POST'])(
@@ -164,7 +168,6 @@ class Pogom(Flask):
         self.route("/get_deviceworkerdata", methods=['GET'])(self.get_deviceworkerdata)
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
-        self.route("/webhook", methods=['GET', 'POST'])(self.webhook)
         self.route("/serviceWorker.min.js", methods=['GET'])(
             self.render_service_worker_js)
         self.route("/feedpokemon", methods=['GET'])(self.feedpokemon)
