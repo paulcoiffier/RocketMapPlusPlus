@@ -2087,7 +2087,7 @@ class Pogom(Flask):
                                show=visibility_flags,
                                mapname=args.mapname,
                                generateImages=str(args.generate_images).lower(),
-                               geofences=geofences,
+                               geofences=str(geofences),
                                )
 
     def raidview(self):
@@ -2104,7 +2104,7 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=geofences,)
+        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=str(geofences),)
 
     def devicesview(self):
         self.heartbeat[0] = now()
@@ -2123,7 +2123,7 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(), geofences=geofences,)
+        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(), geofences=str(geofences),)
 
     def questview(self):
         self.heartbeat[0] = now()
@@ -2139,7 +2139,7 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=geofences,)
+        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=str(geofences),)
 
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
