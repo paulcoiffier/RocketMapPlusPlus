@@ -1003,7 +1003,7 @@ var StoreOptions = {
         default: true,
         type: StoreTypes.Boolean
     },
-    'showS2CellsLv14': {
+    'showS2CellsLv13': {
         default: false,
         type: StoreTypes.Boolean
     },
