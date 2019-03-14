@@ -2466,7 +2466,7 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
-        geofencenames = request.args.get('geofencenames')
+        geofencenames = request.form.get('geofencenames', '')
 
         d = {}
         d['timestamp'] = datetime.utcnow()
@@ -2511,7 +2511,7 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
-        geofencenames = request.args.get('geofencenames')
+        geofencenames = request.form.get('geofencenames', '')
 
         d = {}
 
@@ -2558,7 +2558,7 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
-        geofencenames = request.args.get('geofencenames')
+        geofencenames = request.form.get('geofencenames', '')
 
         d = {}
         d['timestamp'] = datetime.utcnow()
