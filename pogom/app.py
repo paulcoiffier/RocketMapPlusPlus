@@ -2387,7 +2387,12 @@ class Pogom(Flask):
                         'name': g['name'],
                         'coordinates': []
                     }
-                geofences[g['name']]['coordinates'] = g['polygon']
+                for point in g['polygon']:
+                    coordinate = {
+                        'lat': point['latitude'],
+                        'lng': point['longitude']
+                    }
+                    geofences[g['name']]['coordinates'].append(coordinate)
 
             for g in allexcludedgeofences:
                 # Check if already there
@@ -2402,7 +2407,12 @@ class Pogom(Flask):
                         'name': g['name'],
                         'coordinates': []
                     }
-                geofences[g['name']]['coordinates'] = g['polygon']
+                for point in g['polygon']:
+                    coordinate = {
+                        'lat': point['latitude'],
+                        'lng': point['longitude']
+                    }
+                    geofences[g['name']]['coordinates'].append(coordinate)
 
             d['geofences'] = geofences
 
