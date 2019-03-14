@@ -29,7 +29,7 @@ from .userAuth import DiscordAPI
 from .models import (Pokemon, Gym, GymDetails, Pokestop, Raid, ScannedLocation,
                      MainWorker, WorkerStatus, Token,
                      SpawnPoint, DeviceWorker, SpawnpointDetectionData, ScanSpawnPoint, PokestopMember,
-                     Quest, PokestopDetails, Geofence, GymMember, GymPokemon, Weather)
+                     Quest, PokestopDetails, GymMember, GymPokemon, Weather)
 from .utils import (get_args, get_pokemon_name, get_pokemon_types,
                     now, dottedQuadToNum, date_secs, calc_pokemon_level,
                     get_timezone_offset)
@@ -2077,6 +2077,8 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
+        geofences = request.args.get('geofences', '')
+
         return render_template('map.html',
                                lat=map_lat,
                                lng=map_lng,
@@ -2085,6 +2087,7 @@ class Pogom(Flask):
                                show=visibility_flags,
                                mapname=args.mapname,
                                generateImages=str(args.generate_images).lower(),
+                               geofences=geofences,
                                )
 
     def raidview(self):
@@ -2098,7 +2101,10 @@ class Pogom(Flask):
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
-        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
+
+        geofences = request.args.get('geofences', '')
+
+        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=geofences,)
 
     def devicesview(self):
         self.heartbeat[0] = now()
@@ -2114,7 +2120,10 @@ class Pogom(Flask):
         needlogin = True
         if not args.devices_page_accounts:
             needlogin = False
-        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(),)
+
+        geofences = request.args.get('geofences', '')
+
+        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(), geofences=geofences,)
 
     def questview(self):
         self.heartbeat[0] = now()
@@ -2127,7 +2136,10 @@ class Pogom(Flask):
 
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
-        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale,)
+
+        geofences = request.args.get('geofences', '')
+
+        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=geofences,)
 
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.
@@ -2172,6 +2184,8 @@ class Pogom(Flask):
         lastpokemon = request.args.get('lastpokemon')
         lastslocs = request.args.get('lastslocs')
         lastspawns = request.args.get('lastspawns')
+
+        geofencenames = request.args.get('geofencenames')
 
         if request.args.get('luredonly', 'true') == 'true':
             luredonly = True
@@ -2265,8 +2279,8 @@ class Pogom(Flask):
                                                  neLng)))
                 d['reids'] = reids
 
-            if len(d['pokemons']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-                d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'])
+            if len(d['pokemons']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+                d['pokemons'] = self.geofences.get_geofenced_results(d['pokemons'], geofencenames)
 
         if (request.args.get('pokestops', 'true') == 'true' and
                 not args.no_pokestops):
@@ -2282,8 +2296,8 @@ class Pogom(Flask):
                                            oSwLat=oSwLat, oSwLng=oSwLng,
                                            oNeLat=oNeLat, oNeLng=oNeLng,
                                            lured=luredonly))
-            if len(d['pokestops']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-                d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'])
+            if len(d['pokestops']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+                d['pokestops'] = self.geofences.get_geofenced_results(d['pokestops'], geofencenames)
 
         if request.args.get('gyms', 'true') == 'true' and not args.no_gyms:
             if lastgyms != 'true':
@@ -2296,8 +2310,8 @@ class Pogom(Flask):
                         Gym.get_gyms(swLat, swLng, neLat, neLng,
                                      oSwLat=oSwLat, oSwLng=oSwLng,
                                      oNeLat=oNeLat, oNeLng=oNeLng))
-            if len(d['gyms']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-                d['gyms'] = self.geofences.get_geofenced_results(d['gyms'])
+            if len(d['gyms']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+                d['gyms'] = self.geofences.get_geofenced_results(d['gyms'], geofencenames)
 
         if request.args.get('seen', 'false') == 'true':
             d['seen'] = Pokemon.get_seen(int(request.args.get('duration')))
@@ -2328,8 +2342,8 @@ class Pogom(Flask):
                             swLat, swLng, neLat, neLng,
                             oSwLat=oSwLat, oSwLng=oSwLng,
                             oNeLat=oNeLat, oNeLng=oNeLng))
-            if len(d['spawnpoints']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-                d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'])
+            if len(d['spawnpoints']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+                d['spawnpoints'] = self.geofences.get_geofenced_results(d['spawnpoints'], geofencenames)
 
         if request.args.get('status', 'false') == 'true':
             args = get_args()
@@ -2355,24 +2369,40 @@ class Pogom(Flask):
         if request.args.get('weatherAlerts', 'false') == 'true':
             d['weatherAlerts'] = get_weather_alerts(swLat, swLng, neLat, neLng)
 
-        if not args.no_geofences and request.args.get('geofences', 'true') == 'true':
-            db_geofences = Geofence.get_geofences()
+        if not args.no_geofences and request.args.get('geofences', 'true') == 'true' and self.geofences.is_enabled():
+            allgeofences = self.geofences.geofenced_areas
+            allexcludedgeofences = self.geofences.excluded_areas
 
             geofences = {}
-            for g in db_geofences:
+            for g in allgeofences:
                 # Check if already there
+                if geofencenames != '':
+                    geofences_to_search_for = geofencenames.lower().split(",")
+                    if g['name'].lower() not in geofences_to_search_for:
+                        continue
                 geofence = geofences.get(g['name'], None)
                 if not geofence:  # Create a new sub-dict if new
                     geofences[g['name']] = {
-                        'excluded': g['excluded'],
+                        'excluded': False,
                         'name': g['name'],
                         'coordinates': []
                     }
-                coordinate = {
-                    'lat': g['latitude'],
-                    'lng': g['longitude']
-                }
-                geofences[g['name']]['coordinates'].append(coordinate)
+                geofences[g['name']]['coordinates'] = g['polygon']
+
+            for g in allexcludedgeofences:
+                # Check if already there
+                if geofencenames != '':
+                    geofences_to_search_for = geofencenames.lower().split(",")
+                    if g['name'].lower() not in geofences_to_search_for:
+                        continue
+                geofence = geofences.get(g['name'], None)
+                if not geofence:  # Create a new sub-dict if new
+                    geofences[g['name']] = {
+                        'excluded': True,
+                        'name': g['name'],
+                        'coordinates': []
+                    }
+                geofences[g['name']]['coordinates'] = g['polygon']
 
             d['geofences'] = geofences
 
@@ -2436,14 +2466,16 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
+        geofencenames = request.args.get('geofencenames')
+
         d = {}
         d['timestamp'] = datetime.utcnow()
         d['raids'] = Gym.get_raids()
         if not self.geofences:
             from .geofence import Geofences
             self.geofences = Geofences()
-        if len(d['raids']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-            d['raids'] = self.geofences.get_geofenced_results(d['raids'])
+        if len(d['raids']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+            d['raids'] = self.geofences.get_geofenced_results(d['raids'], geofencenames)
         return jsonify(d)
 
     def is_devices_user(self, username, password):
@@ -2479,6 +2511,8 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
+        geofencenames = request.args.get('geofencenames')
+
         d = {}
 
         d['timestamp'] = datetime.utcnow()
@@ -2500,6 +2534,8 @@ class Pogom(Flask):
                         deviceworker['route'] = 0
                         if deviceworker['fetching'] != 'IDLE' and uuid in self.deviceschedules:
                             deviceworker['route'] = len(self.deviceschedules[uuid])
+            if len(d['devices']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+                d['devices'] = self.geofences.get_geofenced_results(d['devices'], geofencenames)
 
         else:
             d['login'] = 'failed'
@@ -2522,6 +2558,8 @@ class Pogom(Flask):
         if args.on_demand_timeout > 0:
             self.control_flags['on_demand'].clear()
 
+        geofencenames = request.args.get('geofencenames')
+
         d = {}
         d['timestamp'] = datetime.utcnow()
 
@@ -2529,7 +2567,7 @@ class Pogom(Flask):
             from .geofence import Geofences
             self.geofences = Geofences()
         if self.geofences.is_enabled():
-            swLat, swLng, neLat, neLng = self.geofences.get_boundary_coords()
+            swLat, swLng, neLat, neLng = self.geofences.get_boundary_coords(geofencenames)
         else:
             swLat = None
             swLng = None
@@ -2538,8 +2576,8 @@ class Pogom(Flask):
 
         d['quests'] = Quest.get_quests(swLat, swLng, neLat, neLng)
 
-        if len(d['quests']) > 0 and not args.data_outside_geofences and self.geofences.is_enabled():
-            d['quests'] = self.geofences.get_geofenced_results(d['quests'])
+        if len(d['quests']) > 0 and (not args.data_outside_geofences or geofencenames != "") and self.geofences.is_enabled():
+            d['quests'] = self.geofences.get_geofenced_results(d['quests'], geofencenames)
 
         return jsonify(d)
 

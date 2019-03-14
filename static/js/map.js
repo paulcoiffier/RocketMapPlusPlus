@@ -2568,7 +2568,8 @@ function loadRawData() {
             'oNeLat': oNeLat,
             'oNeLng': oNeLng,
             'reids': String(reincludedPokemon),
-            'eids': String(excludedPokemon)
+            'eids': String(excludedPokemon),
+            'geofencenames': geofencenames
         },
         dataType: 'json',
         cache: false,

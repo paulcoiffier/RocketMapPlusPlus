@@ -1,39 +1,86 @@
-function start(){
-    showQuests(null);
+var rawDataIsLoading = false
 
-    window.setInterval(updateLabelDiffTime, 1000)
+// Raw data updating
+var minUpdateDelay = 300000 // Minimum delay between updates (in ms).
+var lastRawUpdateTime = new Date()
+
+function showQuests(data) {
+  $('#myTable tbody > tr').remove();
+  console.log("fetch quests");
+  if (data != null){
+    console.log("got data no position");
+    let quests = data['quests'].sort(function(a, b) {
+      return b['last_scanned'] - a['last_scanned'];
+    });
+    $.each( quests, function( key, val ) {
+      let imgSrc
+      if (val['url'] === '') {
+        imgSrc = 'static/images/pokestop/Pokestop_Quest.png'
+      } else {
+        imgSrc = val['url']
+      }
+
+      $( "<tr/>", {
+        "class": 'my-new-list',
+        "type": val['reward_type'],
+        html: "<td><img class='reward-icon' src='static/icons/" + val['icon'] +".png' style='width:100px;height:100px;'></td><td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
+          Quest: "+ val['quest_text']+ "</br> \
+          Reward: "+ val['reward_text'] + "</br> \
+          </td><td><img class='pokestop img sprite' src='" + imgSrc + "' style='width:100px;height:100px;'></td><td>"+ moment(val['last_scanned']).format('HH:mm') + " - <span class='label-countdown' disappears-at='" + val['expiration'] + "'>00m00s</span> left</td>"
+      }).appendTo( "tbody" );
+    });
+    applyFilter();
+  }
 }
 
- function showQuests(position) {
-       $('#myTable tbody > tr').remove();
-       console.log("fetch quests");
-       $.getJSON( "raw_quests", function( data ) {
-           if (data != null){
-                 console.log("got data no position");
-                 let quests = data['quests'].sort(function(a, b) {
-                    return b['last_scanned'] - a['last_scanned'];
-                 });
-                   $.each( quests, function( key, val ) {
-                      let imgSrc
-                      if (val['url'] === '') {
-                          imgSrc = 'static/images/pokestop/Pokestop_Quest.png'
-                      } else {
-                          imgSrc = val['url']
-                      }
+function loadRawData() {
+    return $.ajax({
+        url: 'raw_quests',
+        type: 'post',
+        data: {
+            'geofencenames': geofencenames
+        },
+        dataType: 'json',
+        beforeSend: function () {
+            if (rawDataIsLoading) {
+                return false
+            } else {
+                rawDataIsLoading = true
+            }
+        },
+        complete: function () {
+            rawDataIsLoading = false
+        }
+    })
+}
 
-                      $( "<tr/>", {
-                       "class": 'my-new-list',
-                       "type": val['reward_type'],
-                       html: "<td><img class='reward-icon' src='static/icons/" + val['icon'] +".png' style='width:100px;height:100px;'></td><td><a target=\"_blank\" href=\"https://www.google.com/maps/dir/Current+Location/"+val['latitude']+","+val['longitude']+"\">" + val['name'] + "</a></br> \
-															 Quest: "+ val['quest_text']+ "</br> \
-															 Reward: "+ val['reward_text'] + "</br> \
-                                                             </td><td><img class='pokestop img sprite' src='" + imgSrc + "' style='width:100px;height:100px;'></td><td>"+ moment(val['last_scanned']).format('HH:mm') + " - <span class='label-countdown' disappears-at='" + val['expiration'] + "'>00m00s</span> left</td>"
-                       }).appendTo( "tbody" );
-                   });
-                   applyFilter();
-           }
-   });
- }
+function updateQuests() {
+    lastRawUpdateTime = new Date()
+    loadRawData().done(function (result) {
+        // Parse result on success.
+        showQuests(result)
+    }).always(function () {
+        // Only queue next request when previous is over.
+        // Minimum delay of minUpdateDelay.
+        var diff = new Date() - lastRawUpdateTime
+        var delay = Math.max(minUpdateDelay - diff, 1) // Don't go below 1.
+
+        // Don't use interval.
+        window.setTimeout(updateQuests, delay)
+    })
+}
+
+
+/*
+ * Document ready
+ */
+$(document).ready(function () {
+  loadRawData().done(function (result) {
+    showQuests(result)
+    window.setTimeout(updateQuests, minUpdateDelay)
+    window.setInterval(updateLabelDiffTime, 1000)
+  })
+})
 
 function applyFilter() {
     var input, filter, table, tr, td, i;
