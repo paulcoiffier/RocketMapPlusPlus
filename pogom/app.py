@@ -2389,8 +2389,8 @@ class Pogom(Flask):
                     }
                 for point in g['polygon']:
                     coordinate = {
-                        'lat': point['latitude'],
-                        'lng': point['longitude']
+                        'lat': point['lat'],
+                        'lng': point['lon']
                     }
                     geofences[g['name']]['coordinates'].append(coordinate)
 
@@ -2409,8 +2409,8 @@ class Pogom(Flask):
                     }
                 for point in g['polygon']:
                     coordinate = {
-                        'lat': point['latitude'],
-                        'lng': point['longitude']
+                        'lat': point['lat'],
+                        'lng': point['lon']
                     }
                     geofences[g['name']]['coordinates'].append(coordinate)
 
