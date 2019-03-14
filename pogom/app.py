@@ -2078,6 +2078,13 @@ class Pogom(Flask):
         map_lng = self.current_location[1]
 
         geofences = request.args.get('geofences', '')
+        if not self.geofences:
+            from .geofence import Geofences
+            self.geofences = Geofences()
+        if geofences != '' and self.geofences.is_enabled():
+            swLat, swLng, neLat, neLng = self.geofences.get_boundary_coords(geofences)
+            map_lat = (swLat + neLat) / 2
+            map_lng = (swLng + neLng) / 2
 
         return render_template('map.html',
                                lat=map_lat,
