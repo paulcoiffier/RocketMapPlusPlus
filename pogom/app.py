@@ -1641,7 +1641,7 @@ class Pogom(Flask):
                                     'uuid': deviceworker['deviceid'],
                                     'name': deviceworker['name'],
                                     'type': 'shiny_quest',
-                                    'message': 'A Shiny Quest was discovered for this device at ' + quest_json["fortId"] + '.'
+                                    'message': 'A Shiny Quest was discovered for this device at ' + str(quest_json["fortId"]) + '.'
                                 }
                                 self.wh_update_queue.put(('devices', wh_worker))
 
@@ -1876,7 +1876,7 @@ class Pogom(Flask):
                                 'uuid': deviceworker['deviceid'],
                                 'name': deviceworker['name'],
                                 'type': 'shiny_pokemon',
-                                'message': 'A Shiny Pokemon was discovered for this device at (' + str(wildpokemon['latitude']) + ',' + wildpokemon['longitude'] + ').'
+                                'message': 'A Shiny Pokemon was discovered for this device at (' + str(wildpokemon['latitude']) + ',' + str(wildpokemon['longitude']) + ').'
                             }
                             self.wh_update_queue.put(('devices', wh_worker))
 
