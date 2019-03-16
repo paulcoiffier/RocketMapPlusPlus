@@ -2192,7 +2192,7 @@ class Pogom(Flask):
         lastslocs = request.args.get('lastslocs')
         lastspawns = request.args.get('lastspawns')
 
-        geofencenames = request.args.get('geofencenames')
+        geofencenames = request.args.get('geofencenames', '')
 
         if request.args.get('luredonly', 'true') == 'true':
             luredonly = True
