@@ -2096,6 +2096,7 @@ class Pogom(Flask):
                                generateImages=str(args.generate_images).lower(),
                                geofences=str(geofences),
                                analyticskey=str(args.google_analytics_key),
+                               usegoogleanalytics=True if str(args.google_analytics_key) != '' else False,
                                )
 
     def raidview(self):
@@ -2119,6 +2120,7 @@ class Pogom(Flask):
                                lang=args.locale,
                                geofences=str(geofences),
                                analyticskey=str(args.google_analytics_key),
+                               usegoogleanalytics=True if str(args.google_analytics_key) != '' else False,
                                )
 
     def devicesview(self):
@@ -2146,6 +2148,7 @@ class Pogom(Flask):
                                needlogin=str(needlogin).lower(),
                                geofences=str(geofences),
                                analyticskey=str(args.google_analytics_key),
+                               usegoogleanalytics=True if str(args.google_analytics_key) != '' else False,
                                )
 
     def questview(self):
@@ -2169,6 +2172,7 @@ class Pogom(Flask):
                                lang=args.locale,
                                geofences=str(geofences),
                                analyticskey=str(args.google_analytics_key),
+                               usegoogleanalytics=True if str(args.google_analytics_key) != '' else False,
                                )
 
     def raw_data(self):

@@ -551,8 +551,17 @@
       var showConfig = {{show|tojson|safe}};
       var generateImages = {{generateImages}};
       var geofencenames = {{'`' + geofences + '`'}};
-      var analyticsKey = {{'`' + analyticskey + '`'}};
     </script>
+      {% if usegoogleanalytics %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ analyticskey }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', {{'`' + analyticskey + '`'}});
+    </script>
+      {% endif %}
     <script src="{{ url_for('static', filename='dist/js/app.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/map.common.min.js').lstrip('/') }}"></script>
     <!-- Load custom JS before map.js so it can change Store defaults. -->
