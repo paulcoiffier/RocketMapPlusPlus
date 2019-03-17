@@ -165,6 +165,8 @@ def get_args():
     parser.add_argument('-k', '--gmaps-key',
                         help='Google Maps Javascript API Key.',
                         required=True)
+    parser.add_argument('-gak', '--google-analytics-key',
+                        help='Google Analytics Key.')
     parser.add_argument('--skip-empty',
                         help=('Enables skipping of empty cells in normal ' +
                               'scans - requires previously populated ' +

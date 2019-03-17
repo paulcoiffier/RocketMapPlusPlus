@@ -71,6 +71,16 @@ $(document).ready(function () {
     showRaids(result)
     window.setTimeout(updateRaids, minUpdateDelay)
   })
+
+  // Google Analytics.
+  if (analyticsKey.length > 0) {
+    window.ga = window.ga || function () {
+      (ga.q = ga.q || []).push(arguments)
+    }
+    ga.l = Date.now
+    ga('create', analyticsKey, 'auto')
+    ga('send', 'pageview')
+  }
 })
 
 function load(){

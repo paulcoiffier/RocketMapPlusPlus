@@ -392,6 +392,16 @@ function initMap() { // eslint-disable-line no-unused-vars
     if (Push._agents.chrome.isSupported()) {
         createServiceWorkerReceiver()
     }
+
+    // Google Analytics.
+    if (analyticsKey.length > 0) {
+        window.ga = window.ga || function () {
+            (ga.q = ga.q || []).push(arguments)
+        }
+        ga.l = Date.now
+        ga('create', analyticsKey, 'auto')
+        ga('send', 'pageview')
+    }
 }
 
 function updateLocationMarker(style) {

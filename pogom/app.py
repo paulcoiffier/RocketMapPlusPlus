@@ -2095,6 +2095,7 @@ class Pogom(Flask):
                                mapname=args.mapname,
                                generateImages=str(args.generate_images).lower(),
                                geofences=str(geofences),
+                               analyticskey=str(args.google_analytics_key),
                                )
 
     def raidview(self):
@@ -2111,7 +2112,14 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('raids.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=str(geofences),)
+        return render_template('raids.html',
+                               lat=map_lat,
+                               lng=map_lng,
+                               mapname=args.mapname,
+                               lang=args.locale,
+                               geofences=str(geofences),
+                               analyticskey=str(args.google_analytics_key),
+                               )
 
     def devicesview(self):
         self.heartbeat[0] = now()
@@ -2130,7 +2138,15 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('devices.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, needlogin=str(needlogin).lower(), geofences=str(geofences),)
+        return render_template('devices.html',
+                               lat=map_lat,
+                               lng=map_lng,
+                               mapname=args.mapname,
+                               lang=args.locale,
+                               needlogin=str(needlogin).lower(),
+                               geofences=str(geofences),
+                               analyticskey=str(args.google_analytics_key),
+                               )
 
     def questview(self):
         self.heartbeat[0] = now()
@@ -2146,7 +2162,14 @@ class Pogom(Flask):
 
         geofences = request.args.get('geofences', '')
 
-        return render_template('quests.html', lat=map_lat, lng=map_lng, mapname=args.mapname, lang=args.locale, geofences=str(geofences),)
+        return render_template('quests.html',
+                               lat=map_lat,
+                               lng=map_lng,
+                               mapname=args.mapname,
+                               lang=args.locale,
+                               geofences=str(geofences),
+                               analyticskey=str(args.google_analytics_key),
+                               )
 
     def raw_data(self):
         # Make sure fingerprint isn't blacklisted.

@@ -551,6 +551,7 @@
       var showConfig = {{show|tojson|safe}};
       var generateImages = {{generateImages}};
       var geofencenames = {{'`' + geofences + '`'}};
+      var analyticsKey = {{'`' + analyticskey + '`'}};
     </script>
     <script src="{{ url_for('static', filename='dist/js/app.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/map.common.min.js').lstrip('/') }}"></script>

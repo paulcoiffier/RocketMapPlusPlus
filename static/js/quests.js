@@ -80,6 +80,17 @@ $(document).ready(function () {
     window.setTimeout(updateQuests, minUpdateDelay)
     window.setInterval(updateLabelDiffTime, 1000)
   })
+
+  // Google Analytics.
+  if (analyticsKey.length > 0) {
+    window.ga = window.ga || function () {
+      (ga.q = ga.q || []).push(arguments)
+    }
+    ga.l = Date.now
+    ga('create', analyticsKey, 'auto')
+    ga('send', 'pageview')
+  }
+
 })
 
 function applyFilter() {
