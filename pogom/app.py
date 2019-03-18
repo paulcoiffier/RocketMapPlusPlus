@@ -185,6 +185,7 @@ class Pogom(Flask):
         self.devices_last_teleport_time = {}
         self.geofences = None
         self.devices_users = {}
+        self.ga_alerts = {}
 
     def get_active_devices(self):
         result = []
@@ -626,9 +627,47 @@ class Pogom(Flask):
 
             self.save_device(deviceworker)
 
+            self.track_event('worker', 'sent', uuid)
+
             return self.parse_map_protos(protos, trainerlvl, deviceworker)
         else:
             return 'wrong'
+
+    def track_event(self, category, action, uuid='555', label=None, value=0):
+        args = get_args()
+
+        if args.google_analytics_key == '':
+            return
+
+        last_message_sent = self.ga_alerts.get(uuid, {}).get(category, {}).get(action, None)
+        if last_message_sent is None or (datetime.utcnow() - last_message_sent).total_seconds() > 30:
+            if uuid not in self.ga_alerts:
+                self.ga_alerts[uuid] = {}
+            if category not in self.ga_alerts[uuid]:
+                self.ga_alerts[uuid][category] = {}
+            self.ga_alerts[uuid][category][action] = datetime.utcnow()
+            data = {
+                'v': '1',  # API Version.
+                'tid': args.google_analytics_key,  # Tracking ID / Property ID.
+                # Anonymous Client Identifier. Ideally, this should be a UUID that
+                # is associated with particular user, device, or browser instance.
+                'cid': uuid,
+                't': 'event',  # Event hit type.
+                'ec': category,  # Event category.
+                'ea': action,  # Event action.
+                'el': label,  # Event label.
+                'ev': value,  # Event value, must be an integer
+            }
+
+            import requests
+
+            response = requests.post(
+                'https://www.google-analytics.com/collect', data=data)
+
+            # If the request fails, this will raise a RequestException. Depending
+            # on your application's needs, this may be a non-error and can be caught
+            # by the caller.
+            response.raise_for_status()
 
     def parse_map_protos(self, protos_dict, trainerlvl, deviceworker):
         pokemon = {}
@@ -2689,10 +2728,12 @@ class Pogom(Flask):
         args = get_args()
 
         if latitude == 0 and longitude == 0:
-            latitude = map_lat
-            longitude = map_lng
+            latitude = self.current_location[0]
+            longitude = self.current_location[1]
 
         deviceworker = self.get_device(uuid, latitude, longitude)
+
+        self.track_event('fetch', 'walk_spawnpoint', uuid)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -2882,10 +2923,12 @@ class Pogom(Flask):
         args = get_args()
 
         if latitude == 0 and longitude == 0:
-            latitude = map_lat
-            longitude = map_lng
+            latitude = self.current_location[0]
+            longitude = self.current_location[1]
 
         deviceworker = self.get_device(uuid, latitude, longitude)
+
+        self.track_event('fetch', 'walk_gpx', uuid)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -3034,10 +3077,12 @@ class Pogom(Flask):
         args = get_args()
 
         if latitude == 0 and longitude == 0:
-            latitude = map_lat
-            longitude = map_lng
+            latitude = self.current_location[0]
+            longitude = self.current_location[1]
 
         deviceworker = self.get_device(uuid, latitude, longitude)
+
+        self.track_event('fetch', 'walk_pokestop', uuid)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -3228,6 +3273,8 @@ class Pogom(Flask):
 
         args = get_args()
         dt_now = datetime.utcnow()
+
+        self.track_event('fetch', 'teleport_gym', uuid)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
@@ -3424,10 +3471,12 @@ class Pogom(Flask):
         dt_now = datetime.utcnow()
 
         if latitude == 0 and longitude == 0:
-            latitude = map_lat
-            longitude = map_lng
+            latitude = self.current_location[0]
+            longitude = self.current_location[1]
 
         deviceworker = self.get_device(uuid, latitude, longitude)
+
+        self.track_event('fetch', 'teleport_gpx', uuid)
 
         if uuid not in self.deviceschedules:
             self.deviceschedules[uuid] = []
