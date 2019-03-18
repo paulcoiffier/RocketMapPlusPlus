@@ -4020,7 +4020,9 @@ class Pogom(Flask):
                                lng=self.current_location[1],
                                gmaps_key=args.gmaps_key,
                                show=visibility_flags,
-                               mapname=args.mapname
+                               mapname=args.mapname,
+                               analyticskey=str(args.google_analytics_key),
+                               usegoogleanalytics=True if str(args.google_analytics_key) != '' else False,
                                )
 
     def get_gymdata(self):
