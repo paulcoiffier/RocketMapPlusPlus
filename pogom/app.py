@@ -3126,7 +3126,6 @@ class Pogom(Flask):
         maxpoints = request_json.get('maxpoints', False)
         geofence = request_json.get('geofence', "")
         no_overlap = request_json.get('no_overlap', False)
-        mapcontrolled = request_json.get('mapcontrolled', False)
         speed = request_json.get('speed', args.speed)
         arrived_range = request_json.get('arrived_range', args.arrived_range)
 
@@ -3171,14 +3170,6 @@ class Pogom(Flask):
                     no_overlap = True
                 else:
                     no_overlap = False
-            except:
-                pass
-        if not isinstance(mapcontrolled, bool):
-            try:
-                if mapcontrolled.lower() == 'true':
-                    mapcontrolled = True
-                else:
-                    mapcontrolled = False
             except:
                 pass
         if not isinstance(speed, (int, long)):
