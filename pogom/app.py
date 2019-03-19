@@ -633,19 +633,25 @@ class Pogom(Flask):
         else:
             return 'wrong'
 
-    def track_event(self, category, action, uuid='555', label=None, value=0):
+    def track_event(self, category, action, uuid='555', label=None):
         args = get_args()
 
         if args.google_analytics_key == '':
             return
 
-        last_message_sent = self.ga_alerts.get(uuid, {}).get(category, {}).get(action, None)
+        last_message_sent = self.ga_alerts.get(uuid, {}).get(category, {}).get(action, {}).get('sent', None)
         if last_message_sent is None or (datetime.utcnow() - last_message_sent).total_seconds() > 30:
             if uuid not in self.ga_alerts:
                 self.ga_alerts[uuid] = {}
             if category not in self.ga_alerts[uuid]:
                 self.ga_alerts[uuid][category] = {}
-            self.ga_alerts[uuid][category][action] = datetime.utcnow()
+            if action not in self.ga_alerts[uuid][category]:
+                self.ga_alerts[uuid][category][action] = {
+                    'sent': None,
+                    'count': 0,
+                }
+            self.ga_alerts[uuid][category][action]['sent'] = datetime.utcnow()
+            value = self.ga_alerts[uuid][category][action]['count']
             data = {
                 'v': '1',  # API Version.
                 'tid': args.google_analytics_key,  # Tracking ID / Property ID.
@@ -664,10 +670,14 @@ class Pogom(Flask):
             response = requests.post(
                 'https://www.google-analytics.com/collect', data=data)
 
+            self.ga_alerts[uuid][category][action]['count'] = 0
+
             # If the request fails, this will raise a RequestException. Depending
             # on your application's needs, this may be a non-error and can be caught
             # by the caller.
             response.raise_for_status()
+        else:
+            self.ga_alerts[uuid][category][action]['count'] += 1
 
     def parse_map_protos(self, protos_dict, trainerlvl, deviceworker):
         pokemon = {}
