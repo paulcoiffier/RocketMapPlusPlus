@@ -636,7 +636,7 @@ class Pogom(Flask):
     def track_event(self, category, action, uuid='555', label=None):
         args = get_args()
 
-        if args.google_analytics_key == '':
+        if (args.google_analytics_key == '' or args.google_analytics_key == None):
             return
 
         last_message_sent = self.ga_alerts.get(uuid, {}).get(category, {}).get(action, {}).get('sent', None)
