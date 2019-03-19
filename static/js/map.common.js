@@ -1003,6 +1003,18 @@ var StoreOptions = {
         default: true,
         type: StoreTypes.Boolean
     },
+    'showS2CellsLv13': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
+    'showS2CellsLv14': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
+    'showS2CellsLv17': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showWeatherAlerts': {
         default: true,
         type: StoreTypes.Boolean
@@ -1163,6 +1175,9 @@ var mapData = {
     spawnpoints: {},
     weather: {},
     s2cells: {},
+    s2cellsLv13: {},
+    s2cellsLv14: {},
+    s2cellsLv17: {},
     weatherAlerts: {}
 }
 

@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+      {% if usegoogleanalytics %}
+    <!-- Google Analytics -->
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', {{'`' + analyticskey + '`'}}, 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
+      {% endif %}
+
     <title>{{mapname}} - Devices</title>
 
     <!-- Fav- & Apple-Touch-Icons -->
@@ -56,6 +68,7 @@
 
     <script>
       var needlogin = {{needlogin}};
+      var geofencenames = {{'`' + geofences + '`'}};
     </script>
 
     <!-- Load JS libs before custom scripts. -->

@@ -152,13 +152,13 @@ const genderSpecificSprites = [
     449, 450
 ]
 const possibleShinySprites = [
-    1, 4, 7, 10, 25, 27, 29, 30, 31, 54,
-    58, 74, 77, 81, 88, 90, 92, 96, 98, 104,
-    127, 129, 133, 138, 140, 142, 147, 152, 155, 158,
-    177, 179, 191, 198, 200, 204, 209, 220, 225, 228,
-    246, 261, 263, 276, 278, 296, 302, 304, 307, 311,
-    312, 315, 320, 325, 333, 349, 353, 355, 361, 370,
-    374, 425
+    1, 4, 7, 10, 16, 19, 25, 27, 29, 30,
+    31, 54, 56, 58, 66, 74, 77, 81, 88, 90,
+    94, 92, 96, 98, 104, 127, 129, 133, 138, 140,
+    142, 147, 152, 155, 158, 177, 179, 191, 198, 200,
+    204, 209, 220, 225, 228, 246, 261, 263, 276, 278,
+    296, 302, 304, 307, 311, 312, 315, 320, 325, 333,
+    349, 353, 355, 361, 366, 370, 374, 425
 ]
 
 const excludedRaritiesList = [
@@ -580,6 +580,9 @@ function initSidebar() {
     $('#geofences-switch').prop('checked', Store.get('showGeofences'))
     $('#weather-cells-switch').prop('checked', Store.get('showWeatherCells'))
     $('#s2cells-switch').prop('checked', Store.get('showS2Cells'))
+    $('#s2cellsLv13-switch').prop('checked', Store.get('showS2CellsLv13'))
+    $('#s2cellsLv14-switch').prop('checked', Store.get('showS2CellsLv14'))
+    $('#s2cellsLv17-switch').prop('checked', Store.get('showS2CellsLv17'))
     $('#weather-alerts-switch').prop('checked', Store.get('showWeatherAlerts'))
 
     // Only create the Autocomplete element if it's enabled in template.
@@ -2460,6 +2463,18 @@ function showInBoundsMarkers(markers, type) {
                 if (map.getBounds().intersects(getS2CellBounds(item))) {
                     show = true
                 }
+            } else if(type == 's2cellLv13') {
+                if (map.getBounds().intersects(getS2CellBounds(item))) {
+                    show = true
+                }
+            } else if(type == 's2cellLv14') {
+                if (map.getBounds().intersects(getS2CellBounds(item))) {
+                    show = true
+                }
+            } else if(type == 's2cellLv17') {
+                if (map.getBounds().intersects(getS2CellBounds(item))) {
+                    show = true
+                }
             }
         }
 
@@ -2553,7 +2568,8 @@ function loadRawData() {
             'oNeLat': oNeLat,
             'oNeLng': oNeLng,
             'reids': String(reincludedPokemon),
-            'eids': String(excludedPokemon)
+            'eids': String(excludedPokemon),
+            'geofencenames': geofencenames
         },
         dataType: 'json',
         cache: false,
@@ -3075,6 +3091,11 @@ function updateRoutes(routes) {
     }
 }
 
+function getMapCenter(){
+	var loc = map.getCenter()
+	return {lat : loc.lat(), lng : loc.lng()}
+}
+
 function updateMap() {
     loadRawData().done(function (result) {
         processPokemons(result.pokemons)
@@ -3085,6 +3106,18 @@ function updateMap() {
         $.each(result.spawnpoints, processSpawnpoint)
         $.each(result.weather, processWeather)
         $.each(result.s2cells, processS2Cell)
+	    var loadS2CellsLv13 = Store.get('showS2CellsLv13')
+	    if (loadS2CellsLv13 == true) {
+            $.each(calculateS2Cells(getMapCenter(), 13), processS2CellLv13)
+        }
+	    var loadS2CellsLv14 = Store.get('showS2CellsLv14')
+        if (loadS2CellsLv14 == true) {
+            $.each(calculateS2Cells(getMapCenter(), 14), processS2CellLv14)
+        }
+        var loadS2CellsLv17 = Store.get('showS2CellsLv17')
+	    if (loadS2CellsLv17 == true) {
+	        $.each(calculateS2Cells(getMapCenter(), 17), processS2CellLv17)
+        }
         processWeatherAlerts(result.weatherAlerts)
         updateMainCellWeather()
         // showInBoundsMarkers(mapData.pokemons, 'pokemon')
@@ -3095,6 +3128,9 @@ function updateMap() {
         showInBoundsMarkers(mapData.spawnpoints, 'inbound')
         showInBoundsMarkers(mapData.weather, 'weather')
         showInBoundsMarkers(mapData.s2cells, 's2cell')
+        showInBoundsMarkers(mapData.s2cellsLv13, 's2cellLv13')
+        showInBoundsMarkers(mapData.s2cellsLv14, 's2cellLv14')
+        showInBoundsMarkers(mapData.s2cellsLv17, 's2cellLv17')
         showInBoundsMarkers(mapData.weatherAlerts, 's2cell')
         clearStaleMarkers()
 
@@ -4428,6 +4464,18 @@ $(function () {
 
     $('#s2cells-switch').change(function () {
         buildSwitchChangeListener(mapData, ['s2cells'], 'showS2Cells').bind(this)()
+    })
+
+    $('#s2cellsLv13-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['s2cellsLv13'], 'showS2CellsLv13').bind(this)()
+    })
+
+    $('#s2cellsLv14-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['s2cellsLv14'], 'showS2CellsLv14').bind(this)()
+    })
+
+    $('#s2cellsLv17-switch').change(function () {
+        buildSwitchChangeListener(mapData, ['s2cellsLv17'], 'showS2CellsLv17').bind(this)()
     })
 
     $('#weather-alerts-switch').change(function () {
