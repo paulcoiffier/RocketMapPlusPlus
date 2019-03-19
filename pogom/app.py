@@ -1441,7 +1441,7 @@ class Pogom(Flask):
                     continue
 
                 playernickname = get_player_response_json.get("playerData", {}).get("username", "")
-                if playernickname != "" and playernickname != deviceworker["name"] and args.use_username and len(playernickname) < 100 and 'quest_' not in playernickname:
+                if playernickname != "" and playernickname != deviceworker["name"] and args.use_username and len(playernickname) < 16 and 'quest_' not in playernickname:
                     deviceworker["name"] = playernickname
                     self.save_device(deviceworker, True)
 
