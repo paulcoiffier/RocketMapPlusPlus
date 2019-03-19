@@ -1043,7 +1043,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences, exraidonly):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1072,6 +1072,11 @@ class Gym(LatLongModel):
             if len(scheduled_points) > 0:
                 query = (query
                          .where(Gym.gym_id.not_in(scheduled_points))
+                         .dicts())
+
+            if exraidonly:
+                query = (query
+                         .where(Gym.is_ex_raid_eligible)
                          .dicts())
 
             queryDict = query.dicts()
