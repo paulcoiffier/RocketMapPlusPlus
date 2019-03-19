@@ -1185,6 +1185,9 @@ var mapData = {
     weatherAlerts: {}
 }
 
+// used by FindPane
+var fp_circled
+
 // Populated by a JSON request.
 var pokemonRarities = {}
 

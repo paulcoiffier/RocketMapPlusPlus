@@ -2110,6 +2110,7 @@ class Pogom(Flask):
             'custom_css': args.custom_css,
             'custom_js': args.custom_js,
             'devices': not args.no_devices,
+            'find_pane': not args.no_find_pane,
             'show_auth': True if args.user_auth else False
         }
 

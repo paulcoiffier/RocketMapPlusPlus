@@ -60,7 +60,9 @@
         {% if show.pokemons %}
           <a href="#stats" id="statsToggle" class="statsNav" style="float: right;"><span class="label">Stats</span></a>
         {% endif %}
+        {% if show.find_pane %}
           <a href="#find" id="findToggle" class="findNav" style="float: right;"><span class="label">Find</span></a>
+        {% endif %}
         {% if show.show_auth %}
           <a href="auth_logout" style="float: right;"><span class="label">Log-Out</span></a>
         {% endif %}
@@ -502,14 +504,20 @@
         <center><button class="settings" onclick="confirm('Are you sure you want to reset settings to default values?') ? (localStorage.clear(), window.location.reload()) : false"><i class="fa fa-refresh fa-fw"></i>Reset Settings</button></center>
       </div>
       </nav>
+{% if show.find_pane %}
       <nav id="find">
         <div id="find-accordion">
           <h3><i class="fa fa-map-marker fa-fw"></i>Stops / Gyms</h3>
           <div>
+            <div id="findStopsGymsFilter" class="form-control switch-container">
+              <h3>Filter: </h3>
+	      <input type="text" id="fp_sg_filter" onchange="updateStopsGymsList()"/>
+            </div>
             <div id="findStopsGyms" class="form-control switch-container">
               <center><h1>Loading...</h1></center>
             </div>
 	  </div>
+	  {% if false %}
           <h3><i class="fa fa-binoculars fa-fw"></i>Quests</h3>
           <div>
             <div class="form-control switch-container" >
@@ -523,8 +531,10 @@
               </div>
             </div>
           </div>
+{% endif %}
         </div>
       </nav>
+{% endif %}
       <nav id="gym-details">
         <center><h1>Loading...</h1></center>
       </nav>
