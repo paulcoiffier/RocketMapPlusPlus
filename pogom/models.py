@@ -690,6 +690,10 @@ class Pokestop(LatLongModel):
             lat2 = lat + 0.1
             lng1 = lng - 0.1
             lng2 = lng + 0.1
+
+            if geofence_name != "":
+                lat1, lng1, lat2, lng2 = geofences.get_boundary_coords(geofence_name)
+
             minlat = min(lat1, lat2)
             maxlat = max(lat1, lat2)
             minlng = min(lng1, lng2)
@@ -1053,6 +1057,10 @@ class Gym(LatLongModel):
             lat2 = lat + 0.1
             lng1 = lng - 0.1
             lng2 = lng + 0.1
+
+            if geofence_name != "":
+                lat1, lng1, lat2, lng2 = geofences.get_boundary_coords(geofence_name)
+
             minlat = min(lat1, lat2)
             maxlat = max(lat1, lat2)
             minlng = min(lng1, lng2)
@@ -1959,6 +1967,10 @@ class SpawnPoint(LatLongModel):
             lat2 = lat + 0.1
             lng1 = lng - 0.1
             lng2 = lng + 0.1
+
+            if geofence_name != "":
+                lat1, lng1, lat2, lng2 = geofences.get_boundary_coords(geofence_name)
+
             minlat = min(lat1, lat2)
             maxlat = max(lat1, lat2)
             minlng = min(lng1, lng2)
