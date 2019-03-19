@@ -165,6 +165,8 @@ def get_args():
     parser.add_argument('-k', '--gmaps-key',
                         help='Google Maps Javascript API Key.',
                         required=True)
+    parser.add_argument('-gak', '--google-analytics-key',
+                        help='Google Analytics Key.')
     parser.add_argument('--skip-empty',
                         help=('Enables skipping of empty cells in normal ' +
                               'scans - requires previously populated ' +
@@ -206,6 +208,9 @@ def get_args():
                         action='store_true', default=False)
     parser.add_argument('-nqp', '--no-quests-page',
                         help=('Disables Quests Page from the map.'),
+                        action='store_true', default=False)
+    parser.add_argument('-mo', '--map-only',
+                        help=('Disables Worker mode and Fetch mode endpoints from the map.'),
                         action='store_true', default=False)
     parser.add_argument('-dog', '--data-outside-geofences',
                         help=('Show data from outside of Geofences on the map.'),

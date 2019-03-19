@@ -2,6 +2,18 @@
 <html lang="{{lang}}">
   <head>
     <meta charset="utf-8">
+
+      {% if usegoogleanalytics %}
+    <!-- Google Analytics -->
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', {{'`' + analyticskey + '`'}}, 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
+      {% endif %}
+
     <title>{{mapname}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -345,6 +357,16 @@
                 </div>
             </div>
             <div class="form-control switch-container">
+                <h3>Gym area S2Lv13</h3>
+                <div class="onoffswitch">
+                    <input id="s2cellsLv13-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
+                    <label class="onoffswitch-label" for="s2cellsLv13-switch">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-control switch-container">
                 <h3>Gym area S2Lv14</h3>
                 <div class="onoffswitch">
                     <input id="s2cellsLv14-switch" type="checkbox" name="ranges-switch" class="onoffswitch-checkbox">
@@ -567,6 +589,7 @@
       var centerLng = {{lng}};
       var showConfig = {{show|tojson|safe}};
       var generateImages = {{generateImages}};
+      var geofencenames = {{'`' + geofences + '`'}};
     </script>
     <script src="{{ url_for('static', filename='dist/js/app.min.js').lstrip('/') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/map.common.min.js').lstrip('/') }}"></script>
@@ -582,6 +605,5 @@
     <script src="{{ url_for('static', filename='dist/js/s2cells.min.js').lstrip('/') }}"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&amp;callback=initMap&amp;libraries=places,geometry"></script>
     <script defer src="{{ url_for('static', filename='dist/js/label.min.js').lstrip('/') }}"></script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
   </body>
 </html>

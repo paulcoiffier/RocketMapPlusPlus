@@ -6,7 +6,6 @@ import timeit
 import logging
 
 from .utils import get_args
-from .models import Geofence
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,6 @@ class Geofences:
                 args.geofence_file, excluded=False)
             self.excluded_areas = self.parse_geofences_file(
                 args.geofence_excluded_file, excluded=True)
-            Geofence.push_geofences(self.geofenced_areas + self.excluded_areas)
             log.info('Loaded %d geofenced and %d excluded areas.',
                      len(self.geofenced_areas),
                      len(self.excluded_areas))
@@ -48,8 +46,10 @@ class Geofences:
         neLat = None
         neLng = None
 
+        geofences_to_search_for = name.lower().split(",")
+
         for va in self.geofenced_areas:
-            if (name == "" or name == va["name"]):
+            if (name == "" or va["name"].lower() in geofences_to_search_for):
                 va_swLat = va['polygon'][0]['lat']
                 va_swLng = va['polygon'][0]['lon']
                 va_neLat = va['polygon'][0]['lat']
@@ -60,7 +60,7 @@ class Geofences:
                     va_swLng = min(coords['lon'], va_swLng)
                     va_neLat = max(coords['lat'], va_neLat)
                     va_neLng = max(coords['lon'], va_neLng)
-                    
+
                 if swLat is None:
                     swLat = va_swLat
                     swLng = va_swLng
@@ -71,14 +71,15 @@ class Geofences:
                     swLng = min(swLng, va_swLng)
                     neLat = max(neLat, va_neLat)
                     neLng = max(neLng, va_neLng)
-                
+
         return swLat, swLng, neLat, neLng
 
     def get_geofenced_results(self, list_to_check, name=""):
         log.info('Using matplotlib: %s.', self.use_matplotlib)
         log.info('Found %d coordinates to geofence.', len(list_to_check))
         geofences_to_search_for = name.lower().split(",")
-        log.info('Requested number of geofences: %d, "%s"', len(geofences_to_search_for),name)
+        if name != "":
+            log.info('Requested number of geofences: %d, "%s"', len(geofences_to_search_for), name)
 
         if isinstance(list_to_check, dict):
             geofenced_coordinates = {}

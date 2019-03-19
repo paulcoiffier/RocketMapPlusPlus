@@ -38,11 +38,9 @@ function showDevices(data) {
   }
 }
 
-   function changeClass(obj)
-   {
-       $('#' + obj.id).toggleClass('inactive');
-
-   }
+function changeClass(obj){
+  $('#' + obj.id).toggleClass('inactive');
+}
 
 function changeLocation(obj) {
   var buttonid = obj.id;
@@ -105,7 +103,8 @@ function loadRawData() {
         type: 'post',
         data: {
             'username': statusPageUsername,
-            'password': statusPagePassword
+            'password': statusPagePassword,
+            'geofencenames': geofencenames
         },
         dataType: 'json',
         beforeSend: function () {
@@ -176,4 +175,5 @@ $(document).ready(function () {
         }
       })
     }
+
 })

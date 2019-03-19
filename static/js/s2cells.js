@@ -52,3 +52,15 @@ function processS2CellLv14(i, item) {
         mapData.s2cellsLv14[s2CellId] = item
     }
 }
+function processS2CellLv13(i, item) {
+    if (!Store.get('showS2CellsLv13')) {
+        return false
+    }
+
+    var s2CellId = item.s2_cell_id
+    if (!(s2CellId in mapData.s2cellsLv13)) {
+        safeDelMarker(item)
+        item.marker = setupS2CellPolygon(item, 1.5 ,'#CB42F4')
+        mapData.s2cellsLv13[s2CellId] = item
+    }
+}

@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+      {% if usegoogleanalytics %}
+    <!-- Google Analytics -->
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', {{'`' + analyticskey + '`'}}, 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
+      {% endif %}
+
     <title>{{mapname}} - Quests</title>
 
     <!-- Fav- & Apple-Touch-Icons -->
@@ -25,7 +37,7 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/appicons/180x180.png').lstrip('/') }}" sizes="180x180">
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/quests.min.css').lstrip('/') }}">
 </head>
-<body class="questsPage" onload="start()">
+<body class="questsPage">
     <input type="text" id="quest" onkeyup="applyFilter()" placeholder="Search for pokestop or quest.." title="Type in a pokestop or quest">
     <table id="myTable">
         <thead>
@@ -39,6 +51,9 @@
         <tbody>
         </tbody>
     </table>
+    <script>
+      var geofencenames = {{'`' + geofences + '`'}};
+    </script>
     <!-- Load JS libs before custom scripts. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>

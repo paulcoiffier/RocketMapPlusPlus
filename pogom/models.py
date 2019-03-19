@@ -48,7 +48,7 @@ args = get_args()
 flaskDb = FlaskDB()
 cache = TTLCache(maxsize=100, ttl=60 * 5)
 
-db_schema_version = 60
+db_schema_version = 61
 
 
 class MyRetryDB(RetryOperationalError, PooledMySQLDatabase):
@@ -343,77 +343,6 @@ class Pokemon(LatLongModel):
                  )
 
         return list(itertools.chain(*query))
-
-
-# Geofence DB Model
-class Geofence(BaseModel):
-    name = Utf8mb4CharField(max_length=50)
-    excluded = BooleanField()
-    coordinates_id = SmallIntegerField()
-    latitude = DoubleField()
-    longitude = DoubleField()
-
-    class Meta:
-        primary_key = False
-
-    @staticmethod
-    def clear_all():
-        # Remove all geofences without interfering with other threads.
-        with flaskDb.database.transaction():
-            DeleteQuery(Geofence).execute()
-
-    @staticmethod
-    def remove_duplicates(geofences):
-        # Remove old geofences without interfering with other DB threads.
-        with flaskDb.database.transaction():
-            for g in geofences:
-                (DeleteQuery(Geofence)
-                 .where(Geofence.name == g['name'])
-                 .execute())
-
-    @staticmethod
-    def push_geofences(geofences):
-        Geofence.remove_duplicates(geofences)
-
-        db_geofences = []
-        for g in geofences:
-            coordinates_id = 0
-            for c in g['polygon']:
-                db_geofences.append({
-                    'excluded': g['excluded'],
-                    'name': g['name'],
-                    'coordinates_id': coordinates_id,
-                    'latitude': c['lat'],
-                    'longitude': c['lon']
-                })
-                coordinates_id = coordinates_id + 1
-
-        # Make a DB save.
-        with flaskDb.database.transaction():
-            Geofence.insert_many(db_geofences).execute()
-
-        return db_geofences
-
-    @staticmethod
-    def get_geofences():
-        query = Geofence.select().dicts()
-
-        # Performance:  disable the garbage collector prior to creating a
-        # (potentially) large dict with append().
-        gc.disable()
-
-        geofences = []
-        for g in query:
-            if args.china:
-                g['polygon']['latitude'], g['polygon']['longitude'] = \
-                    transform_from_wgs_to_gcj(g['polygon']['latitude'],
-                                              g['polygon']['longitude'])
-            geofences.append(g)
-
-        # Re-enable the GC.
-        gc.enable()
-
-        return geofences
 
 
 class Quest(BaseModel):
@@ -1114,7 +1043,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences, exraidonly):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1143,6 +1072,11 @@ class Gym(LatLongModel):
             if len(scheduled_points) > 0:
                 query = (query
                          .where(Gym.gym_id.not_in(scheduled_points))
+                         .dicts())
+
+            if exraidonly:
+                query = (query
+                         .where(Gym.is_ex_raid_eligible)
                          .dicts())
 
             queryDict = query.dicts()
@@ -3948,7 +3882,7 @@ def create_tables(db):
               GymMember, GymPokemon, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
               Token, LocationAltitude, PlayerLocale, HashKeys, Weather, DeviceWorker, PokestopMember,
-              Quest, PokestopDetails, Geofence]
+              Quest, PokestopDetails]
     with db.execution_context():
         for table in tables:
             if not table.table_exists():
@@ -3965,7 +3899,7 @@ def drop_tables(db):
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
               Token, HashKeys, Weather, DeviceWorker, PokestopMember,
-              Quest, PokestopDetails, Geofence]
+              Quest, PokestopDetails]
     with db.execution_context():
         db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
         for table in tables:
@@ -4324,6 +4258,8 @@ def database_migrate(db, old_ver):
             migrator.drop_column('deviceworker', 'discord_id'),
             migrator.add_column('deviceworker', 'username', Utf8mb4CharField(max_length=100, default="")),
         )
+    if old_ver < 61:
+        db.execute_sql('DROP TABLE `geofence`;')
 
     # Always log that we're done.
     log.info('Schema upgrade complete.')
