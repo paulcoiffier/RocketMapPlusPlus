@@ -5,23 +5,23 @@
 
 Live visualization of all the Pokémon (with option to show gyms, raids and PokéStops) in your area. This is a proof of concept that we can load all the Pokémon visible nearby given a location. Currently runs on a Flask server displaying Google Maps with markers on it. The data for these maps should come from the 'host your own map' functionality of [Pokemon Go ++](https://www.globalplusplus.com).
 
-## Features:
+## Fonctionnalités:
 
-* Shows Pokémon, PokéStops, raids and gyms with a clean GUI.
+* Afficher les Pokémon, PokéStops, raids et arènes
 * Notifications
-* Lure information
-* Filters
-* Localization (en, es, fr, pt_br, de, ru, ko, ja, zh_tw, zh_cn, zh_hk)
-* DB storage (mysql) of all found Pokémon
+* Leurres
+* Filtres
+* Localisation (en, es, fr, pt_br, de, ru, ko, ja, zh_tw, zh_cn, zh_hk)
+* Stockage en base de données (mysql) de tous les Pokémon
 
 ## Installation
 
-### Downloading the Application
+### Télécharger l'pplication
 
 To run a copy from the latest develop branch in git you can clone the repository:
 `git clone --recursive https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git`
 
-### Installing Modules
+### Installer les modules
 
 At this point you should have the following:
 ```
@@ -51,7 +51,7 @@ Windows:
 Linux/OSX:
 `sudo -H pip install -r requirements.txt`
 
-### Building Front-End Assets
+### Build du Front-End
 
 In order to run from a git clone, you must compile the front-end assets with node. Make sure you have node installed for your platform.
 Once node/npm is installed, open a command window and validation your install:
@@ -72,7 +72,7 @@ Once node/npm is installed, you can install the node dependencies and build the 
 The assets should automatically build (you'd see something about "grunt build"), if that doesn't happen, you can directly run the build process:
 `npm run build`
 
-### Basic Launching
+### Permier lancement
 
 Once those have run, you should be able to start using the application, make sure you’re in the directory of RocketMapPlusPlus then:
 `python ./runserver.py --help`
@@ -84,7 +84,7 @@ Let’s run through this startup command to make sure you understand what flags 
 
 Once your setup is running, open your browser to http://localhost:5000 and your pokemon will begin to show up! Happy hunting!
 
-### Sample config.ini example
+### Example de configuration config.ini
 
 ```
 gmaps-key:                     **GOOGLE MAPS KEY**
@@ -98,7 +98,7 @@ db-pass:                       **DB PASSWORD**
 gym-info
 ```
 
-## ++ Integration
+## ++ Intégration
 
 In order to integrate with Pokemon Go ++ you need to have your map running, make sure your iDevice can reach the map and then use the url `http://<your-ip>:<rocketmap port>/webhook` in the field 'Worker Mode URL' and enable the Worker Mode.
 
