@@ -1129,7 +1129,7 @@ class Gym(LatLongModel):
                         'longitude': longitude,
                         'distance': distance,
                         'key': key,
-                        'last_scanned': last_scanned,
+                        'last_scanned': g['last_scanned'],
                     }
             if oldest_first:
                 orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['last_scanned']))

@@ -492,6 +492,9 @@ def get_args():
                               'area. Regarded this as inverted geofence. ' +
                               'Can be combined with geofence-file.'),
                         default='')
+    parser.add_argument('-dg', '--default-geofence',
+                        help=('Default Geofence name for pages & routes'),
+                        default='')
     verbose = parser.add_mutually_exclusive_group()
     verbose.add_argument('-v',
                          help=('Show debug messages from RocketMap ' +

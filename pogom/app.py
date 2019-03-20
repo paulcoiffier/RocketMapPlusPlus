@@ -2127,7 +2127,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        geofences = request.args.get('geofences', '')
+        geofences = request.args.get('geofences', args.default_geofence)
         if not self.geofences:
             from .geofence import Geofences
             self.geofences = Geofences()
@@ -2161,7 +2161,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        geofences = request.args.get('geofences', '')
+        geofences = request.args.get('geofences', args.default_geofence)
 
         return render_template('raids.html',
                                lat=map_lat,
@@ -2188,7 +2188,7 @@ class Pogom(Flask):
         if not args.devices_page_accounts:
             needlogin = False
 
-        geofences = request.args.get('geofences', '')
+        geofences = request.args.get('geofences', args.default_geofence)
 
         return render_template('devices.html',
                                lat=map_lat,
@@ -2213,7 +2213,7 @@ class Pogom(Flask):
         map_lat = self.current_location[0]
         map_lng = self.current_location[1]
 
-        geofences = request.args.get('geofences', '')
+        geofences = request.args.get('geofences', args.default_geofence)
 
         return render_template('quests.html',
                                lat=map_lat,
