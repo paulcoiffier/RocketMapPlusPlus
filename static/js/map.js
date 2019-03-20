@@ -553,6 +553,7 @@ function initSidebar() {
     $('#ex-raid-gyms-only-switch').prop('checked', Store.get('showExRaidGymsOnly'))
     $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
     $('#pokemon-stats-switch').prop('checked', Store.get('showPokemonStats'))
+    $('#find-switch').prop('checked', Store.get('showFind'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
     $('#pokestop-sidebar-switch').prop('checked', Store.get('usePokestopSidebar'))
     $('#pokestop-sidebar-wrapper').toggle(Store.get('showPokestops'))
@@ -4579,6 +4580,14 @@ $(function () {
         $('#scan-here').toggle(this.checked)
         Store.set('scanHere', this.checked)
     })
+
+    if ($('#find-accordion').length) {
+        $('#find-accordion').accordion({
+            active: 0,
+            collapsible: true,
+            heightStyle: 'content'
+        })
+    }
 
     if ($('#nav-accordion').length) {
         $('#nav-accordion').accordion({

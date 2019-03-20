@@ -475,6 +475,9 @@ def get_args():
                               'environment and auto-upload to ' +
                               'hastebin.com.'),
                         action='store_true', default=False)
+    parser.add_argument('-nfp', '--no-find-pane',
+                        help=('Disallow users to search using the find pane.'),
+                        action='store_true', default=False)
     parser.add_argument('-exg', '--ex-gyms',
                         help=('Fetch OSM parks within geofence and flag ' +
                               'gyms that are candidates for EX raids. ' +

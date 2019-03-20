@@ -19,6 +19,11 @@
     var $statsToggle = document.querySelector('a[href="#stats"]')
     var $statsClose
 
+    // find sidebar.
+    var $find = document.querySelector('#find')
+    var $findToggle = document.querySelector('a[href="#find"]')
+    var $findClose
+
     // Gym sidebar
     var $gymSidebar = document.querySelector('#gym-details')
     var $gymSidebarClose
@@ -27,6 +32,13 @@
     addEventsListener($nav, 'click touchend', function (event) {
         event.stopPropagation()
     })
+
+    if ($find) {
+        // Event: Prevent clicks/taps inside the find from bubbling.
+        addEventsListener($find, 'click touchend', function (event) {
+            event.stopPropagation()
+        })
+    }
 
     if ($stats) {
         // Event: Prevent clicks/taps inside the stats from bubbling.
@@ -61,10 +73,16 @@
         if (event.target.matches('a[href="#nav"]')) {
             return
         }
+        if ($find && event.target.matches('a[href="#find"]')) {
+            return
+        }
         if ($stats && event.target.matches('a[href="#stats"]')) {
             return
         }
         $nav.classList.remove('visible')
+        if ($find) {
+            $find.classList.remove('visible')
+        }
         if ($stats) {
             $stats.classList.remove('visible')
         }
@@ -78,6 +96,15 @@
         $nav.classList.toggle('visible')
     })
 
+    // Event: Toggle find on click.
+    if ($findToggle) {
+        $findToggle.addEventListener('click', function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+	    updateStopsGymsList()
+            $find.classList.toggle('visible')
+        })
+    }
     // Event: Toggle stats on click.
     if ($statsToggle) {
         $statsToggle.addEventListener('click', function (event) {
@@ -95,6 +122,14 @@
     $navClose.className = 'close'
     $navClose.tabIndex = 0
     $nav.appendChild($navClose)
+
+    if ($find) {
+        $findClose = document.createElement('a')
+        $findClose.href = '#'
+        $findClose.className = 'close'
+        $findClose.tabIndex = 0
+        $find.appendChild($findClose)
+    }
 
     if ($stats) {
         $statsClose = document.createElement('a')
@@ -124,6 +159,9 @@
     window.addEventListener('keydown', function (event) {
         if (event.keyCode === 27) {
             $nav.classList.remove('visible')
+            if ($find) {
+                $find.classList.remove('visible')
+            }
             if ($stats) {
                 $stats.classList.remove('visible')
             }
@@ -142,6 +180,15 @@
         event.stopPropagation()
         $nav.classList.remove('visible')
     })
+
+    if ($findClose) {
+        // Event: Hide find on click.
+        $findClose.addEventListener('click', function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+            $find.classList.remove('visible')
+        })
+    }
 
     if ($statsClose) {
         // Event: Hide stats on click.
