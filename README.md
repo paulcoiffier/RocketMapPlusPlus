@@ -16,35 +16,34 @@ Live visualization of all the Pokémon (with option to show gyms, raids and Pok�
 
 ## Installation
 
-### Télécharger l'pplication
+### Télécharger l'application
 
-To run a copy from the latest develop branch in git you can clone the repository:
-`git clone --recursive https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git`
+`git clone https://github.com/GlobalPlusPlus/RocketMapPlusPlus.git`
 
 ### Installer les modules
 
-At this point you should have the following:
+A ce point vous devez avoir d'installé :
 ```
 Python 2.7
 pip
 RocketMapPlusPlus application folder
 ```
 
-First, open up your shell (cmd.exe/terminal.app) and change to the directory of RocketMapPlusPlus.
+Ouvrez une fenêtre de commande (cmd.exe/terminal.app) et allez dans le répertoire de RocketMapPlusPlus.
 
-You can verify your installation like this:
+Effectuez les vérifications suivantes:
 ```
 python --version
 pip --version
 ```
-The output should look something like:
+Le résultat doit ressembler à cela:
 ```
 $ python --version
 Python 2.7.12
 $ pip --version
 pip 8.1.2 from /usr/local/lib/python2.7/site-packages (python 2.7)
 ```
-Now you can install all the Python dependencies, make sure you’re still in the directory of RocketMapPlusPlus:
+Maintenant vous pouvez installer les dépendances Python. Veillez à être dans le répertoire RocketMapPlusPlus:
 
 Windows:
 `pip install -r requirements.txt`
