@@ -3012,7 +3012,7 @@ class Pogom(Flask):
         if routename is None or routename == "":
             routename = uuid
 
-        if (deviceworker['fetching'] == 'walk_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+        if (deviceworker['fetching'] == 'walk_gpx' and deviceworker.get('route', '') != routename and deviceworker.get('route', '') != ''):
             self.deviceschedules[uuid] = []
 
         if len(self.deviceschedules[uuid]) > 0:
@@ -3452,7 +3452,7 @@ class Pogom(Flask):
                 self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences, exraidonly, oldest_first)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
-            
+
             self.devices_last_teleport_time[uuid] = dt_now
             self.save_device(deviceworker)
 
@@ -3553,7 +3553,7 @@ class Pogom(Flask):
         if routename is None or routename == "":
             routename = uuid
 
-        if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker['route'] != routename and deviceworker['route'] != ''):
+        if (deviceworker['fetching'] == 'teleport_gpx' and deviceworker.get('route', '') != routename and deviceworker.get('route', '') != ''):
             self.deviceschedules[uuid] = []
 
         ls_times = self.devices_last_scanned_times.get(uuid)
