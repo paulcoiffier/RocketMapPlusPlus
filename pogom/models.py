@@ -1052,7 +1052,7 @@ class Gym(LatLongModel):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
-                Gym.latitude, Gym.longitude, Gym.gym_id).dicts())
+                Gym.latitude, Gym.longitude, Gym.gym_id, Gym.last_scanned).dicts())
 
             lat1 = lat - 0.1
             lat2 = lat + 0.1
