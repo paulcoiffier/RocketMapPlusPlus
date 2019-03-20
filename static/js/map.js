@@ -12,6 +12,7 @@ var $selectIconSize
 var $switchOpenGymsOnly
 var $switchParkGymsOnly
 var $switchExRaidGymsOnly
+var $switchExRaidRaidsOnly
 var $switchParkRaidGymsOnly
 var $switchActiveRaidGymsOnly
 var $switchRaidMinLevel
@@ -542,6 +543,7 @@ function initSidebar() {
     $('#raids-switch').prop('checked', Store.get('showRaids'))
     $('#raid-park-gym-switch').prop('checked', Store.get('showParkRaidsOnly'))
     $('#raid-active-gym-switch').prop('checked', Store.get('showActiveRaidsOnly'))
+    $('#ex-raid-raids-only-switch').prop('checked', Store.get('showExRaidRaidsOnly'))
     $('#raid-min-level-only-switch').val(Store.get('showRaidMinLevel'))
     $('#raid-max-level-only-switch').val(Store.get('showRaidMaxLevel'))
     $('#raids-filter-wrapper').toggle(Store.get('showRaids'))
@@ -2923,6 +2925,13 @@ function processGym(i, item) {
         }
     }
 
+    if (Store.get('showExRaidRaidsOnly')) {
+        if (!item.is_ex_raid_eligible) {
+            removeGymFromMap(item['gym_id'])
+            return true
+        }
+    }
+
     if (!Store.get('showGyms')) {
         if (Store.get('showRaids') && !isValidRaid(item.raid)) {
             removeGymFromMap(item['gym_id'])
@@ -3930,6 +3939,14 @@ $(function () {
 
     $switchExRaidGymsOnly.on('change', function () {
         Store.set('showExRaidGymsOnly', this.checked)
+        lastgyms = false
+        updateMap()
+    })
+
+    $switchExRaidRaidsOnly = $('#ex-raid-raids-only-switch')
+
+    $switchExRaidRaidsOnly.on('change', function () {
+        Store.set('showExRaidRaidsOnly', this.checked)
         lastgyms = false
         updateMap()
     })

@@ -895,6 +895,10 @@ var StoreOptions = {
         default: false,
         type: StoreTypes.Boolean
     },
+    'showExRaidRaidsOnly': {
+        default: false,
+        type: StoreTypes.Boolean
+    },
     'showExRaidGymsOnly': {
         default: false,
         type: StoreTypes.Boolean
