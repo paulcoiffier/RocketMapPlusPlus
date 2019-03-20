@@ -1054,20 +1054,14 @@ class Gym(LatLongModel):
             query = (Gym.select(
                 Gym.latitude, Gym.longitude, Gym.gym_id, Gym.last_scanned).dicts())
 
-            lat1 = lat - 0.1
-            lat2 = lat + 0.1
-            lng1 = lng - 0.1
-            lng2 = lng + 0.1
-
             if geofence_name != "":
                 lat1, lng1, lat2, lng2 = geofences.get_boundary_coords(geofence_name)
 
-            minlat = min(lat1, lat2)
-            maxlat = max(lat1, lat2)
-            minlng = min(lng1, lng2)
-            maxlng = max(lng1, lng2)
+                minlat = min(lat1, lat2)
+                maxlat = max(lat1, lat2)
+                minlng = min(lng1, lng2)
+                maxlng = max(lng1, lng2)
 
-            if dist > 0:
                 query = (query
                          .where((Gym.latitude >= minlat) &
                                 (Gym.longitude >= minlng) &
@@ -1112,7 +1106,7 @@ class Gym(LatLongModel):
 
             if len(egg_todo) > 0:
                 gym_ids = egg_todo[:]
-            elif (not isinstance(raidless, (bool)) and len(gym_ids) > raidless and isinstance(oldest_first, (bool))):
+            elif (not isinstance(raidless, (bool)) and len(gym_ids) > raidless):
                 gym_ids = gym_ids[:raidless]
 
             if len(queryDict) > 0 and geofences.is_enabled():
