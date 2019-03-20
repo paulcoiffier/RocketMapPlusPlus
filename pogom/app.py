@@ -1296,6 +1296,8 @@ class Pogom(Flask):
                                                 float(fort['lastModifiedTimestampMs']),
                                             'raid_active_until':
                                                 raid_active_until,
+                                            'ex_raid_eligible':
+                                                fort.get('isExRaidEligible', False)
                                         })
 
                                         self.wh_update_queue.put(('gym', wh_gym))
@@ -1361,6 +1363,8 @@ class Pogom(Flask):
                                                 'move_1': raidpokemonmove1 if raidpokemonmove1 else 0,
                                                 'move_2': raidpokemonmove2 if raidpokemonmove2 else 0,
                                                 'is_ex_raid_eligible':
+                                                    fort.get('isExRaidEligible', False),
+                                                'ex_raid_eligible':
                                                     fort.get('isExRaidEligible', False),
                                                 'name': gym_name,
                                                 'description': gym_description,
@@ -1526,6 +1530,8 @@ class Pogom(Flask):
                             float(fort["gymDisplay"].get('occupiedMillis', 0)),
                         'last_modified':
                             float(fort['lastModifiedTimestampMs']),
+                        'ex_raid_eligible':
+                            fort.get('isExRaidEligible', False)
                     })
 
                     self.wh_update_queue.put(('gym', wh_gym))
