@@ -279,9 +279,9 @@ def main():
 
     # Control the search status (running or not) across threads.
     control_flags = {
-      'on_demand': Event(),
-      'api_watchdog': Event(),
-      'search_control': Event()
+        'on_demand': Event(),
+        'api_watchdog': Event(),
+        'search_control': Event()
     }
 
     for flag in control_flags.values():
@@ -304,47 +304,48 @@ def main():
         t.daemon = True
         t.start()
 
-    # Database cleaner; really only need one ever.
-    if args.db_cleanup:
-        t = Thread(target=clean_db_loop, name='db-cleaner', args=(args,))
-        t.daemon = True
-        t.start()
-
-    if args.rarity_update_frequency:
-        t = Thread(target=dynamic_rarity_refresher,
-                   name='dynamic-rarity')
-        t.daemon = True
-        t.start()
-        log.info('Dynamic rarity is enabled.')
-    else:
-        log.info('Dynamic rarity is disabled.')
-
-    t = Thread(target=device_worker_refresher,
-               name='device-worker',
-               args=(db_updates_queue, wh_updates_queue, args))
-    t.daemon = True
-    t.start()
-
-    # WH updates queue & WH unique key LFU caches.
-    # The LFU caches will stop the server from resending the same data an
-    # infinite number of times. The caches will be instantiated in the
-    # webhook's startup code.
-    wh_key_cache = {}
-
-    if not args.wh_types:
-        log.info('Webhook disabled.')
-    else:
-        log.info('Webhook enabled for events: sending %s to %s.',
-                 args.wh_types,
-                 args.webhooks)
-
-        # Thread to process webhook updates.
-        for i in range(args.wh_threads):
-            log.debug('Starting wh-updater worker thread %d', i)
-            t = Thread(target=wh_updater, name='wh-updater-{}'.format(i),
-                       args=(args, wh_updates_queue, wh_key_cache))
+    if not args.map_only:
+        # Database cleaner; really only need one ever.
+        if args.db_cleanup:
+            t = Thread(target=clean_db_loop, name='db-cleaner', args=(args,))
             t.daemon = True
             t.start()
+
+        if args.rarity_update_frequency:
+            t = Thread(target=dynamic_rarity_refresher,
+                       name='dynamic-rarity')
+            t.daemon = True
+            t.start()
+            log.info('Dynamic rarity is enabled.')
+        else:
+            log.info('Dynamic rarity is disabled.')
+
+        t = Thread(target=device_worker_refresher,
+                   name='device-worker',
+                   args=(db_updates_queue, wh_updates_queue, args))
+        t.daemon = True
+        t.start()
+
+        # WH updates queue & WH unique key LFU caches.
+        # The LFU caches will stop the server from resending the same data an
+        # infinite number of times. The caches will be instantiated in the
+        # webhook's startup code.
+        wh_key_cache = {}
+
+        if not args.wh_types:
+            log.info('Webhook disabled.')
+        else:
+            log.info('Webhook enabled for events: sending %s to %s.',
+                     args.wh_types,
+                     args.webhooks)
+
+            # Thread to process webhook updates.
+            for i in range(args.wh_threads):
+                log.debug('Starting wh-updater worker thread %d', i)
+                t = Thread(target=wh_updater, name='wh-updater-{}'.format(i),
+                           args=(args, wh_updates_queue, wh_key_cache))
+                t.daemon = True
+                t.start()
 
     if args.cors:
         CORS(app)
