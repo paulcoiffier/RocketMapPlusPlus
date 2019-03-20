@@ -723,18 +723,19 @@ class Pokestop(LatLongModel):
 
                 now_date = datetime.utcnow()
 
-                quests = (Quest
-                          .select(
-                              Quest.pokestop_id,
-                              Quest.quest_type,
-                              Quest.reward_type,
-                              Quest.reward_item,
-                              Quest.quest_json)
-                          .where((Quest.pokestop_id << pokestop_ids) & (Quest.expiration >= now_date))
-                          .dicts())
+                if len(pokestop_ids) > 0:
+                    quests = (Quest
+                              .select(
+                                  Quest.pokestop_id,
+                                  Quest.quest_type,
+                                  Quest.reward_type,
+                                  Quest.reward_item,
+                                  Quest.quest_json)
+                              .where((Quest.pokestop_id << pokestop_ids) & (Quest.expiration >= now_date))
+                              .dicts())
 
-                for q in quests:
-                    pokestop_quest_ids.append(q['pokestop_id'])
+                    for q in quests:
+                        pokestop_quest_ids.append(q['pokestop_id'])
 
             if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
@@ -1094,7 +1095,7 @@ class Gym(LatLongModel):
             for g in queryDict:
                 gym_ids.append(g['gym_id'])
 
-            if raidless:
+            if raidless and len(gym_ids) > 0:
                 raids = (Raid
                          .select()
                          .where(Raid.gym_id << gym_ids)
@@ -1111,9 +1112,9 @@ class Gym(LatLongModel):
 
             if len(egg_todo) > 0:
                 gym_ids = egg_todo[:]
-            elif (not isinstance(raidless, (bool)) and len(gym_ids) > raidless and isinstance(oldest_first, (bool))): 
+            elif (not isinstance(raidless, (bool)) and len(gym_ids) > raidless and isinstance(oldest_first, (bool))):
                 gym_ids = gym_ids[:raidless]
-                
+
             if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 
@@ -1127,9 +1128,13 @@ class Gym(LatLongModel):
                         'latitude': latitude,
                         'longitude': longitude,
                         'distance': distance,
-                        'key': key
+                        'key': key,
+                        'last_scanned': last_scanned,
                     }
-            orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
+            if oldest_first:
+                orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['last_scanned']))
+            else:
+                orderedgyms = OrderedDict(sorted(gyms.items(), key=lambda x: x[1]['distance']))
 
             newlat = 0
             newlong = 0
@@ -1152,7 +1157,8 @@ class Gym(LatLongModel):
                     result.append((value['latitude'], value['longitude'], value['key']))
                     newlat = value['latitude']
                     newlong = value['longitude']
-                orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
+                if not oldest_first:
+                    orderedgyms = OrderedDict(sorted(orderedgyms.items(), key=lambda x: geopy.distance.vincenty((newlat, newlong), (x[1]['latitude'], x[1]['longitude'])).km))
 
         return result
 
