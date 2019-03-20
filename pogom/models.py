@@ -1047,7 +1047,7 @@ class Gym(LatLongModel):
         return False
 
     @staticmethod
-    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences, exraidonly):
+    def get_nearby_gyms(lat, lng, dist, teleport_ignore, raidless, maxpoints, geofence_name, scheduled_points, geofences, exraidonly, oldest_first):
         gyms = {}
         with Gym.database().execution_context():
             query = (Gym.select(
@@ -1087,7 +1087,7 @@ class Gym(LatLongModel):
                          .where(Gym.is_ex_raid_eligible)
                          .dicts())
 
-            queryDict = query.dicts()
+            queryDict = query.order_by(Gym.last_scanned.asc()).dicts()
 
             gym_ids = []
             egg_todo = []
@@ -1111,7 +1111,9 @@ class Gym(LatLongModel):
 
             if len(egg_todo) > 0:
                 gym_ids = egg_todo[:]
-
+            elif (not isinstance(raidless, (bool)) and len(gym_ids) > raidless and isinstance(oldest_first, (bool))): 
+                gym_ids = gym_ids[:raidless]
+                
             if len(queryDict) > 0 and geofences.is_enabled():
                 queryDict = geofences.get_geofenced_results(queryDict, geofence_name)
 

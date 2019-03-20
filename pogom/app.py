@@ -3311,6 +3311,7 @@ class Pogom(Flask):
         geofence = request_json.get('geofence', "")
         no_overlap = request_json.get('no_overlap', False)
         exraidonly = request_json.get('exraidonly', False)
+        oldest_first = request_json.get('oldest_first', False)
 
         if not isinstance(scheduletimeout, (int, long)):
             try:
@@ -3445,11 +3446,12 @@ class Pogom(Flask):
 
             log.warning("Geofences: ".format(geofence))
 
-            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences, exraidonly)
+            self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, raidless, maxpoints, geofence, scheduled_points, self.geofences, exraidonly, oldest_first)
             if raidless and len(self.deviceschedules[uuid]) == 0:
-                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences, exraidonly)
+                self.deviceschedules[uuid] = Gym.get_nearby_gyms(latitude, longitude, maxradius, teleport_ignore, False, maxpoints, geofence, scheduled_points, self.geofences, exraidonly, oldest_first)
             if len(self.deviceschedules[uuid]) == 0:
                 return self.scan_loc(mapcontrolled, uuid, latitude, longitude, request_json)
+            
             self.devices_last_teleport_time[uuid] = dt_now
             self.save_device(deviceworker)
 
